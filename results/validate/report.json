@@ -1,0 +1,54 @@
+[
+  {
+    "file": "6.7.1.1.json",
+    "case_id": "6.7.1.1",
+    "violations": [
+      {
+        "rule": "R1",
+        "path": "steps[7].message",
+        "detail": "unknown message: RRCSetupComplete (Registration Request)"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.10.json",
+    "case_id": "6.7.1.10",
+    "violations": []
+  },
+  {
+    "file": "6.7.1.12.json",
+    "case_id": "6.7.1.12",
+    "violations": [
+      {
+        "rule": "R1",
+        "path": "steps[2].message",
+        "detail": "unknown message: RRCConnectionRelease"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.2.json",
+    "case_id": "6.7.1.2",
+    "violations": []
+  },
+  {
+    "file": "6.7.1.3.json",
+    "case_id": "6.7.1.3",
+    "violations": []
+  },
+  {
+    "file": "6.7.1.4.json",
+    "case_id": "6.7.1.4",
+    "violations": []
+  },
+  {
+    "file": "6.7.1.5.json",
+    "case_id": "6.7.1.5",
+    "violations": []
+  },
+  {
+    "file": "6.7.1.6.json",
+    "case_id": "6.7.1.6",
+    "violations": []
+  }
+]

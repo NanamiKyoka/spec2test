@@ -1,0 +1,139 @@
+[
+  {
+    "case": "6.7.1.1",
+    "gold_sequence": [
+      "rrcsetuprequest"
+    ],
+    "system_sequence": [
+      "systeminformationsib19",
+      "providevalidgnssposition",
+      "systeminformationsib19",
+      "rrcsetuprequest",
+      "rrcsetup",
+      "rrcsetupcompleteregistrationrequest",
+      "dlinformationtransferregistrationaccept",
+      "ulinformationtransferregistrationcomplete",
+      "rrcrelease"
+    ]
+  },
+  {
+    "case": "6.7.1.10",
+    "gold_sequence": [
+      "paging"
+    ],
+    "system_sequence": [
+      "sib25",
+      "sib4"
+    ]
+  },
+  {
+    "case": "6.7.1.12",
+    "gold_sequence": [
+      "paging"
+    ],
+    "system_sequence": [
+      "systeminformation",
+      "rrcconnectionrelease",
+      "systeminformation",
+      "rrcrelease",
+      "systeminformation"
+    ]
+  },
+  {
+    "case": "6.7.1.2",
+    "gold_sequence": [
+      "rrcsetuprequest",
+      "paging",
+      "rrcsetuprequest",
+      "rrcrelease"
+    ],
+    "system_sequence": [
+      "mib",
+      "sib1"
+    ]
+  },
+  {
+    "case": "6.7.1.3",
+    "gold_sequence": [
+      "rrcsetuprequest",
+      "rrcsetuprequest",
+      "paging",
+      "rrcsetuprequest"
+    ],
+    "system_sequence": [
+      "mib",
+      "sib1",
+      "paging",
+      "sib1",
+      "paging",
+      "rrcsetuprequest",
+      "rrcsetup",
+      "rrcsetupcomplete",
+      "rrcrelease",
+      "sib1",
+      "paging"
+    ]
+  },
+  {
+    "case": "6.7.1.4",
+    "gold_sequence": [
+      "rrcsetuprequest",
+      "rrcsetuprequest"
+    ],
+    "system_sequence": [
+      "rrcsetuprequest",
+      "rrcsetup",
+      "rrcsetupcomplete",
+      "registrationrequest",
+      "authenticationrequest",
+      "authenticationresponse",
+      "securitymodecommand",
+      "securitymodecomplete",
+      "registrationaccept",
+      "registrationcomplete",
+      "rrcrelease",
+      "rrcsetuprequest",
+      "rrcsetup",
+      "rrcsetupcomplete",
+      "registrationrequest",
+      "authenticationrequest",
+      "authenticationresponse",
+      "securitymodecommand",
+      "securitymodecomplete",
+      "registrationaccept",
+      "registrationcomplete"
+    ]
+  },
+  {
+    "case": "6.7.1.5",
+    "gold_sequence": [],
+    "system_sequence": [
+      "systeminformationsib2sib4sib19",
+      "paging",
+      "rrcsetuprequest",
+      "rrcsetup",
+      "rrcsetupcomplete",
+      "rrcrelease",
+      "systeminformationsib2sib4sib19",
+      "paging",
+      "rrcsetuprequest",
+      "rrcsetup",
+      "rrcsetupcomplete"
+    ]
+  },
+  {
+    "case": "6.7.1.6",
+    "gold_sequence": [
+      "pdcchdci10shortmessage",
+      "configurationupdatecommand",
+      "rrcrelease"
+    ],
+    "system_sequence": [
+      "systeminformation",
+      "paging",
+      "systeminformation",
+      "paging",
+      "systeminformation"
+    ]
+  }
+]

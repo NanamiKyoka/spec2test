@@ -1,0 +1,23 @@
+# 规范原文与切分结果不入库（ADR-0003）
+data/
+_scratch/
+
+# 实验原型（含 829MB 依赖，不入库）
+alt/
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# 杂项
+.pytest_cache/
+*.log
+.chainlit/
+.files/
+
+# 前端构建（源码入库，依赖与截图不入库）
+app/node_modules/
+app/smoke-about.png
+web_m2/

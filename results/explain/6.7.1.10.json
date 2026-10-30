@@ -1,0 +1,48 @@
+{
+  "case_id": "6.7.1.10",
+  "provider": "proxy",
+  "model": "deepseek-v4.1-flash",
+  "generated_at": "2026-10-30T07:44:01.392368+00:00",
+  "headline": "用例被拒绝：SIB4含未知字段",
+  "sections": [
+    {
+      "key": "tests",
+      "title": "这条用例在验什么",
+      "body": "验证支持在NR空闲态跳过TN测量的终端：当tn-AreaIdList中的TN NR小区排名高于服务小区，且终端处于该频率覆盖范围时，终端重选到该TN NR小区。"
+    },
+    {
+      "key": "generated",
+      "title": "系统生成了什么",
+      "body": "系统生成10步流程：先下发SIB1、SIB4、SIB25，后续包含寻呼与RRC建立相关消息；其中第4至6步消息名为空。"
+    },
+    {
+      "key": "verdict",
+      "title": "为什么是这个判定",
+      "body": "numbers.verdict为reject，实际违规1条：SIB4中出现未知字段tn-AreaIdList-r19，因此判定为拒绝，不能视为通过。"
+    },
+    {
+      "key": "data",
+      "title": "数据怎么读",
+      "body": "L1=1.0，L3=1.0，gold_ie_n=2，calls=2。L3不为null，说明按召回计分；gold叶子IE为tn-ReferenceLocation-r18和tn-DistanceRadius-r18。"
+    },
+    {
+      "key": "caveats",
+      "title": "哪里还不确定",
+      "body": "证据有限：第4至6步消息名为空，reason为空；未知字段是否由版本或命名差异造成，仅凭现有证据无法确认。"
+    }
+  ],
+  "numbers": {
+    "L1": 1.0,
+    "L3": 1.0,
+    "gold": 2,
+    "calls": 2,
+    "violations": 1,
+    "verdict": "reject"
+  },
+  "grounded_on": [
+    "data/ctx/6.7.1.10.json",
+    "data/out_rejected/6.7.1.10.json",
+    "data/score/report.json",
+    "data/ir/ie/6.7.1.10.json"
+  ]
+}

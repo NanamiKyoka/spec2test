@@ -1,0 +1,48 @@
+{
+  "case_id": "6.7.1.12",
+  "provider": "proxy",
+  "model": "deepseek-v4.1-flash",
+  "generated_at": "2026-10-30T07:44:07.170438+00:00",
+  "headline": "该用例因缺少消息名而弃权，未作判定",
+  "sections": [
+    {
+      "key": "tests",
+      "title": "这条用例在验什么",
+      "body": "验证处于E-UTRA地面网空闲态的终端，在拥有有效GNSS位置时，能否按优先级重选到跨制式NR非地面网小区：既包括优先级更低的小区，也包括优先级更高的小区。参考TS 36.304的5.2.4.1、5.2.4.2、5.2.4.5。"
+    },
+    {
+      "key": "generated",
+      "title": "系统生成了什么",
+      "body": "系统从证据中拆出12步流程：第1至3步对应低优先级场景，第4至7步逐步推进，第8至12步对应高优先级场景；涉及SystemInformation、RRCConnectionRelease、RRCRelease等信令。但提取到的消息清单为空，消息名为空的步骤较多。"
+    },
+    {
+      "key": "verdict",
+      "title": "为什么是这个判定",
+      "body": "numbers.verdict为abstained，即弃权；实际违规条数为0条。弃权原因是输入中缺少消息或SIB名称，无法据此进行合格性比对，因此这并不等于用例通过，也没有判定为未判定。"
+    },
+    {
+      "key": "data",
+      "title": "数据怎么读",
+      "body": "L1为1.0；L3为弃权，不计分；gold叶子信元共14个，如threshServingLow、threshX-High、cellReselectionPriority等；calls为0。得分显示状态为弃权，说明没有实际发起比对调用。"
+    },
+    {
+      "key": "caveats",
+      "title": "哪里还不确定",
+      "body": "由于消息名为空，无法确认每一步具体交互哪条信令；14个目标信元是否在流程中被正确赋值也未核实。需补齐消息与SIB名称后重跑，才能给出真实判定。"
+    }
+  ],
+  "numbers": {
+    "L1": 1.0,
+    "L3": null,
+    "gold": 14,
+    "calls": 0,
+    "violations": 0,
+    "verdict": "abstained"
+  },
+  "grounded_on": [
+    "data/ctx/6.7.1.12.json",
+    "data/out/6.7.1.12.json",
+    "data/score/report.json",
+    "data/ir/ie/6.7.1.12.json"
+  ]
+}
