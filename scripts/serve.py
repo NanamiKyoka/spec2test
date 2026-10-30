@@ -28,6 +28,8 @@ ROOT = os.path.dirname(HERE)
 SETTINGS = os.path.join(ROOT, "data", "settings.json")
 CONV_DIR = os.path.join(ROOT, "data", "conversations")
 RUNS_FILE = os.path.join(ROOT, "data", "runs.jsonl")
+JOBS_DIR = os.path.join(ROOT, "data", "jobs")
+JOBS_KEEP = 300
 RUN_ONE = os.path.join(HERE, "run_one.py")
 
 CATALOG_PROXY = ["claude-sonnet-4-6[1M]", "claude-opus-4-8[1M]", "claude-haiku-4-5"]
@@ -56,6 +58,58 @@ def norm_base(url):
 
 _jobs = {}
 _jobs_lock = threading.Lock()
+
+
+def _job_path(jid):
+    return os.path.join(JOBS_DIR, jid + ".json")
+
+
+def save_job(job):
+    """任务状态落盘（原子写）。worker 是唯一写入者，避免高频锁。"""
+    jid = job.get("id")
+    if not jid:
+        return
+    try:
+        os.makedirs(JOBS_DIR, exist_ok=True)
+        job["updated"] = time.time()
+        tmp = _job_path(jid) + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(job, f, ensure_ascii=False)
+        os.replace(tmp, _job_path(jid))
+    except Exception:
+        pass
+
+
+def load_jobs():
+    """启动时恢复历史任务；上次异常退出留下的 running/queued 标记为中断。"""
+    try:
+        os.makedirs(JOBS_DIR, exist_ok=True)
+        names = [n for n in os.listdir(JOBS_DIR) if n.endswith(".json")]
+        names.sort(key=lambda n: os.path.getmtime(os.path.join(JOBS_DIR, n)), reverse=True)
+        for n in names:
+            try:
+                with open(os.path.join(JOBS_DIR, n), encoding="utf-8") as f:
+                    job = json.load(f)
+            except Exception:
+                continue
+            jid = job.get("id") or n[:-5]
+            job["id"] = jid
+            if job.get("state") in ("queued", "running"):
+                job["state"] = "failed"
+                job["finished"] = job.get("finished") or time.time()
+                job.setdefault("log", []).append(
+                    {"t": round(time.time(), 3), "msg": "服务重启，任务中断"}
+                )
+                save_job(job)
+            _jobs[jid] = job
+        # 只保留最近 JOBS_KEEP 个任务文件，避免 data/ 无限增长
+        for n in names[JOBS_KEEP:]:
+            try:
+                os.remove(os.path.join(JOBS_DIR, n))
+            except Exception:
+                pass
+    except Exception:
+        pass
 
 
 # ---------- settings ----------
@@ -403,21 +457,23 @@ def case_stages(cid):
 def start_job(cid, dry_run=False, conversation_id=None):
     jid = uuid.uuid4().hex[:12]
     with _jobs_lock:
-        _jobs[jid] = {"state": "queued", "stage": "", "log": [], "result": None,
-                      "created": time.time(), "case": cid, "verdict": None,
-                      "stages": [], "started": None, "finished": None}
+        _jobs[jid] = {"id": jid, "state": "queued", "stage": "", "log": [], "result": None,
+                      "created": time.time(), "updated": time.time(), "case": cid,
+                      "verdict": None, "stages": [], "started": None, "finished": None}
+    save_job(_jobs[jid])
     s = load_settings()
 
     def worker():
         job = _jobs[jid]
         job["state"] = "running"
         job["started"] = time.time()
+        save_job(job)
         cmd = [sys.executable, RUN_ONE, cid]
         if dry_run:
             cmd.append("--dry-run")
         try:
             proc = subprocess.Popen(cmd, cwd=ROOT, env=child_env(s), text=True,
-                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                     encoding="utf-8", errors="replace", bufsize=1)
             for line in proc.stdout:
                 line = line.strip()
@@ -440,17 +496,22 @@ def start_job(cid, dry_run=False, conversation_id=None):
                 if stage == "score":
                     job["result"] = ev
                     job["verdict"] = (ev.get("detail") or {}).get("verdict", job.get("verdict"))
-            err = (proc.stderr.read() or "").strip()
-            proc.wait(timeout=5)
+                save_job(job)
+            try:
+                proc.wait(timeout=15)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                proc.wait(timeout=5)
+                job["log"].append({"t": round(time.time(), 3), "msg": "进程超时，已终止"})
             if proc.returncode != 0:
                 job["state"] = "failed"
-                if err:
-                    job["log"].append({"t": round(time.time(), 3), "msg": err[-300:]})
             else:
                 job["state"] = "done"
+            save_job(job)
         except Exception as e:
             job["state"] = "failed"
             job["log"].append({"t": round(time.time(), 3), "msg": "执行异常：%s" % e})
+            save_job(job)
         finally:
             job["finished"] = time.time()
             job["verdict"] = _job_verdict(job)
@@ -465,6 +526,7 @@ def start_job(cid, dry_run=False, conversation_id=None):
                 except Exception as e:
                     job["log"].append({"t": round(time.time(), 3),
                                        "msg": "会话写入失败：%s" % e})
+            save_job(job)
 
 
     threading.Thread(target=worker, daemon=True).start()
@@ -534,18 +596,42 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         return "live" if live else "snapshot"
 
     def translate_path(self, path):
-        clean = urllib.parse.urlparse(path).path
+        clean = urllib.parse.unquote(urllib.parse.urlparse(path).path)
+        denied = os.path.join(self.root, "__denied__")
+        if "\x00" in clean:
+            return denied
+        # 只允许 web/、data/、results/ 三棵静态树，避免暴露源码、.git、日志等
+        if not (clean == "/web" or clean.startswith("/web/")
+                or clean.startswith("/data/") or clean.startswith("/results/")):
+            return denied
         if clean.startswith("/data/"):
-            rel = clean[len("/data/"):]
-            if rel == "settings.json":          # 绝不暴露配置文件
-                return os.path.join(self.root, "data", "__denied__")
-            live = os.path.join(self.root, "data", rel)
-            if os.path.exists(live):
-                return live
-            snap = os.path.join(self.root, "results", rel)
-            if os.path.exists(snap):
+            rel = clean[len("/data/"):].lstrip("/")
+            data_root = os.path.realpath(os.path.join(self.root, "data"))
+            results_root = os.path.realpath(os.path.join(self.root, "results"))
+            target = os.path.realpath(os.path.join(data_root, rel))
+            # 任何层级的 settings.json 一律拒绝
+            if os.path.basename(target).lower() == "settings.json":
+                return denied
+            if target != data_root and not target.startswith(data_root + os.sep):
+                return denied
+            if os.path.isdir(target):
+                return denied
+            if os.path.exists(target):
+                return target
+            snap = os.path.realpath(os.path.join(results_root, rel))
+            if (snap != results_root and snap.startswith(results_root + os.sep)
+                    and not os.path.isdir(snap) and os.path.exists(snap)):
                 return snap
-            return live
+            return target
+        if clean.startswith("/results/"):
+            rel = clean[len("/results/"):].lstrip("/")
+            results_root = os.path.realpath(os.path.join(self.root, "results"))
+            target = os.path.realpath(os.path.join(results_root, rel))
+            if target != results_root and not target.startswith(results_root + os.sep):
+                return denied
+            if os.path.isdir(target):
+                return denied
+            return target
         return super().translate_path(path)
 
     def _json(self, obj, code=200):
@@ -557,8 +643,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
     def _body(self):
-        n = int(self.headers.get("Content-Length") or 0)
-        if not n:
+        try:
+            n = int(self.headers.get("Content-Length") or 0)
+        except ValueError:
+            return {}
+        if n <= 0:
+            return {}
+        if n > 1_000_000:                      # 1MB 上限
+            return {}
+        ct = (self.headers.get("Content-Type") or "").split(";")[0].strip().lower()
+        if ct and ct != "application/json":
             return {}
         try:
             return json.loads(self.rfile.read(n).decode("utf-8"))
@@ -624,14 +718,27 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return self._json({"case": m.group(1), "stages": case_stages(m.group(1))})
         m = re.match(r"^/api/job/([0-9a-f]+)$", path)
         if m:
+            jid = m.group(1)
             with _jobs_lock:
-                job = _jobs.get(m.group(1))
+                job = _jobs.get(jid)
+            if not job and os.path.exists(_job_path(jid)):
+                try:
+                    with open(_job_path(jid), encoding="utf-8") as f:
+                        job = json.load(f)
+                    _jobs[jid] = job
+                except Exception:
+                    job = None
             if not job:
                 return self._json({"error": "job_not_found"}, 404)
             return self._json(job)
         super().do_GET()
 
     def do_POST(self):
+        orig = self.headers.get("Origin")
+        if orig:
+            port = self.server.server_address[1]
+            if orig not in ("http://127.0.0.1:%d" % port, "http://localhost:%d" % port):
+                return self._json({"error": "bad_origin"}, 403)
         path = urllib.parse.urlparse(self.path).path
         if path == "/api/settings":
             body = self._body()
@@ -757,6 +864,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             cid = (body.get("case") or "").strip()
             if not cid:
                 return self._json({"error": "missing_case"}, 400)
+            if not re.match(r"^6\.7\.1\.\d{1,2}$", cid) or cid not in {c.get("case") for c in list_cases()}:
+                return self._json({"error": "unknown_case"}, 400)
             s = load_settings()
             if not credential_ok(s):
                 return self._json({"error": "no_credential"}, 400)
@@ -800,7 +909,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         return self._json({"ok": True})
 
     def log_message(self, fmt, *args):
-        print("%s - %s" % (self.address_string(), fmt % args))
+        msg = fmt % args
+        # 日志脱敏：URL 查询里的 key/token 一律替换
+        msg = re.sub(r"(?i)(api_key|key|token|authorization|session)=([^&\s]+)", r"\1=***", msg)
+        print("%s - %s" % (self.address_string(), msg))
 
 
 def main():
@@ -815,6 +927,7 @@ def main():
         raise SystemExit("找不到 web/index.html，请在仓库根下运行")
 
     Handler.root = ROOT
+    load_jobs()
     url = "http://%s:%d/web/" % (args.host, args.port)
     handler = functools.partial(Handler, directory=ROOT)
 
