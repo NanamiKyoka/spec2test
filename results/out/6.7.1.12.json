@@ -113,7 +113,369 @@
       ]
     }
   ],
-  "messages": [],
+  "messages": [
+    {
+      "message": "SIB2",
+      "ies": [],
+      "_error": "parse_failed(stop=max_tokens)"
+    },
+    {
+      "message": "SIB4",
+      "derivation_path": "SIB4 ASN.1 -> interFreqCarrierFreqList -> InterFreqCarrierFreqInfo (including r19 NTN parameters)",
+      "ies": [
+        {
+          "name": "interFreqCarrierFreqList",
+          "value": "2",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "dl-CarrierFreq",
+          "value": "2016667",
+          "condition": "entry 1: lower-priority inter-RAT NR NTN frequency",
+          "_known": true
+        },
+        {
+          "name": "frequencyBandList",
+          "value": "256",
+          "condition": "entry 1",
+          "_known": true
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "3",
+          "condition": "entry 1: lower priority than serving E-UTRA TN",
+          "_known": true
+        },
+        {
+          "name": "q-RxLevMin",
+          "value": "-60",
+          "condition": "entry 1",
+          "_known": true
+        },
+        {
+          "name": "q-QualMin",
+          "value": "-18",
+          "condition": "entry 1",
+          "_known": true
+        },
+        {
+          "name": "q-OffsetFreq",
+          "value": "dB0",
+          "condition": "entry 1",
+          "_known": true
+        },
+        {
+          "name": "deriveSSB-IndexFromCell",
+          "value": "true",
+          "condition": "entry 1",
+          "_known": true
+        },
+        {
+          "name": "altitudeMin-r19",
+          "value": "0",
+          "condition": "entry 1 NTN",
+          "_known": true
+        },
+        {
+          "name": "altitudeMax-r19",
+          "value": "10000",
+          "condition": "entry 1 NTN",
+          "_known": true
+        },
+        {
+          "name": "altitudeHyst-r19",
+          "value": "10",
+          "condition": "entry 1 NTN",
+          "_known": true
+        },
+        {
+          "name": "offsetLat-r19",
+          "value": "0",
+          "condition": "entry 1 NTN",
+          "_known": true
+        },
+        {
+          "name": "offsetLon-r19",
+          "value": "0",
+          "condition": "entry 1 NTN",
+          "_known": true
+        },
+        {
+          "name": "refLocOffset-r19",
+          "value": "0",
+          "condition": "entry 1 NTN",
+          "_known": true
+        },
+        {
+          "name": "interFreqNeighCellList",
+          "value": "1",
+          "condition": "entry 1",
+          "_known": true
+        },
+        {
+          "name": "physCellId",
+          "value": "100",
+          "condition": "entry 1 neighbor NR NTN cell",
+          "_known": true
+        },
+        {
+          "name": "q-OffsetCell",
+          "value": "dB0",
+          "condition": "entry 1 neighbor",
+          "_known": true
+        },
+        {
+          "name": "q-RxLevMinOffsetCell",
+          "value": "1",
+          "condition": "entry 1 neighbor",
+          "_known": true
+        },
+        {
+          "name": "q-QualMinOffsetCell",
+          "value": "1",
+          "condition": "entry 1 neighbor",
+          "_known": true
+        },
+        {
+          "name": "dl-CarrierFreq",
+          "value": "518400",
+          "condition": "entry 2: higher-priority inter-RAT NR NTN frequency",
+          "_known": true
+        },
+        {
+          "name": "frequencyBandList",
+          "value": "256",
+          "condition": "entry 2",
+          "_known": true
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "7",
+          "condition": "entry 2: higher priority than serving E-UTRA TN",
+          "_known": true
+        },
+        {
+          "name": "q-RxLevMin",
+          "value": "-60",
+          "condition": "entry 2",
+          "_known": true
+        },
+        {
+          "name": "q-QualMin",
+          "value": "-18",
+          "condition": "entry 2",
+          "_known": true
+        },
+        {
+          "name": "q-OffsetFreq",
+          "value": "dB0",
+          "condition": "entry 2",
+          "_known": true
+        },
+        {
+          "name": "deriveSSB-IndexFromCell",
+          "value": "true",
+          "condition": "entry 2",
+          "_known": true
+        },
+        {
+          "name": "altitudeMin-r19",
+          "value": "0",
+          "condition": "entry 2 NTN",
+          "_known": true
+        },
+        {
+          "name": "altitudeMax-r19",
+          "value": "10000",
+          "condition": "entry 2 NTN",
+          "_known": true
+        },
+        {
+          "name": "altitudeHyst-r19",
+          "value": "10",
+          "condition": "entry 2 NTN",
+          "_known": true
+        },
+        {
+          "name": "offsetLat-r19",
+          "value": "0",
+          "condition": "entry 2 NTN",
+          "_known": true
+        },
+        {
+          "name": "offsetLon-r19",
+          "value": "0",
+          "condition": "entry 2 NTN",
+          "_known": true
+        },
+        {
+          "name": "refLocOffset-r19",
+          "value": "0",
+          "condition": "entry 2 NTN",
+          "_known": true
+        },
+        {
+          "name": "interFreqNeighCellList",
+          "value": "1",
+          "condition": "entry 2",
+          "_known": true
+        },
+        {
+          "name": "physCellId",
+          "value": "200",
+          "condition": "entry 2 neighbor NR NTN cell",
+          "_known": true
+        },
+        {
+          "name": "q-OffsetCell",
+          "value": "dB0",
+          "condition": "entry 2 neighbor",
+          "_known": true
+        },
+        {
+          "name": "q-RxLevMinOffsetCell",
+          "value": "1",
+          "condition": "entry 2 neighbor",
+          "_known": true
+        },
+        {
+          "name": "q-QualMinOffsetCell",
+          "value": "1",
+          "condition": "entry 2 neighbor",
+          "_known": true
+        },
+        {
+          "name": "interFreqCarrierFreqList-v1900",
+          "value": "2",
+          "condition": "r19 NTN parameters present",
+          "_known": true
+        },
+        {
+          "name": "lateNonCriticalExtension",
+          "value": "Not present",
+          "condition": "",
+          "_known": true
+        }
+      ],
+      "_stop": "end_turn"
+    },
+    {
+      "message": "SIB5",
+      "derivation_path": "3GPP TS 38.331 SIB5 default_template_fields",
+      "ies": [
+        {
+          "name": "carrierFreqListEUTRA",
+          "value": "2 entries",
+          "condition": "contains lower-priority and higher-priority inter-RAT carriers",
+          "_known": true
+        },
+        {
+          "name": "carrierFreq",
+          "value": "6300",
+          "condition": "entry 1: lower-priority inter-RAT NR NTN reselection case",
+          "_known": true
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "2",
+          "condition": "entry 1: lower priority",
+          "_known": true
+        },
+        {
+          "name": "threshX-High",
+          "value": "5",
+          "condition": "entry 1",
+          "_known": true
+        },
+        {
+          "name": "threshX-Low",
+          "value": "5",
+          "condition": "entry 1: lower-priority reselection threshold",
+          "_known": true
+        },
+        {
+          "name": "q-RxLevMin",
+          "value": "-60",
+          "condition": "entry 1",
+          "_known": true
+        },
+        {
+          "name": "allowedMeasBandwidth",
+          "value": "n25",
+          "condition": "entry 1",
+          "_known": true
+        },
+        {
+          "name": "presenceAntennaPort1",
+          "value": "true",
+          "condition": "entry 1",
+          "_known": true
+        },
+        {
+          "name": "carrierFreq",
+          "value": "6320",
+          "condition": "entry 2: higher-priority inter-RAT NR NTN reselection case",
+          "_known": true
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "6",
+          "condition": "entry 2: higher priority",
+          "_known": true
+        },
+        {
+          "name": "threshX-High",
+          "value": "5",
+          "condition": "entry 2: higher-priority reselection threshold",
+          "_known": true
+        },
+        {
+          "name": "threshX-Low",
+          "value": "5",
+          "condition": "entry 2",
+          "_known": true
+        },
+        {
+          "name": "q-RxLevMin",
+          "value": "-60",
+          "condition": "entry 2",
+          "_known": true
+        },
+        {
+          "name": "allowedMeasBandwidth",
+          "value": "n25",
+          "condition": "entry 2",
+          "_known": true
+        },
+        {
+          "name": "presenceAntennaPort1",
+          "value": "true",
+          "condition": "entry 2",
+          "_known": true
+        },
+        {
+          "name": "t-ReselectionEUTRA",
+          "value": "1",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "t-ReselectionEUTRA-SF",
+          "value": "Not present",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "lateNonCriticalExtension",
+          "value": "Not present",
+          "condition": "",
+          "_known": true
+        }
+      ],
+      "_stop": "end_turn"
+    }
+  ],
   "_backend_model": "deepseek-v4.1-flash",
   "_stage1": {
     "stop": "end_turn",
@@ -121,10 +483,32 @@
     "repairs": 0
   },
   "_stage2": {
-    "candidates": [],
-    "calls": 0
+    "candidates": [
+      "SIB2",
+      "SIB4",
+      "SIB5"
+    ],
+    "calls": 3
   },
-  "status": "abstained",
-  "reason": "inputs contain no message/SIB names",
-  "calls": 0
+  "status": "generated",
+  "reason": "",
+  "calls": 3,
+  "tp": [
+    {
+      "index": 1,
+      "given": "UE in E-UTRA TN RRC_Idle state",
+      "when": "UE detects the cell re-selection criteria are met for the cell which belongs to the lower priority inter-RAT NR NTN Cell and UE has a valid GNSS position",
+      "then": "UE reselects the cell which belongs to the lower priority inter-RAT NR NTN Cell",
+      "ok": true
+    },
+    {
+      "index": 2,
+      "given": "UE in E-UTRA TN RRC_Idle state",
+      "when": "UE detects the cell re-selection criteria are met for the cell which belongs to the higher priority inter-RAT NR NTN Cell and UE has a valid GNSS position",
+      "then": "UE reselects the cell which belongs to the higher priority inter-RAT NR NTN Cell",
+      "ok": true
+    }
+  ],
+  "violations": [],
+  "verdict": "pass"
 }

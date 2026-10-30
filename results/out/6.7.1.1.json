@@ -98,108 +98,120 @@
   "messages": [
     {
       "message": "SIB19",
-      "derivation_path": "SIB19-r17 ASN.1 template (TS 38.331) with NR NTN access fields; optional v18/r19 fields absent",
+      "derivation_path": "SIB19-r17 ASN.1 default template",
       "ies": [
         {
+          "name": "carrierFreq-r17",
+          "value": "Not present",
+          "condition": "SIB19 broadcast",
+          "_known": true
+        },
+        {
           "name": "distanceThresh-r17",
-          "value": "0",
-          "condition": "Broadcast with referenceLocation-r17 for NR NTN cell access",
-          "_known": true
-        },
-        {
-          "name": "ntn-Config-r17",
-          "value": "epochTime-r17=0, ntn-UlSyncValidityDuration-r17=s5, cellSpecificKoffset-r17=0, kmac-r17=0, ta-Report-r17=enabled",
-          "condition": "Present for NR NTN cell",
-          "_known": true
-        },
-        {
-          "name": "t-Service-r17",
-          "value": "0",
-          "condition": "",
-          "_known": true
-        },
-        {
-          "name": "referenceLocation-r17",
-          "value": "latitude-r17=0, longitude-r17=0, altitude-r17=0",
-          "condition": "Broadcast in both cases; case 1 UE has no valid GNSS and does not establish RRC; case 2 UE has valid GNSS and establishes RRC for Registration",
-          "_known": true
-        },
-        {
-          "name": "ntn-NeighCellConfigList-r17",
           "value": "Not present",
-          "condition": "",
-          "_known": true
-        },
-        {
-          "name": "ntn-Config-r18",
-          "value": "Not present",
-          "condition": "",
-          "_known": true
-        },
-        {
-          "name": "ntn-CovEnh-r18",
-          "value": "Not present",
-          "condition": "",
-          "_known": true
-        },
-        {
-          "name": "ntn-NeighCellConfigListExt-v1720",
-          "value": "Not present",
-          "condition": "",
-          "_known": true
-        },
-        {
-          "name": "movingReferenceLocation-r18",
-          "value": "Not present",
-          "condition": "",
-          "_known": true
-        },
-        {
-          "name": "numberOfMsg4HARQ-ACK-Repetitions-r18",
-          "value": "Not present",
-          "condition": "",
-          "_known": true
-        },
-        {
-          "name": "rsrp-ThresholdMsg4HARQ-ACK-r18",
-          "value": "Not present",
-          "condition": "",
-          "_known": true
-        },
-        {
-          "name": "satSwitchWithReSync-r18",
-          "value": "Not present",
-          "condition": "",
-          "_known": true
-        },
-        {
-          "name": "ssb-TimeOffset-r18",
-          "value": "Not present",
-          "condition": "",
-          "_known": true
-        },
-        {
-          "name": "t-ServiceStart-r18",
-          "value": "Not present",
-          "condition": "",
-          "_known": true
-        },
-        {
-          "name": "refLoc-r19",
-          "value": "Not present",
-          "condition": "",
-          "_known": true
-        },
-        {
-          "name": "refLocList-r19",
-          "value": "Not present",
-          "condition": "",
+          "condition": "SIB19 broadcast",
           "_known": true
         },
         {
           "name": "lateNonCriticalExtension",
           "value": "Not present",
-          "condition": "",
+          "condition": "SIB19 broadcast",
+          "_known": true
+        },
+        {
+          "name": "movingReferenceLocation-r18",
+          "value": "Not present",
+          "condition": "SIB19 broadcast",
+          "_known": true
+        },
+        {
+          "name": "ntn-Config-r17",
+          "value": "Present",
+          "condition": "SIB19 broadcast; UE has valid GNSS position",
+          "_known": true
+        },
+        {
+          "name": "ntn-Config-r18",
+          "value": "Not present",
+          "condition": "SIB19 broadcast",
+          "_known": true
+        },
+        {
+          "name": "ntn-CovEnh-r18",
+          "value": "Not present",
+          "condition": "SIB19 broadcast",
+          "_known": true
+        },
+        {
+          "name": "ntn-NeighCellConfigList-r17",
+          "value": "Not present",
+          "condition": "SIB19 broadcast",
+          "_known": true
+        },
+        {
+          "name": "ntn-NeighCellConfigListExt-v1720",
+          "value": "Not present",
+          "condition": "SIB19 broadcast",
+          "_known": true
+        },
+        {
+          "name": "numberOfMsg4HARQ-ACK-Repetitions-r18",
+          "value": "Not present",
+          "condition": "SIB19 broadcast",
+          "_known": true
+        },
+        {
+          "name": "physCellId-r17",
+          "value": "Not present",
+          "condition": "SIB19 broadcast",
+          "_known": true
+        },
+        {
+          "name": "refLoc-r19",
+          "value": "Not present",
+          "condition": "SIB19 broadcast",
+          "_known": true
+        },
+        {
+          "name": "refLocList-r19",
+          "value": "Not present",
+          "condition": "SIB19 broadcast",
+          "_known": true
+        },
+        {
+          "name": "referenceLocation-r17",
+          "value": "Present",
+          "condition": "SIB19 broadcast; UE has valid GNSS position",
+          "_known": true
+        },
+        {
+          "name": "rsrp-ThresholdMsg4HARQ-ACK-r18",
+          "value": "Not present",
+          "condition": "SIB19 broadcast",
+          "_known": true
+        },
+        {
+          "name": "satSwitchWithReSync-r18",
+          "value": "Not present",
+          "condition": "SIB19 broadcast",
+          "_known": true
+        },
+        {
+          "name": "ssb-TimeOffset-r18",
+          "value": "Not present",
+          "condition": "SIB19 broadcast",
+          "_known": true
+        },
+        {
+          "name": "t-Service-r17",
+          "value": "Present",
+          "condition": "SIB19 broadcast; UE has valid GNSS position",
+          "_known": true
+        },
+        {
+          "name": "t-ServiceStart-r18",
+          "value": "Not present",
+          "condition": "SIB19 broadcast",
           "_known": true
         }
       ],
@@ -207,36 +219,72 @@
     },
     {
       "message": "SIB1",
-      "derivation_path": "3GPP TS 38.331 SIB1 ASN.1; default_template_fields",
+      "derivation_path": "default_template_fields",
       "ies": [
         {
           "name": "cellAccessRelatedInfo",
-          "value": "plmn-IdentityList: 1 entry; trackingAreaCode: 0x0001",
-          "condition": "Serving NTN cell",
-          "_known": true
-        },
-        {
-          "name": "cellIdentity",
-          "value": "0x000000001",
-          "condition": "",
+          "value": "Present",
+          "condition": "NR NTN cell",
           "_known": true
         },
         {
           "name": "cellSelectionInfo",
-          "value": "q-RxLevMin = -60; q-QualMin = -18",
-          "condition": "",
-          "_known": true
-        },
-        {
-          "name": "cellBarred",
-          "value": "notBarred",
+          "value": "Present",
           "condition": "",
           "_known": true
         },
         {
           "name": "cellBarredNTN-r17",
           "value": "notBarred",
-          "condition": "NTN access allowed; SIB19 is broadcast",
+          "condition": "NR NTN cell",
+          "_known": true
+        },
+        {
+          "name": "cellBarredRedCap-r17",
+          "value": "notBarred",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "cellBarredRedCap1Rx-r17",
+          "value": "notBarred",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "cellBarredRedCap2Rx-r17",
+          "value": "notBarred",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "cellBarredNES-r18",
+          "value": "notBarred",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "cellBarredATG-r18",
+          "value": "notBarred",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "cellBarredFixedVSAT-r18",
+          "value": "notBarred",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "cellBarredMobileVSAT-r18",
+          "value": "notBarred",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "cellBarred2RxXR-r18",
+          "value": "notBarred",
+          "condition": "",
           "_known": true
         },
         {
@@ -252,32 +300,44 @@
           "_known": true
         },
         {
-          "name": "si-SchedulingInfo",
-          "value": "SIB19 scheduled; periodicity = 160 ms; si-WindowLength = 20 ms",
-          "condition": "SIB19 broadcast",
+          "name": "eDRX-AllowedIdle-r17",
+          "value": "true",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "eDRX-AllowedInactive-r17",
+          "value": "true",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "eDRX-AllowedInactive-r18",
+          "value": "true",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "connEstFailureControl",
+          "value": "Present",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "downlinkConfigCommon",
+          "value": "Present",
+          "condition": "",
           "_known": true
         },
         {
           "name": "frequencyInfoDL",
-          "value": "absoluteFrequencySSB = 2016667; absoluteFrequencyPointA = 2016667; SCS = 15 kHz",
-          "condition": "NTN DL carrier",
-          "_known": true
-        },
-        {
-          "name": "bcch-Config",
-          "value": "8",
+          "value": "Present",
           "condition": "",
           "_known": true
         },
         {
-          "name": "defaultPagingCycle",
-          "value": "64",
-          "condition": "",
-          "_known": true
-        },
-        {
-          "name": "eCallOverIMS-Support",
-          "value": "Not present",
+          "name": "frequencyInfoUL",
+          "value": "Present",
           "condition": "",
           "_known": true
         }
@@ -286,228 +346,126 @@
     },
     {
       "message": "SIB4",
-      "derivation_path": "3GPP TS 38.331 SIB4 ASN.1; default_template_fields with interFreqCarrierFreqList[0]",
+      "derivation_path": "default_template_fields",
       "ies": [
         {
           "name": "interFreqCarrierFreqList",
-          "value": "1 entry (InterFreqCarrierFreqInfo)",
-          "condition": "SIB4 mandatory",
+          "value": "1 entry",
+          "condition": "",
           "_known": true
         },
         {
           "name": "dl-CarrierFreq",
           "value": "630000",
-          "condition": "InterFreqCarrierFreqInfo mandatory",
+          "condition": "interFreqCarrierFreqList present",
           "_known": true
         },
         {
           "name": "frequencyBandList",
-          "value": "78",
-          "condition": "InterFreqCarrierFreqInfo OPTIONAL; present",
+          "value": "n78",
+          "condition": "interFreqCarrierFreqList present",
           "_known": true
         },
         {
-          "name": "ssbSubcarrierSpacing",
-          "value": "kHz30",
-          "condition": "InterFreqCarrierFreqInfo mandatory",
+          "name": "nrofSS-BlocksToAverage",
+          "value": "Not present",
+          "condition": "interFreqCarrierFreqList present",
+          "_known": true
+        },
+        {
+          "name": "absThreshSS-BlocksConsolidation",
+          "value": "Not present",
+          "condition": "interFreqCarrierFreqList present",
           "_known": true
         },
         {
           "name": "deriveSSB-IndexFromCell",
           "value": "true",
-          "condition": "InterFreqCarrierFreqInfo mandatory",
+          "condition": "interFreqCarrierFreqList present",
           "_known": true
         },
         {
           "name": "q-RxLevMin",
           "value": "-60",
-          "condition": "InterFreqCarrierFreqInfo mandatory",
-          "_known": true
-        },
-        {
-          "name": "q-QualMin",
-          "value": "-18",
-          "condition": "InterFreqCarrierFreqInfo OPTIONAL; present",
-          "_known": true
-        },
-        {
-          "name": "p-Max",
-          "value": "23",
-          "condition": "InterFreqCarrierFreqInfo OPTIONAL; present",
-          "_known": true
-        },
-        {
-          "name": "t-ReselectionNR",
-          "value": "2",
-          "condition": "InterFreqCarrierFreqInfo mandatory",
+          "condition": "interFreqCarrierFreqList present",
           "_known": true
         },
         {
           "name": "cellReselectionPriority",
           "value": "5",
-          "condition": "InterFreqCarrierFreqInfo OPTIONAL; present",
-          "_known": true
-        },
-        {
-          "name": "cellReselectionSubPriority",
-          "value": "oDot4",
-          "condition": "InterFreqCarrierFreqInfo OPTIONAL; present",
+          "condition": "interFreqCarrierFreqList present",
           "_known": true
         },
         {
           "name": "q-OffsetFreq",
           "value": "dB0",
-          "condition": "InterFreqCarrierFreqInfo DEFAULT dB0",
-          "_known": true
-        },
-        {
-          "name": "nrofSS-BlocksToAverage",
-          "value": "4",
-          "condition": "InterFreqCarrierFreqInfo OPTIONAL; present",
-          "_known": true
-        },
-        {
-          "name": "absThreshSS-BlocksConsolidation",
-          "value": "thresholdRSRP: 56",
-          "condition": "InterFreqCarrierFreqInfo OPTIONAL; present",
+          "condition": "interFreqCarrierFreqList present",
           "_known": true
         },
         {
           "name": "interFreqNeighCellList",
           "value": "Not present",
-          "condition": "InterFreqCarrierFreqInfo OPTIONAL; absent",
+          "condition": "interFreqCarrierFreqList present",
           "_known": true
         },
         {
           "name": "interFreqExcludedCellList",
           "value": "Not present",
-          "condition": "InterFreqCarrierFreqInfo OPTIONAL; absent",
-          "_known": true
-        },
-        {
-          "name": "interFreqCarrierFreqList-v1610",
-          "value": "Not present",
-          "condition": "SIB4 OPTIONAL; absent",
-          "_known": true
-        },
-        {
-          "name": "interFreqCarrierFreqList-v1700",
-          "value": "Not present",
-          "condition": "SIB4 OPTIONAL; absent",
-          "_known": true
-        },
-        {
-          "name": "interFreqCarrierFreqList-v1720",
-          "value": "Not present",
-          "condition": "SIB4 OPTIONAL; absent",
-          "_known": true
-        },
-        {
-          "name": "interFreqCarrierFreqList-v1730",
-          "value": "Not present",
-          "condition": "SIB4 OPTIONAL; absent",
-          "_known": true
-        },
-        {
-          "name": "interFreqCarrierFreqList-v1760",
-          "value": "Not present",
-          "condition": "SIB4 OPTIONAL; absent",
-          "_known": true
-        },
-        {
-          "name": "interFreqCarrierFreqList-v1800",
-          "value": "Not present",
-          "condition": "SIB4 OPTIONAL; absent",
+          "condition": "interFreqCarrierFreqList present",
           "_known": true
         },
         {
           "name": "interFreqCarrierFreqList-v1900",
-          "value": "Not present",
-          "condition": "SIB4 OPTIONAL; absent",
-          "_known": true
-        },
-        {
-          "name": "frequencyBandListAerial-r18",
-          "value": "Not present",
-          "condition": "InterFreqCarrierFreqInfo OPTIONAL; absent",
-          "_known": true
-        },
-        {
-          "name": "refLocMapList-r19",
-          "value": "Not present",
-          "condition": "InterFreqCarrierFreqInfo-v1900 OPTIONAL; absent",
-          "_known": true
-        },
-        {
-          "name": "offsetLat-r19",
-          "value": "Not present",
-          "condition": "InterFreqCarrierFreqInfo-v1900 OPTIONAL; absent",
-          "_known": true
-        },
-        {
-          "name": "offsetLon-r19",
-          "value": "Not present",
-          "condition": "InterFreqCarrierFreqInfo-v1900 OPTIONAL; absent",
+          "value": "1 entry",
+          "condition": "NTN neighbour carrier present",
           "_known": true
         },
         {
           "name": "altitudeHyst-r19",
-          "value": "Not present",
-          "condition": "InterFreqCarrierFreqInfo-v1900 OPTIONAL; absent",
+          "value": "100",
+          "condition": "interFreqCarrierFreqList-v1900 present",
           "_known": true
         },
         {
           "name": "altitudeMax-r19",
-          "value": "Not present",
-          "condition": "InterFreqCarrierFreqInfo-v1900 OPTIONAL; absent",
+          "value": "10000",
+          "condition": "interFreqCarrierFreqList-v1900 present",
           "_known": true
         },
         {
           "name": "altitudeMin-r19",
-          "value": "Not present",
-          "condition": "InterFreqCarrierFreqInfo-v1900 OPTIONAL; absent",
+          "value": "0",
+          "condition": "interFreqCarrierFreqList-v1900 present",
           "_known": true
         },
         {
-          "name": "emptyList-r19",
-          "value": "Not present",
-          "condition": "InterFreqCarrierFreqInfo-v1900 OPTIONAL; absent",
+          "name": "offsetLat-r19",
+          "value": "0",
+          "condition": "interFreqCarrierFreqList-v1900 present",
           "_known": true
         },
         {
-          "name": "excludedCells-r19",
-          "value": "Not present",
-          "condition": "InterFreqCarrierFreqInfo-v1900 OPTIONAL; absent",
+          "name": "offsetLon-r19",
+          "value": "0",
+          "condition": "interFreqCarrierFreqList-v1900 present",
+          "_known": true
+        },
+        {
+          "name": "refLocMapList-r19",
+          "value": "1 entry",
+          "condition": "interFreqCarrierFreqList-v1900 present",
           "_known": true
         },
         {
           "name": "refLocOffset-r19",
-          "value": "Not present",
-          "condition": "InterFreqCarrierFreqInfo-v1900 OPTIONAL; absent",
-          "_known": true
-        },
-        {
-          "name": "od-SIB1-cellReselectionPriority-r19",
-          "value": "Not present",
-          "condition": "InterFreqCarrierFreqInfo-v1900 OPTIONAL; absent",
-          "_known": true
-        },
-        {
-          "name": "od-SIB1-cellReselectionSubPriority-r19",
-          "value": "Not present",
-          "condition": "InterFreqCarrierFreqInfo-v1900 OPTIONAL; absent",
-          "_known": true
-        },
-        {
-          "name": "interFreqOD-SIB1-ExcludedCellList-r19",
-          "value": "Not present",
-          "condition": "SIB4-v1900 OPTIONAL; absent",
+          "value": "0",
+          "condition": "interFreqCarrierFreqList-v1900 present",
           "_known": true
         },
         {
           "name": "lateNonCriticalExtension",
           "value": "Not present",
-          "condition": "SIB4 OPTIONAL; absent",
+          "condition": "",
           "_known": true
         }
       ],
@@ -515,143 +473,17 @@
     },
     {
       "message": "SIB5",
-      "derivation_path": "default_template_fields",
+      "derivation_path": "38.331 SIB5 ASN.1 default_template_fields",
       "ies": [
         {
           "name": "carrierFreqListEUTRA",
-          "value": "1 entry",
+          "value": "Not present",
           "condition": "",
           "_known": true
         },
         {
-          "name": "carrierFreq",
-          "value": 6300,
-          "condition": "carrierFreqListEUTRA[0]",
-          "_known": true
-        },
-        {
-          "name": "allowedMeasBandwidth",
-          "value": "mbw6",
-          "condition": "carrierFreqListEUTRA[0]",
-          "_known": true
-        },
-        {
-          "name": "presenceAntennaPort1",
-          "value": true,
-          "condition": "carrierFreqListEUTRA[0]",
-          "_known": true
-        },
-        {
-          "name": "cellReselectionPriority",
-          "value": 0,
-          "condition": "carrierFreqListEUTRA[0]",
-          "_known": true
-        },
-        {
-          "name": "cellReselectionSubPriority",
-          "value": "oDot2",
-          "condition": "carrierFreqListEUTRA[0]",
-          "_known": true
-        },
-        {
-          "name": "q-RxLevMin",
-          "value": -60,
-          "condition": "carrierFreqListEUTRA[0]",
-          "_known": true
-        },
-        {
-          "name": "q-RxLevMinOffsetCell",
-          "value": 1,
-          "condition": "carrierFreqListEUTRA[0]",
-          "_known": true
-        },
-        {
-          "name": "q-QualMin",
-          "value": -34,
-          "condition": "carrierFreqListEUTRA[0]",
-          "_known": true
-        },
-        {
-          "name": "q-QualMinOffsetCell",
-          "value": 1,
-          "condition": "carrierFreqListEUTRA[0]",
-          "_known": true
-        },
-        {
-          "name": "threshX-High",
-          "value": 0,
-          "condition": "carrierFreqListEUTRA[0]",
-          "_known": true
-        },
-        {
-          "name": "threshX-Low",
-          "value": 0,
-          "condition": "carrierFreqListEUTRA[0]",
-          "_known": true
-        },
-        {
-          "name": "threshX-Q",
-          "value": "Present",
-          "condition": "carrierFreqListEUTRA[0]",
-          "_known": true
-        },
-        {
-          "name": "threshX-HighQ",
-          "value": 0,
-          "condition": "threshX-Q present",
-          "_known": true
-        },
-        {
-          "name": "threshX-LowQ",
-          "value": 0,
-          "condition": "threshX-Q present",
-          "_known": true
-        },
-        {
-          "name": "physCellId",
-          "value": 0,
-          "condition": "carrierFreqListEUTRA[0]",
-          "_known": true
-        },
-        {
-          "name": "dummy",
-          "value": "Not present",
-          "condition": "carrierFreqListEUTRA[0]",
-          "_known": true
-        },
-        {
-          "name": "eutra-multiBandInfoList",
-          "value": "Not present",
-          "condition": "carrierFreqListEUTRA[0]",
-          "_known": true
-        },
-        {
-          "name": "eutra-FreqNeighCellList",
-          "value": "Not present",
-          "condition": "carrierFreqListEUTRA[0]",
-          "_known": true
-        },
-        {
-          "name": "eutra-ExcludedCellList",
-          "value": "Not present",
-          "condition": "carrierFreqListEUTRA[0]",
-          "_known": true
-        },
-        {
-          "name": "eutra-FreqNeighHSDN-CellList-r17",
-          "value": "Not present",
-          "condition": "carrierFreqListEUTRA[0]",
-          "_known": true
-        },
-        {
-          "name": "eutra-MultiBandInfoListAerial-r18",
-          "value": "Not present",
-          "condition": "carrierFreqListEUTRA[0]",
-          "_known": true
-        },
-        {
           "name": "t-ReselectionEUTRA",
-          "value": 0,
+          "value": 1,
           "condition": "",
           "_known": true
         },
@@ -680,30 +512,6 @@
           "_known": true
         },
         {
-          "name": "highSpeedEUTRACarrier-r16",
-          "value": "Not present",
-          "condition": "",
-          "_known": true
-        },
-        {
-          "name": "idleModeMeasVoiceFallback-r17",
-          "value": "Not present",
-          "condition": "",
-          "_known": true
-        },
-        {
-          "name": "tn-AreaIdList-r18",
-          "value": "Not present",
-          "condition": "",
-          "_known": true
-        },
-        {
-          "name": "p-MaxEUTRA",
-          "value": -30,
-          "condition": "",
-          "_known": true
-        },
-        {
           "name": "lateNonCriticalExtension",
           "value": "Not present",
           "condition": "",
@@ -721,12 +529,6 @@
           "value": "Not present",
           "condition": "",
           "_known": false
-        },
-        {
-          "name": "idleModeMeasurementsNR-r16",
-          "value": "Not present",
-          "condition": "",
-          "_known": true
         },
         {
           "name": "lateNonCriticalExtension",
@@ -748,33 +550,57 @@
       "derivation_path": "3GPP TS 38.331 SIB12 ASN.1",
       "ies": [
         {
-          "name": "segmentNumber-r16",
+          "name": "segmentNumber",
           "value": "Not present",
-          "condition": "SIB12 is not segmented",
+          "condition": "optional; no SIB12 segmentation",
           "_known": true
         },
         {
-          "name": "segmentType-r16",
+          "name": "segmentType",
           "value": "Not present",
-          "condition": "SIB12 is not segmented",
+          "condition": "optional; no SIB12 segmentation",
           "_known": true
         },
         {
-          "name": "sl-ConfigCommonNR-r16",
-          "value": "Present",
-          "condition": "",
+          "name": "segmentContainer",
+          "value": "Not present",
+          "condition": "optional; no SIB12 segmentation",
+          "_known": true
+        },
+        {
+          "name": "cellReselectionInfoCommon",
+          "value": "Not present",
+          "condition": "optional; no sidelink cell reselection common info",
+          "_known": true
+        },
+        {
+          "name": "cellReselectionInfoSidelink",
+          "value": "Not present",
+          "condition": "optional; no sidelink cell reselection info",
+          "_known": false
+        },
+        {
+          "name": "sl-ConfigCommonNR",
+          "value": "Not present",
+          "condition": "optional; no NR sidelink common configuration",
+          "_known": false
+        },
+        {
+          "name": "t400",
+          "value": "Not present",
+          "condition": "optional; timer T400 not configured",
           "_known": true
         },
         {
           "name": "lateNonCriticalExtension",
           "value": "Not present",
-          "condition": "",
+          "condition": "optional",
           "_known": true
         },
         {
           "name": "nonCriticalExtension",
           "value": "Not present",
-          "condition": "",
+          "condition": "optional",
           "_known": true
         }
       ],
@@ -783,37 +609,24 @@
     {
       "message": "SIB13",
       "derivation_path": "3GPP TS 38.331 SIB13 ASN.1",
-      "ies": [
-        {
-          "name": "mbs-Config-r17",
-          "value": "Not present",
-          "condition": "OPTIONAL",
-          "_known": false
-        },
-        {
-          "name": "lateNonCriticalExtension",
-          "value": "Not present",
-          "condition": "OPTIONAL",
-          "_known": true
-        },
-        {
-          "name": "nonCriticalExtension",
-          "value": "Not present",
-          "condition": "OPTIONAL",
-          "_known": true
-        }
-      ],
+      "ies": [],
       "_stop": "end_turn"
     },
     {
       "message": "SIB14",
-      "derivation_path": "3GPP TS 38.331 SIB14 ASN.1",
+      "derivation_path": "3GPP TS 38.331 SIB19 ASN.1",
       "ies": [
         {
-          "name": "sl-DiscConfigCommon-r16",
+          "name": "ntn-Config-r17",
+          "value": "Present",
+          "condition": "Cell broadcasts SIB19",
+          "_known": true
+        },
+        {
+          "name": "t-Service-r17",
           "value": "Not present",
           "condition": "",
-          "_known": false
+          "_known": true
         },
         {
           "name": "lateNonCriticalExtension",
@@ -832,28 +645,16 @@
     },
     {
       "message": "SIB15",
-      "derivation_path": "TS 38.331 SIB15 ASN.1",
+      "derivation_path": "3GPP TS 38.331 SIB15 ASN.1 (TimeReferenceInfo); test context uses SIB19 for NTN access",
       "ies": [
         {
-          "name": "posSIB-MappingInfo-r16",
+          "name": "timeReferenceInfoList-r17",
           "value": "Not present",
-          "condition": "",
-          "_known": true
-        },
-        {
-          "name": "posSIB-Config-r16",
-          "value": "Not present",
-          "condition": "",
+          "condition": "SIB15 is not the NTN SIB19 configuration used for the GNSS/registration decision",
           "_known": false
         },
         {
           "name": "lateNonCriticalExtension",
-          "value": "Not present",
-          "condition": "",
-          "_known": true
-        },
-        {
-          "name": "nonCriticalExtension",
           "value": "Not present",
           "condition": "",
           "_known": true
@@ -879,5 +680,22 @@
     "calls": 9
   },
   "verdict": "pass",
-  "violations": []
+  "violations": [],
+  "calls": 9,
+  "tp": [
+    {
+      "index": 1,
+      "given": "UE in 5GMM-DEREGISTERED/RRC-IDLE and UE finds a cell which provides access by NR NTN RAT",
+      "when": "UE has no valid GNSS position",
+      "then": "UE shall not establish RRC connection to perform a Registration procedure",
+      "ok": true
+    },
+    {
+      "index": 2,
+      "given": "UE in 5GMM-DEREGISTERED/RRC-IDLE and UE finds a cell which provides access by NR NTN",
+      "when": "Cell broadcasts SIB19 and UE has a valid GNSS position",
+      "then": "UE establishes RRC connection and successfully performs Registration procedure",
+      "ok": true
+    }
+  ]
 }

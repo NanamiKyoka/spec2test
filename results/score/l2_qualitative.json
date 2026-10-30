@@ -5,15 +5,12 @@
       "rrcsetuprequest"
     ],
     "system_sequence": [
-      "systeminformationsib19",
-      "providevalidgnssposition",
-      "systeminformationsib19",
+      "sib19",
       "rrcsetuprequest",
       "rrcsetup",
-      "rrcsetupcompleteregistrationrequest",
-      "dlinformationtransferregistrationaccept",
-      "ulinformationtransferregistrationcomplete",
-      "rrcrelease"
+      "rrcsetupcomplete",
+      "registrationaccept",
+      "registrationcomplete"
     ]
   },
   {
@@ -63,15 +60,11 @@
     "system_sequence": [
       "mib",
       "sib1",
-      "paging",
+      "mib",
       "sib1",
-      "paging",
-      "rrcsetuprequest",
-      "rrcsetup",
-      "rrcsetupcomplete",
-      "rrcrelease",
+      "mib",
       "sib1",
-      "paging"
+      "sib1"
     ]
   },
   {
@@ -108,17 +101,9 @@
     "case": "6.7.1.5",
     "gold_sequence": [],
     "system_sequence": [
-      "systeminformationsib2sib4sib19",
-      "paging",
-      "rrcsetuprequest",
-      "rrcsetup",
-      "rrcsetupcomplete",
+      "systeminformation",
       "rrcrelease",
-      "systeminformationsib2sib4sib19",
-      "paging",
-      "rrcsetuprequest",
-      "rrcsetup",
-      "rrcsetupcomplete"
+      "systeminformation"
     ]
   },
   {

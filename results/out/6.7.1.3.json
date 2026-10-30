@@ -5,25 +5,25 @@
       "st": 1,
       "actor": "SS",
       "direction": "S->U",
-      "message": "MIB",
+      "message": "",
       "tp_ref": [
         1
       ]
     },
     {
       "st": 2,
-      "actor": "SS",
-      "direction": "S->U",
-      "message": "SIB1 (cellBarredNTN not present)",
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
       "tp_ref": [
         1
       ]
     },
     {
       "st": 3,
-      "actor": "UE",
-      "direction": "U->S",
-      "message": "",
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "MIB",
       "tp_ref": [
         1
       ]
@@ -32,9 +32,9 @@
       "st": 4,
       "actor": "SS",
       "direction": "S->U",
-      "message": "SIB1 (cellBarredNTN not barred)",
+      "message": "SIB1",
       "tp_ref": [
-        2
+        1
       ]
     },
     {
@@ -43,20 +43,92 @@
       "direction": "U->S",
       "message": "",
       "tp_ref": [
-        2
+        1
       ]
     },
     {
       "st": 6,
       "actor": "SS",
       "direction": "S->U",
-      "message": "SIB1 (cellBarredNTN barred)",
+      "message": "",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 7,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "MIB",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 8,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 9,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 10,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "",
       "tp_ref": [
         3
       ]
     },
     {
-      "st": 7,
+      "st": 11,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "MIB",
+      "tp_ref": [
+        3
+      ]
+    },
+    {
+      "st": 12,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1",
+      "tp_ref": [
+        3
+      ]
+    },
+    {
+      "st": 13,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        3
+      ]
+    },
+    {
+      "st": 14,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1",
+      "tp_ref": [
+        3
+      ]
+    },
+    {
+      "st": 15,
       "actor": "UE",
       "direction": "U->S",
       "message": "",
@@ -68,24 +140,30 @@
   "messages": [
     {
       "message": "SIB1",
-      "derivation_path": "SIB1 ASN.1 CellAccessRelatedInfo -> cellBarredNTN-r17; SIB1 default_template_fields includes cellBarredNTN-r17",
+      "derivation_path": "3GPP TS 38.331 SIB1 ASN.1 / default_template_fields",
       "ies": [
+        {
+          "name": "cellAccessRelatedInfo",
+          "value": "present",
+          "condition": "All cases: SIB1 carries cellAccessRelatedInfo for the NR NTN cell",
+          "_known": true
+        },
         {
           "name": "cellBarredNTN-r17",
           "value": "Not present",
-          "condition": "Case (1): SIB1 for NR NTN cell; cellBarredNTN-r17 absent, UE considers the cell barred",
+          "condition": "Case (1): NR NTN suitable cell; cellBarredNTN-r17 absent in SIB1, UE considers cell barred and does not camp",
           "_known": true
         },
         {
           "name": "cellBarredNTN-r17",
           "value": "notBarred",
-          "condition": "Case (2): SIB1 for NR NTN cell; cellBarredNTN-r17 present and set to notBarred, UE considers the cell suitable and camps on it",
+          "condition": "Case (2): NR NTN suitable cell; cellBarredNTN-r17 set to notBarred, UE considers cell suitable and camps",
           "_known": true
         },
         {
           "name": "cellBarredNTN-r17",
           "value": "barred",
-          "condition": "Case (3): SIB1 for NR NTN cell; cellBarredNTN-r17 changes to barred, UE considers the cell barred",
+          "condition": "Case (3): NR NTN cell; cellBarredNTN-r17 changes to barred, UE considers cell barred and does not camp",
           "_known": true
         }
       ],
@@ -101,5 +179,29 @@
     "calls": 1
   },
   "verdict": "pass",
-  "violations": []
+  "violations": [],
+  "calls": 1,
+  "tp": [
+    {
+      "index": 1,
+      "given": "UE in NR RRC_IDLE state",
+      "when": "UE finds a suitable cell that provides access by NR NTN RAT and cellBarredNTN in SIB1 is not present",
+      "then": "the UE considers the cell as barred and no camping on this cell can take place",
+      "ok": true
+    },
+    {
+      "index": 2,
+      "given": "UE in NR RRC_IDLE state",
+      "when": "UE finds a suitable cell that provides access by NR NTN RAT \"not barred\"",
+      "then": "the UE considers the cell suitable and camps on it",
+      "ok": true
+    },
+    {
+      "index": 3,
+      "given": "UE in NR RRC_IDLE state",
+      "when": "UE finds a suitable cell that provides access by NR NTN RAT and cellBarredNTN in SIB1 changes to \"barred\"",
+      "then": "the UE considers the cell as barred and no camping on this cell can take place",
+      "ok": true
+    }
+  ]
 }

@@ -50,42 +50,30 @@
   "messages": [
     {
       "message": "SIB1",
-      "derivation_path": "SIB1 default_template_fields -> cellAccessRelatedInfo -> trackingAreaList",
+      "derivation_path": "3GPP TS 38.331 SIB1",
       "ies": [
         {
           "name": "cellAccessRelatedInfo",
           "value": "present",
-          "condition": "SIB1 includes cell access related information",
+          "condition": "",
           "_known": true
         },
         {
           "name": "plmn-IdentityList",
-          "value": "1 PLMN",
+          "value": "1 entry",
           "condition": "inside cellAccessRelatedInfo",
           "_known": true
         },
         {
           "name": "trackingAreaList",
-          "value": "2",
-          "condition": "inside cellAccessRelatedInfo; more than one TAC per PLMN",
-          "_known": true
-        },
-        {
-          "name": "cellIdentity",
-          "value": "valid",
-          "condition": "inside cellAccessRelatedInfo",
-          "_known": true
-        },
-        {
-          "name": "cellSelectionInfo",
-          "value": "present",
-          "condition": "UE is able to find a suitable NR NTN cell",
+          "value": "TAC1, TAC2",
+          "condition": "inside PLMN-IdentityInfo; more than one TAC for the PLMN",
           "_known": true
         },
         {
           "name": "cellBarredNTN-r17",
           "value": "notBarred",
-          "condition": "NR NTN access allowed",
+          "condition": "NR NTN cell; suitable cell",
           "_known": true
         }
       ],
@@ -101,5 +89,15 @@
     "calls": 1
   },
   "verdict": "pass",
-  "violations": []
+  "violations": [],
+  "calls": 1,
+  "tp": [
+    {
+      "index": 1,
+      "given": "UE in NR RRC_IDLE and UE finds a suitable cell which provides access by NR NTN RAT",
+      "when": "SIB1 broadcast more than one TAC per PLMN",
+      "then": "UE forwards the trackingAreaList to upper layers for mobility management procedure and reselects the cell",
+      "ok": true
+    }
+  ]
 }

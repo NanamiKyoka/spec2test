@@ -2,33 +2,33 @@
   "case_id": "6.7.1.10",
   "provider": "proxy",
   "model": "deepseek-v4.1-flash",
-  "generated_at": "2026-10-30T07:44:01.392368+00:00",
-  "headline": "用例被拒绝：SIB4含未知字段",
+  "generated_at": "2026-10-30T14:06:05.904657+00:00",
+  "headline": "用例被驳回：SIB4含未知字段，未通过",
   "sections": [
     {
       "key": "tests",
       "title": "这条用例在验什么",
-      "body": "验证支持在NR空闲态跳过TN测量的终端：当tn-AreaIdList中的TN NR小区排名高于服务小区，且终端处于该频率覆盖范围时，终端重选到该TN NR小区。"
+      "body": "验证支持在RRC_IDLE跳过TN测量的UE驻留NTN小区时，若tn-AreaIdList中的TN NR小区排名高于服务小区，且UE处于该频率覆盖范围内，UE是否会重选到该TN NR小区。"
     },
     {
       "key": "generated",
       "title": "系统生成了什么",
-      "body": "系统生成10步流程：先下发SIB1、SIB4、SIB25，后续包含寻呼与RRC建立相关消息；其中第4至6步消息名为空。"
+      "body": "系统生成5步流程：SS先下发SIB25，再下发SIB4；随后UE与SS各有两次交互，消息均为空。SIB25给出覆盖区域信息，SIB4给出邻频配置及tn-AreaIdList-r19。"
     },
     {
       "key": "verdict",
       "title": "为什么是这个判定",
-      "body": "numbers.verdict为reject，实际违规1条：SIB4中出现未知字段tn-AreaIdList-r19，因此判定为拒绝，不能视为通过。"
+      "body": "判定为reject，实际违规1条：规则R2指出messages[SIB4].ies[14].name出现未知字段tn-AreaIdList-r19，即SIB4不应包含该字段。"
     },
     {
       "key": "data",
       "title": "数据怎么读",
-      "body": "L1=1.0，L3=1.0，gold_ie_n=2，calls=2。L3不为null，说明按召回计分；gold叶子IE为tn-ReferenceLocation-r18和tn-DistanceRadius-r18。"
+      "body": "L1=1.0，L3_recall=1.0，gold_ie_n=2，calls=2；gold叶子IE为tn-ReferenceLocation-r18与tn-DistanceRadius-r18，召回完整。"
     },
     {
       "key": "caveats",
       "title": "哪里还不确定",
-      "body": "证据有限：第4至6步消息名为空，reason为空；未知字段是否由版本或命名差异造成，仅凭现有证据无法确认。"
+      "body": "reason为空，未说明驳回理由；5步中有3步消息为空，重选的具体信令无法核对；证据也未给出该违规字段的修改方式。"
     }
   ],
   "numbers": {
@@ -41,7 +41,7 @@
   },
   "grounded_on": [
     "data/ctx/6.7.1.10.json",
-    "data/out_rejected/6.7.1.10.json",
+    "data/out/6.7.1.10.json",
     "data/score/report.json",
     "data/ir/ie/6.7.1.10.json"
   ]

@@ -249,5 +249,16 @@
   },
   "status": "abstained",
   "reason": "inputs contain no message/SIB names",
-  "calls": 0
+  "calls": 0,
+  "tp": [
+    {
+      "index": 1,
+      "given": "UE configured with \"MinimumPeriodicSearchTimer\", camped on an NR-NTN RAT VPLMN cell and cells of a higher priority NG-RAN PLMN available",
+      "when": "the higher priority PLMN search timer T stored in the USIM or the default value for T is less than the \"MinimumPeriodicSearchTimer\"",
+      "then": "UE shall not use a value for T that is less than the \"MinimumPeriodicSearchTimer\" and selects and camps on a cell of the highest priority PLMN and attempts a location registration on the selected cell upon expiry of \"MinimumPeriodicSearchTimer\"",
+      "ok": true
+    }
+  ],
+  "violations": [],
+  "verdict": null
 }

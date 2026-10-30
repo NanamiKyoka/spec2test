@@ -1,0 +1,48 @@
+{
+  "case_id": "6.7.1.5",
+  "provider": "proxy",
+  "model": "deepseek-v4.1-flash",
+  "generated_at": "2026-10-30T14:07:00.576627+00:00",
+  "headline": "该用例判定为通过：验证NTN空闲态基于位置的测量与重选。",
+  "sections": [
+    {
+      "key": "tests",
+      "title": "这条用例在验什么",
+      "body": "验证支持NR NTN空闲态基于位置测量的UE：当Sintrasearch非零且UE与服务小区参考位置距离大于distanceThresh时，执行频内测量并重选；当Snonintrasearch非零且距离超阈值时，执行频间测量并重选到低优先级频点小区。"
+    },
+    {
+      "key": "generated",
+      "title": "系统生成了什么",
+      "body": "系统生成11步流程，含SIB19与SIB2消息配置；SIB19给出ntn-Config-r17、referenceLocation-r17、distanceThresh-r17等，SIB2给出q-RxLevMin、s-IntraSearchP、s-NonIntraSearchP、cellReselectionPriority、distanceThresh-r17等。"
+    },
+    {
+      "key": "verdict",
+      "title": "为什么是这个判定",
+      "body": "numbers.verdict为pass，实际违规条数为0（violations为空），因此判定通过；未出现弃权或未判定。"
+    },
+    {
+      "key": "data",
+      "title": "数据怎么读",
+      "body": "L1=1.0；L3_recall=0.667；gold=7（gold_ie_n）；calls=2。L3非空，按0.667计；gold表示金标准叶子IE数量为7。"
+    },
+    {
+      "key": "caveats",
+      "title": "哪里还不确定",
+      "body": "证据中部分步骤message为空，且L3_recall仅0.667，说明生成覆盖未完全对齐金标准；但当前无违规记录，判定不受影响。"
+    }
+  ],
+  "numbers": {
+    "L1": 1.0,
+    "L3": 0.667,
+    "gold": 7,
+    "calls": 2,
+    "violations": 0,
+    "verdict": "pass"
+  },
+  "grounded_on": [
+    "data/ctx/6.7.1.5.json",
+    "data/out/6.7.1.5.json",
+    "data/score/report.json",
+    "data/ir/ie/6.7.1.5.json"
+  ]
+}

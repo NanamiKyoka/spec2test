@@ -104,12 +104,225 @@
   "messages": [
     {
       "message": "SIB19",
-      "derivation_path": "default_template_fields",
+      "derivation_path": "SIB19 ASN.1 template from default_template_fields",
       "ies": [
         {
+          "name": "carrierFreq-r17",
+          "value": "1000",
+          "condition": "NR NTN serving cell frequency",
+          "_known": true
+        },
+        {
           "name": "t-Service-r17",
-          "value": "1000000000",
-          "condition": "Serving cell SIB19 includes t-Service-r17; Sintrasearch is non-zero for intra-frequency case and Snonintrasearch is non-zero for inter-frequency case",
+          "value": "10",
+          "condition": "t-Service of the serving cell is present in SIB19",
+          "_known": true
+        },
+        {
+          "name": "ntn-Config-r17",
+          "value": "present",
+          "condition": "cell provides access by NR NTN",
+          "_known": true
+        },
+        {
+          "name": "referenceLocation-r17",
+          "value": "present",
+          "condition": "NTN serving cell reference location",
+          "_known": true
+        }
+      ],
+      "_stop": "end_turn"
+    },
+    {
+      "message": "SIB2",
+      "derivation_path": "SIB2 ASN.1 template (3GPP TS 38.331) with NTN time-based measurement parameters from test purpose",
+      "ies": [
+        {
+          "name": "cellReselectionInfoCommon",
+          "value": "present",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "q-Hyst",
+          "value": "dB2",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "deriveSSB-IndexFromCell",
+          "value": true,
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "cellReselectionServingFreqInfo",
+          "value": "present",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "s-NonIntraSearchP",
+          "value": 10,
+          "condition": "Snonintrasearch non-zero",
+          "_known": true
+        },
+        {
+          "name": "threshServingLowP",
+          "value": 5,
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": 3,
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "intraFreqCellReselectionInfo",
+          "value": "present",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "q-RxLevMin",
+          "value": -60,
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "q-QualMin",
+          "value": -18,
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "s-IntraSearchP",
+          "value": 10,
+          "condition": "Sintrasearch non-zero",
+          "_known": true
+        },
+        {
+          "name": "t-ReselectionNR",
+          "value": 1,
+          "condition": "",
+          "_known": true
+        }
+      ],
+      "_stop": "end_turn"
+    },
+    {
+      "message": "SIB4",
+      "derivation_path": "SIB4 default template / TS 38.331 InterFreqCarrierFreqList",
+      "ies": [
+        {
+          "name": "interFreqCarrierFreqList",
+          "value": "1 entry",
+          "condition": "SIB4 provides a lower-priority inter-frequency carrier for reselection",
+          "_known": true
+        },
+        {
+          "name": "dl-CarrierFreq",
+          "value": "630000",
+          "condition": "interFreqCarrierFreqList[1]",
+          "_known": true
+        },
+        {
+          "name": "frequencyBandList",
+          "value": "78",
+          "condition": "interFreqCarrierFreqList[1]",
+          "_known": true
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "1",
+          "condition": "interFreqCarrierFreqList[1]; lower than serving cell priority",
+          "_known": true
+        },
+        {
+          "name": "q-RxLevMin",
+          "value": "-60",
+          "condition": "interFreqCarrierFreqList[1]",
+          "_known": true
+        },
+        {
+          "name": "q-OffsetFreq",
+          "value": "dB0",
+          "condition": "interFreqCarrierFreqList[1]",
+          "_known": true
+        },
+        {
+          "name": "interFreqNeighCellList",
+          "value": "1 entry",
+          "condition": "interFreqCarrierFreqList[1]",
+          "_known": true
+        },
+        {
+          "name": "physCellId",
+          "value": "1",
+          "condition": "interFreqNeighCellList[1]",
+          "_known": true
+        },
+        {
+          "name": "q-OffsetCell",
+          "value": "dB0",
+          "condition": "interFreqNeighCellList[1]",
+          "_known": true
+        }
+      ],
+      "_stop": "end_turn"
+    },
+    {
+      "message": "SIB5",
+      "derivation_path": "SIB5 ASN.1 default_template_fields -> carrierFreqListEUTRA -> CarrierFreqEUTRA",
+      "ies": [
+        {
+          "name": "carrierFreqListEUTRA",
+          "value": "1 entry",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "carrierFreq",
+          "value": "6300",
+          "condition": "within carrierFreqListEUTRA entry",
+          "_known": true
+        },
+        {
+          "name": "allowedMeasBandwidth",
+          "value": "mbw100",
+          "condition": "within carrierFreqListEUTRA entry",
+          "_known": true
+        },
+        {
+          "name": "presenceAntennaPort1",
+          "value": "true",
+          "condition": "within carrierFreqListEUTRA entry",
+          "_known": true
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "1",
+          "condition": "lower priority than serving NR frequency",
+          "_known": true
+        },
+        {
+          "name": "q-RxLevMin",
+          "value": "-60",
+          "condition": "within carrierFreqListEUTRA entry",
+          "_known": true
+        },
+        {
+          "name": "threshX-Low",
+          "value": "2",
+          "condition": "for lower-priority EUTRA reselection",
+          "_known": true
+        },
+        {
+          "name": "t-ReselectionEUTRA",
+          "value": "2",
+          "condition": "",
           "_known": true
         }
       ],
@@ -124,10 +337,32 @@
   },
   "_stage2": {
     "candidates": [
-      "SIB19"
+      "SIB19",
+      "SIB2",
+      "SIB4",
+      "SIB5"
     ],
-    "calls": 1
+    "calls": 4
   },
   "status": "generated",
-  "calls": 1
+  "calls": 4,
+  "reason": "",
+  "tp": [
+    {
+      "index": 1,
+      "given": "UE supporting time-based measurements in NR RRC_IDLE state on a cell which provides access by NR NTN",
+      "when": "t-Service of the serving cell is present in SIB19 and Sintrasearch is non-zero in system information",
+      "then": "UE performs intra-frequency measurements and reselects the highest ranked cell up on Srxlev > SIntraSearchP",
+      "ok": true
+    },
+    {
+      "index": 2,
+      "given": "UE supporting time-based measurements in NR RRC_IDLE state on a cell which provides access by NR NTN",
+      "when": "t-Service of the serving cell is present in SIB19 and Snonintrasearch is non-zero in system information",
+      "then": "UE performs inter-frequency measurements and reselects the cell which belong to the lower priority frequency upon Srxlev > Snonintrasearch",
+      "ok": true
+    }
+  ],
+  "violations": [],
+  "verdict": "pass"
 }
