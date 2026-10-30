@@ -1,0 +1,79 @@
+{
+  "case_id": "6.7.1.2",
+  "text": "{\"steps\":[{\"st\":1,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB1\"},{\"st\":2,\"actor\":\"UE\",\"direction\":\"U->U\",\"message\":\"\"},{\"st\":3,\"actor\":\"UE\",\"direction\":\"U->U\",\"message\":\"trackingAreaList\"},{\"st\":4,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB1\"},{\"st\":5,\"actor\":\"UE\",\"direction\":\"U->S\",\"message\":\"\"}],\"messages\":[{\"message\":\"SIB1\",\"ies\":[{\"name\":\"cellAccessRelatedInfo.plmn-IdentityInfoList[0].plmn-IdentityList\",\"value\":\"selected PLMN\"},{\"name\":\"cellAccessRelatedInfo.plmn-IdentityInfoList[0].trackingAreaCode\",\"value\":\"TAC1\"},{\"name\":\"cellAccessRelatedInfo.plmn-IdentityInfoList[0].trackingAreaList\",\"value\":\"TAC1, TAC2 (more than one TAC per PLMN)\"},{\"name\":\"cellAccessRelatedInfo.plmn-IdentityInfoList[0].cellIdentity\",\"value\":\"NCI of NR Cell 1\"},{\"name\":\"cellBarredNTN\",\"value\":\"notBarred\"}]},{\"message\":\"SIB1\",\"ies\":[{\"name\":\"cellAccessRelatedInfo.plmn-IdentityInfoList[0].trackingAreaList\",\"value\":\"TAC1, TAC2 (more than one TAC per PLMN)\"},{\"name\":\"cellBarredNTN\",\"value\":\"barred\"}]}]}",
+  "stop_reason": "end_turn",
+  "backend_model": "deepseek-v4.1-flash",
+  "steps": [
+    {
+      "st": 1,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1"
+    },
+    {
+      "st": 2,
+      "actor": "UE",
+      "direction": "U->U",
+      "message": ""
+    },
+    {
+      "st": 3,
+      "actor": "UE",
+      "direction": "U->U",
+      "message": "trackingAreaList"
+    },
+    {
+      "st": 4,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1"
+    },
+    {
+      "st": 5,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": ""
+    }
+  ],
+  "messages": [
+    {
+      "message": "SIB1",
+      "ies": [
+        {
+          "name": "cellAccessRelatedInfo.plmn-IdentityInfoList[0].plmn-IdentityList",
+          "value": "selected PLMN"
+        },
+        {
+          "name": "cellAccessRelatedInfo.plmn-IdentityInfoList[0].trackingAreaCode",
+          "value": "TAC1"
+        },
+        {
+          "name": "cellAccessRelatedInfo.plmn-IdentityInfoList[0].trackingAreaList",
+          "value": "TAC1, TAC2 (more than one TAC per PLMN)"
+        },
+        {
+          "name": "cellAccessRelatedInfo.plmn-IdentityInfoList[0].cellIdentity",
+          "value": "NCI of NR Cell 1"
+        },
+        {
+          "name": "cellBarredNTN",
+          "value": "notBarred"
+        }
+      ]
+    },
+    {
+      "message": "SIB1",
+      "ies": [
+        {
+          "name": "cellAccessRelatedInfo.plmn-IdentityInfoList[0].trackingAreaList",
+          "value": "TAC1, TAC2 (more than one TAC per PLMN)"
+        },
+        {
+          "name": "cellBarredNTN",
+          "value": "barred"
+        }
+      ]
+    }
+  ],
+  "calls": 1
+}

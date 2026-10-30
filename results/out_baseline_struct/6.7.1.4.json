@@ -1,0 +1,178 @@
+{
+  "case_id": "6.7.1.4",
+  "text": "{\"steps\":[{\"st\":1,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB1\"},{\"st\":2,\"actor\":\"UE\",\"direction\":\"U->S\",\"message\":\"\"},{\"st\":3,\"actor\":\"SS\",\"direction\":\"\",\"message\":\"\"},{\"st\":4,\"actor\":\"UE\",\"direction\":\"U->S\",\"message\":\"\"},{\"st\":5,\"actor\":\"UE\",\"direction\":\"U->S\",\"message\":\"RRCSetupRequest\"},{\"st\":6,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"RRCSetup\"},{\"st\":7,\"actor\":\"UE\",\"direction\":\"U->S\",\"message\":\"RRCSetupComplete\"},{\"st\":8,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"Registration Accept\"}],\"messages\":[{\"message\":\"SIB1\",\"ies\":[{\"name\":\"cellAccessRelatedInfo.plmn-IdentityList\",\"value\":\"PLMN15\"},{\"name\":\"cellAccessRelatedInfo.trackingAreaCode\",\"value\":\"TAC_PLMN15\"},{\"name\":\"cellAccessRelatedInfo.cellIdentity\",\"value\":\"NR Cell 12\"},{\"name\":\"cellAccessRelatedInfo.cellReservedForOperatorUse\",\"value\":\"notReserved\"},{\"name\":\"minimumPeriodicSearchTimer\",\"value\":\"configured value greater than USIM/default T\"},{\"name\":\"cellSelectionInfo.q-RxLevMin\",\"value\":\"configured\"}]},{\"message\":\"SIB1\",\"ies\":[{\"name\":\"cellAccessRelatedInfo.plmn-IdentityList\",\"value\":\"PLMN1\"},{\"name\":\"cellAccessRelatedInfo.cellIdentity\",\"value\":\"NR Cell 11\"},{\"name\":\"cellAccessRelatedInfo.cellReservedForOperatorUse\",\"value\":\"notReserved\"}]},{\"message\":\"RRCSetupRequest\",\"ies\":[{\"name\":\"ue-Identity\",\"value\":\"randomValue\"},{\"name\":\"establishmentCause\",\"value\":\"mo-Signalling\"}]},{\"message\":\"RRCSetup\",\"ies\":[{\"name\":\"rrc-TransactionIdentifier\",\"value\":\"0\"}]},{\"message\":\"RRCSetupComplete\",\"ies\":[{\"name\":\"rrc-TransactionIdentifier\",\"value\":\"0\"},{\"name\":\"selectedPLMN-Identity\",\"value\":\"PLMN1\"},{\"name\":\"dedicatedNAS-Message\",\"value\":\"Registration Request\"}]},{\"message\":\"Registration Request\",\"ies\":[{\"name\":\"5GS registration type\",\"value\":\"initial registration\"},{\"name\":\"5GS mobile identity\",\"value\":\"SUCI/5G-GUTI\"},{\"name\":\"Last visited registered TAI\",\"value\":\"TAI of PLMN15\"},{\"name\":\"UE security capability\",\"value\":\"configured\"}]},{\"message\":\"Registration Accept\",\"ies\":[{\"name\":\"5GS registration result\",\"value\":\"3GPP access\"},{\"name\":\"Allowed NSSAI\",\"value\":\"configured\"}]}]}",
+  "stop_reason": "end_turn",
+  "backend_model": "deepseek-v4.1-flash",
+  "steps": [
+    {
+      "st": 1,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1"
+    },
+    {
+      "st": 2,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": ""
+    },
+    {
+      "st": 3,
+      "actor": "SS",
+      "direction": "",
+      "message": ""
+    },
+    {
+      "st": 4,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": ""
+    },
+    {
+      "st": 5,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "RRCSetupRequest"
+    },
+    {
+      "st": 6,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "RRCSetup"
+    },
+    {
+      "st": 7,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "RRCSetupComplete"
+    },
+    {
+      "st": 8,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "Registration Accept"
+    }
+  ],
+  "messages": [
+    {
+      "message": "SIB1",
+      "ies": [
+        {
+          "name": "cellAccessRelatedInfo.plmn-IdentityList",
+          "value": "PLMN15"
+        },
+        {
+          "name": "cellAccessRelatedInfo.trackingAreaCode",
+          "value": "TAC_PLMN15"
+        },
+        {
+          "name": "cellAccessRelatedInfo.cellIdentity",
+          "value": "NR Cell 12"
+        },
+        {
+          "name": "cellAccessRelatedInfo.cellReservedForOperatorUse",
+          "value": "notReserved"
+        },
+        {
+          "name": "minimumPeriodicSearchTimer",
+          "value": "configured value greater than USIM/default T"
+        },
+        {
+          "name": "cellSelectionInfo.q-RxLevMin",
+          "value": "configured"
+        }
+      ]
+    },
+    {
+      "message": "SIB1",
+      "ies": [
+        {
+          "name": "cellAccessRelatedInfo.plmn-IdentityList",
+          "value": "PLMN1"
+        },
+        {
+          "name": "cellAccessRelatedInfo.cellIdentity",
+          "value": "NR Cell 11"
+        },
+        {
+          "name": "cellAccessRelatedInfo.cellReservedForOperatorUse",
+          "value": "notReserved"
+        }
+      ]
+    },
+    {
+      "message": "RRCSetupRequest",
+      "ies": [
+        {
+          "name": "ue-Identity",
+          "value": "randomValue"
+        },
+        {
+          "name": "establishmentCause",
+          "value": "mo-Signalling"
+        }
+      ]
+    },
+    {
+      "message": "RRCSetup",
+      "ies": [
+        {
+          "name": "rrc-TransactionIdentifier",
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "message": "RRCSetupComplete",
+      "ies": [
+        {
+          "name": "rrc-TransactionIdentifier",
+          "value": "0"
+        },
+        {
+          "name": "selectedPLMN-Identity",
+          "value": "PLMN1"
+        },
+        {
+          "name": "dedicatedNAS-Message",
+          "value": "Registration Request"
+        }
+      ]
+    },
+    {
+      "message": "Registration Request",
+      "ies": [
+        {
+          "name": "5GS registration type",
+          "value": "initial registration"
+        },
+        {
+          "name": "5GS mobile identity",
+          "value": "SUCI/5G-GUTI"
+        },
+        {
+          "name": "Last visited registered TAI",
+          "value": "TAI of PLMN15"
+        },
+        {
+          "name": "UE security capability",
+          "value": "configured"
+        }
+      ]
+    },
+    {
+      "message": "Registration Accept",
+      "ies": [
+        {
+          "name": "5GS registration result",
+          "value": "3GPP access"
+        },
+        {
+          "name": "Allowed NSSAI",
+          "value": "configured"
+        }
+      ]
+    }
+  ],
+  "calls": 1
+}

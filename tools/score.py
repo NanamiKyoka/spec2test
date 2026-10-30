@@ -77,6 +77,61 @@ def gold_leaf_ies(gold_path):
     return out
 
 
+REL_SUFFIX = re.compile(r"-r\d+$")
+
+
+def norm_ie_relaxed(s):
+    """宽松口径：去掉路径前缀与 -rNN 版本后缀，用于基线对照（不替代主指标）。"""
+    s = (s or "").strip().lower().split(".")[-1]
+    s = REL_SUFFIX.sub("", s)
+    return re.sub(r"[^a-z0-9]+", "", s)
+
+
+def relaxed_recall(gen_names, gold_names):
+    gs = {norm_ie_relaxed(x) for x in (gold_names or []) if x}
+    if not gs:
+        return None
+    gen = {norm_ie_relaxed(x) for x in (gen_names or []) if x}
+    return round(len(gs & gen) / len(gs), 3)
+
+
+def struct_ies(struct):
+    return [norm_ie(i.get("name", "")) for m in (struct.get("messages") or [])
+            for i in (m.get("ies") or [])]
+
+
+def struct_ies_raw(struct):
+    return [i.get("name", "") for m in (struct.get("messages") or [])
+            for i in (m.get("ies") or [])]
+
+
+def gold_leaf_raw(gold_path):
+    out = []
+    for t in json.load(open(gold_path, encoding="utf-8"))["message_tables"]:
+        for it in (t["leaf_ies"] if "leaf_ies" in t else (t.get("ies") or [])):
+            out.append(it["name"])
+    return out
+
+
+def load_structured_baseline(base_dir, cid):
+    """结构化基线放在自由文本基线目录的同级 out_baseline_struct/。"""
+    p = os.path.join(os.path.dirname(os.path.abspath(base_dir)),
+                     "out_baseline_struct", cid + ".json")
+    if not os.path.exists(p):
+        return None
+    try:
+        return json.load(open(p, encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def baseline_metrics(struct, gold_ie):
+    """返回结构化基线的 L1_base / L1_base_cov / L3_base。"""
+    return {"L1_base": l1_ok(struct),
+            "L1_base_cov": step_msg_coverage(struct),
+            "L3_base": recall(struct_ies(struct), gold_ie)}
+
+
 def main(gold_steps_dir, gold_ie_dir, out_dir, base_dir, report_dir):
     os.makedirs(report_dir, exist_ok=True)
     cases = sorted(f[:-5] for f in os.listdir(gold_steps_dir) if f.endswith(".json"))
@@ -88,9 +143,11 @@ def main(gold_steps_dir, gold_ie_dir, out_dir, base_dir, report_dir):
                     if s.get("direction") in ("S->U", "U->S") and s.get("message")]
 
         gold_ie = []
+        gold_raw = []
         p = os.path.join(gold_ie_dir, cid + ".json")
         if os.path.exists(p):
             gold_ie = gold_leaf_ies(p)
+            gold_raw = gold_leaf_raw(p)
 
         gen_path = os.path.join(out_dir, cid + ".json")
         gen = json.load(open(gen_path, encoding="utf-8")) if os.path.exists(gen_path) else {}
@@ -98,14 +155,28 @@ def main(gold_steps_dir, gold_ie_dir, out_dir, base_dir, report_dir):
                    if s.get("direction") in ("S->U", "U->S") and s.get("message")]
         gen_ie = [norm_ie(i.get("name", "")) for m in (gen.get("messages") or [])
                   for i in (m.get("ies") or [])]
+        gen_raw = [i.get("name", "") for m in (gen.get("messages") or [])
+                   for i in (m.get("ies") or [])]
 
         base_path = os.path.join(base_dir, cid + ".json")
         base_text = ""
         if os.path.exists(base_path):
             base_text = json.load(open(base_path, encoding="utf-8")).get("text", "")
-        # 基线是自由文本，不含结构化 IE 列表；用词袋比 IE 名会虚高，故计分为 None
-        base_structured = bool(re.search(r'"ies"\s*:', base_text))
-        base_ie = [] if not base_structured else tokens_from_text(base_text)
+
+        struct = load_structured_baseline(base_dir, cid)
+        base_raw = struct_ies_raw(struct) if struct is not None else []
+        if struct is not None:
+            bm = baseline_metrics(struct, gold_ie)
+            l1_base = bm["L1_base"]
+            l1_base_cov = bm["L1_base_cov"]
+            l3_base = None if cid in L3_SKIP else bm["L3_base"]
+        else:
+            # 旧行为：自由文本基线没有结构化 IE，L3 不可比
+            base_structured = bool(re.search(r'"ies"\s*:', base_text))
+            base_ie = [] if not base_structured else tokens_from_text(base_text)
+            l1_base = 1.0 if base_text.strip() else 0.0
+            l1_base_cov = None
+            l3_base = None if (cid in L3_SKIP or not base_structured) else recall(base_ie, gold_ie)
 
         abstained = gen.get("status") == "abstained"
         rows.append({
@@ -116,8 +187,13 @@ def main(gold_steps_dir, gold_ie_dir, out_dir, base_dir, report_dir):
             "calls": gen.get("calls", (gen.get("_stage2") or {}).get("calls")),
             "L3_recall": "abstained" if abstained else
                          (None if cid in L3_SKIP else recall(gen_ie, gold_ie)),
-            "L1_base": 1.0 if base_text.strip() else 0.0,
-            "L3_base": None if (cid in L3_SKIP or not base_structured) else recall(base_ie, gold_ie),
+            "L3_relaxed": "abstained" if abstained else
+                          (None if cid in L3_SKIP else relaxed_recall(gen_raw, gold_raw)),
+            "L1_base": l1_base,
+            "L1_base_cov": l1_base_cov,
+            "L3_base": l3_base,
+            "L3_base_relaxed": None if (cid in L3_SKIP or struct is None)
+                               else relaxed_recall(base_raw, gold_raw),
             "gold_ie_n": len(gold_ie),
         })
         qual.append({"case": cid, "gold_sequence": gold_seq, "system_sequence": gen_seq})

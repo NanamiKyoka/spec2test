@@ -12,6 +12,7 @@
 
 统一行为：过滤 thinking 块、剥 ```json 围栏、5xx 重试 2 次。
 """
+import hashlib
 import json
 import os
 import re
@@ -33,6 +34,44 @@ MODEL = os.environ.get("LLM_MODEL") or DEFAULTS.get(PROVIDER, DEFAULTS["proxy"])
 
 UA = "claude-cli/1.0 (external)"
 LAST_MODEL = None
+
+CACHE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                         "data", "cache", "llm")
+
+
+def _cache_key(temperature, system, messages):
+    payload = {
+        "provider": PROVIDER,
+        "model": MODEL,
+        "temperature": temperature,
+        "system": system or "",
+        "messages": messages,
+    }
+    raw = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _cache_read(key):
+    try:
+        with open(os.path.join(CACHE_DIR, key + ".json"), encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) and "text" in data else None
+    except Exception:
+        return None
+
+
+def _cache_write(key, text, stop_reason):
+    try:
+        os.makedirs(CACHE_DIR, exist_ok=True)
+        path = os.path.join(CACHE_DIR, key + ".json")
+        tmp = path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump({"text": text, "stop_reason": stop_reason,
+                       "model": LAST_MODEL, "created": int(time.time())},
+                      f, ensure_ascii=False)
+        os.replace(tmp, path)
+    except Exception:
+        pass
 
 
 def _post(url, body, headers, timeout, retries=2):
@@ -62,8 +101,16 @@ def _post(url, body, headers, timeout, retries=2):
 
 
 def complete(messages, temperature=None, max_tokens=None, system=None, timeout=300):
+    global LAST_MODEL
     temperature = TEMPERATURE if temperature is None else temperature
     max_tokens = MAX_TOKENS if max_tokens is None else max_tokens
+    no_cache = os.environ.get("LLM_NO_CACHE") == "1"
+    cache_key = None if no_cache else _cache_key(temperature, system, messages)
+    if cache_key:
+        hit = _cache_read(cache_key)
+        if hit is not None:
+            LAST_MODEL = hit.get("model") or LAST_MODEL
+            return hit.get("text") or "", hit.get("stop_reason")
 
     if PROVIDER in ("proxy", "anthropic"):
         body = {"model": MODEL, "max_tokens": max_tokens, "temperature": temperature,
@@ -83,7 +130,10 @@ def complete(messages, temperature=None, max_tokens=None, system=None, timeout=3
         data = _post(BASE.rstrip("/") + "/v1/messages", body, headers, timeout)
         text = "".join(b.get("text", "") for b in (data.get("content") or [])
                        if b.get("type") == "text")
-        return text, data.get("stop_reason")
+        stop = data.get("stop_reason")
+        if cache_key and text:
+            _cache_write(cache_key, text, stop)
+        return text, stop
 
     key = os.environ.get("LLM_API_KEY")
     if not key:
@@ -95,7 +145,11 @@ def complete(messages, temperature=None, max_tokens=None, system=None, timeout=3
                "authorization": "Bearer " + key, "user-agent": UA}
     data = _post(BASE.rstrip("/") + "/chat/completions", body, headers, timeout)
     choice = (data.get("choices") or [{}])[0]
-    return (choice.get("message", {}).get("content") or ""), choice.get("finish_reason")
+    text = choice.get("message", {}).get("content") or ""
+    stop = choice.get("finish_reason")
+    if cache_key and text:
+        _cache_write(cache_key, text, stop)
+    return text, stop
 
 
 def extract_json(text):

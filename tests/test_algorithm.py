@@ -56,6 +56,26 @@ def test_r3_supports_old_tp_string():
     assert not any(x["rule"] == "R3" for x in validate.validate(ir, _syms()))
 
 
+def test_relaxed_recall_strips_release_suffix():
+    assert score.relaxed_recall(["cellBarredNTN"], ["cellBarredNTN-r17"]) == 1.0
+    assert score.relaxed_recall(
+        ["cellAccessRelatedInfo.plmn-IdentityList"], ["plmn-IdentityList"]) == 1.0
+    assert score.relaxed_recall(
+        ["tn-DistanceRadius"],
+        ["tn-DistanceRadius-r18", "tn-ReferenceLocation-r18"]) == 0.5
+
+
+def test_r2_grouping_by_message():
+    v = [
+        {"rule": "R2", "path": "messages[SIB4].ies[0].name", "detail": "unknown field 'x' for SIB4"},
+        {"rule": "R1", "path": "steps[1].message", "detail": "unknown message"},
+        {"rule": "R2", "path": "messages[SIB1].ies[2].name", "detail": "unknown field 'y' for SIB1"},
+    ]
+    bad = gen_ie._r2_messages(v)
+    assert set(bad) == {"SIB4", "SIB1"}
+    assert len(bad["SIB4"]) == 1
+
+
 def test_r2_path_uses_message_name():
     ir = {
         "case_id": "x",

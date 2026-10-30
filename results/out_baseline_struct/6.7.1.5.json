@@ -1,0 +1,236 @@
+{
+  "case_id": "6.7.1.5",
+  "text": "{\"steps\":[{\"st\":1,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB1\"},{\"st\":2,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB2\"},{\"st\":3,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB3\"},{\"st\":4,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB4\"},{\"st\":5,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB19\"},{\"st\":6,\"actor\":\"UE\",\"direction\":\"U->S\",\"message\":\"\"},{\"st\":7,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"\"},{\"st\":8,\"actor\":\"UE\",\"direction\":\"U->S\",\"message\":\"\"},{\"st\":9,\"actor\":\"UE\",\"direction\":\"U->S\",\"message\":\"\"},{\"st\":10,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"\"},{\"st\":11,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB2\"},{\"st\":12,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB4\"},{\"st\":13,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"\"},{\"st\":14,\"actor\":\"UE\",\"direction\":\"U->S\",\"message\":\"\"},{\"st\":15,\"actor\":\"UE\",\"direction\":\"U->S\",\"message\":\"\"}],\"messages\":[{\"message\":\"SIB1\",\"ies\":[{\"name\":\"cellAccessRelatedInfo.cellIdentity\",\"value\":\"NR Cell 1\"},{\"name\":\"cellSelectionInfo.q-RxLevMin\",\"value\":\"configured\"}]},{\"message\":\"SIB2\",\"ies\":[{\"name\":\"intraFreqCellReselectionInfo.s-IntraSearchP\",\"value\":\"non-zero (e.g. 10)\"},{\"name\":\"intraFreqCellReselectionInfo.s-IntraSearchQ\",\"value\":\"configured\"},{\"name\":\"cellReselectionServingFreqInfo.s-NonIntraSearchP\",\"value\":\"0/absent in phase 1\"},{\"name\":\"cellReselectionServingFreqInfo.cellReselectionPriority\",\"value\":\"serving frequency priority\"}]},{\"message\":\"SIB3\",\"ies\":[{\"name\":\"intraFreqNeighCellList[0].physCellId\",\"value\":\"NR Cell 2\"},{\"name\":\"intraFreqNeighCellList[0].q-OffsetCell\",\"value\":\"configured for highest rank\"}]},{\"message\":\"SIB4\",\"ies\":[{\"name\":\"interFreqCarrierFreqList[0].dl-CarrierFreq\",\"value\":\"NR Cell 3 frequency\"},{\"name\":\"interFreqCarrierFreqList[0].cellReselectionPriority\",\"value\":\"lower than serving frequency priority\"},{\"name\":\"interFreqCarrierFreqList[0].threshX-LowP\",\"value\":\"configured\"},{\"name\":\"interFreqCarrierFreqList[0].q-RxLevMin\",\"value\":\"configured\"}]},{\"message\":\"SIB19\",\"ies\":[{\"name\":\"ntn-Config\",\"value\":\"configured\"},{\"name\":\"referenceLocation\",\"value\":\"configured at cell reference point\"},{\"name\":\"distanceThresh\",\"value\":\"configured; UE distance > distanceThresh\"},{\"name\":\"t-Service\",\"value\":\"configured\"}]},{\"message\":\"SIB2\",\"ies\":[{\"name\":\"intraFreqCellReselectionInfo.s-IntraSearchP\",\"value\":\"configured (phase 2)\"},{\"name\":\"cellReselectionServingFreqInfo.s-NonIntraSearchP\",\"value\":\"non-zero (e.g. 10)\"},{\"name\":\"cellReselectionServingFreqInfo.s-NonIntraSearchQ\",\"value\":\"configured\"},{\"name\":\"cellReselectionServingFreqInfo.threshServingLowP\",\"value\":\"configured for reselection to lower priority\"},{\"name\":\"cellReselectionServingFreqInfo.cellReselectionPriority\",\"value\":\"serving frequency priority\"}]},{\"message\":\"SIB4\",\"ies\":[{\"name\":\"interFreqCarrierFreqList[0].dl-CarrierFreq\",\"value\":\"NR Cell 3 frequency\"},{\"name\":\"interFreqCarrierFreqList[0].cellReselectionPriority\",\"value\":\"lower than serving frequency priority\"},{\"name\":\"interFreqCarrierFreqList[0].threshX-LowP\",\"value\":\"configured for NR Cell 3\"},{\"name\":\"interFreqCarrierFreqList[0].q-RxLevMin\",\"value\":\"configured\"}]}]}",
+  "stop_reason": "end_turn",
+  "backend_model": "deepseek-v4.1-flash",
+  "steps": [
+    {
+      "st": 1,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1"
+    },
+    {
+      "st": 2,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB2"
+    },
+    {
+      "st": 3,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB3"
+    },
+    {
+      "st": 4,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB4"
+    },
+    {
+      "st": 5,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB19"
+    },
+    {
+      "st": 6,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": ""
+    },
+    {
+      "st": 7,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": ""
+    },
+    {
+      "st": 8,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": ""
+    },
+    {
+      "st": 9,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": ""
+    },
+    {
+      "st": 10,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": ""
+    },
+    {
+      "st": 11,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB2"
+    },
+    {
+      "st": 12,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB4"
+    },
+    {
+      "st": 13,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": ""
+    },
+    {
+      "st": 14,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": ""
+    },
+    {
+      "st": 15,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": ""
+    }
+  ],
+  "messages": [
+    {
+      "message": "SIB1",
+      "ies": [
+        {
+          "name": "cellAccessRelatedInfo.cellIdentity",
+          "value": "NR Cell 1"
+        },
+        {
+          "name": "cellSelectionInfo.q-RxLevMin",
+          "value": "configured"
+        }
+      ]
+    },
+    {
+      "message": "SIB2",
+      "ies": [
+        {
+          "name": "intraFreqCellReselectionInfo.s-IntraSearchP",
+          "value": "non-zero (e.g. 10)"
+        },
+        {
+          "name": "intraFreqCellReselectionInfo.s-IntraSearchQ",
+          "value": "configured"
+        },
+        {
+          "name": "cellReselectionServingFreqInfo.s-NonIntraSearchP",
+          "value": "0/absent in phase 1"
+        },
+        {
+          "name": "cellReselectionServingFreqInfo.cellReselectionPriority",
+          "value": "serving frequency priority"
+        }
+      ]
+    },
+    {
+      "message": "SIB3",
+      "ies": [
+        {
+          "name": "intraFreqNeighCellList[0].physCellId",
+          "value": "NR Cell 2"
+        },
+        {
+          "name": "intraFreqNeighCellList[0].q-OffsetCell",
+          "value": "configured for highest rank"
+        }
+      ]
+    },
+    {
+      "message": "SIB4",
+      "ies": [
+        {
+          "name": "interFreqCarrierFreqList[0].dl-CarrierFreq",
+          "value": "NR Cell 3 frequency"
+        },
+        {
+          "name": "interFreqCarrierFreqList[0].cellReselectionPriority",
+          "value": "lower than serving frequency priority"
+        },
+        {
+          "name": "interFreqCarrierFreqList[0].threshX-LowP",
+          "value": "configured"
+        },
+        {
+          "name": "interFreqCarrierFreqList[0].q-RxLevMin",
+          "value": "configured"
+        }
+      ]
+    },
+    {
+      "message": "SIB19",
+      "ies": [
+        {
+          "name": "ntn-Config",
+          "value": "configured"
+        },
+        {
+          "name": "referenceLocation",
+          "value": "configured at cell reference point"
+        },
+        {
+          "name": "distanceThresh",
+          "value": "configured; UE distance > distanceThresh"
+        },
+        {
+          "name": "t-Service",
+          "value": "configured"
+        }
+      ]
+    },
+    {
+      "message": "SIB2",
+      "ies": [
+        {
+          "name": "intraFreqCellReselectionInfo.s-IntraSearchP",
+          "value": "configured (phase 2)"
+        },
+        {
+          "name": "cellReselectionServingFreqInfo.s-NonIntraSearchP",
+          "value": "non-zero (e.g. 10)"
+        },
+        {
+          "name": "cellReselectionServingFreqInfo.s-NonIntraSearchQ",
+          "value": "configured"
+        },
+        {
+          "name": "cellReselectionServingFreqInfo.threshServingLowP",
+          "value": "configured for reselection to lower priority"
+        },
+        {
+          "name": "cellReselectionServingFreqInfo.cellReselectionPriority",
+          "value": "serving frequency priority"
+        }
+      ]
+    },
+    {
+      "message": "SIB4",
+      "ies": [
+        {
+          "name": "interFreqCarrierFreqList[0].dl-CarrierFreq",
+          "value": "NR Cell 3 frequency"
+        },
+        {
+          "name": "interFreqCarrierFreqList[0].cellReselectionPriority",
+          "value": "lower than serving frequency priority"
+        },
+        {
+          "name": "interFreqCarrierFreqList[0].threshX-LowP",
+          "value": "configured for NR Cell 3"
+        },
+        {
+          "name": "interFreqCarrierFreqList[0].q-RxLevMin",
+          "value": "configured"
+        }
+      ]
+    }
+  ],
+  "calls": 1
+}

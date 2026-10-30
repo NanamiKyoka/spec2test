@@ -6,12 +6,15 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import llm
+import validate
 
 SYSTEM = (
     "你是 3GPP RRC 信令内容助手。只输出 JSON，不要解释。"
     '格式：{"message":"<消息名>","derivation_path":"<模板来源>",'
     '"ies":[{"name":"<字段名>","value":"<取值>","condition":"<条件或空串>"}]}。'
     "字段名必须是该消息 ASN.1 里真实存在的字段；取值写具体值（如 10、true、Not present）。"
+    "若 validation_errors 非空，必须修正这些字段：只能使用 default_template_fields "
+    "或全局标识符里的字段。"
 )
 MAX_MSG = 12
 
@@ -107,7 +110,7 @@ def candidate_messages(ctx, symbols_path):
     return out
 
 
-def generate_ie(ctx, steps, message, symbols_path):
+def generate_ie(ctx, steps, message, symbols_path, feedback=None):
     msgs, gids, _ = load_symbols(symbols_path)
     skeleton = msgs.get(message, {}).get("fields", [])[:60]
     payload = {
@@ -116,6 +119,7 @@ def generate_ie(ctx, steps, message, symbols_path):
         "default_template_fields": skeleton,
         "steps_hint": [{"st": s.get("st"), "direction": s.get("direction"),
                         "message": s.get("message")} for s in (steps or [])][:15],
+        "validation_errors": feedback or [],
     }
     text, stop = llm.complete([{"role": "user", "content": json.dumps(payload, ensure_ascii=False)}],
                               system=SYSTEM)
@@ -130,15 +134,45 @@ def generate_ie(ctx, steps, message, symbols_path):
             "ies": ies, "_stop": stop}
 
 
-def generate_all(ctx, steps, symbols_path):
-    """产品入口：候选为空则不调用模型，直接弃权。"""
+def _r2_messages(violations):
+    """把 R2 违规按消息名归组，供带错重生成。"""
+    bad = {}
+    for v in violations or []:
+        if v.get("rule") != "R2":
+            continue
+        m = re.match(r"messages\[([^\]]+)\]", v.get("path") or "")
+        msg = m.group(1) if m else ""
+        if msg:
+            bad.setdefault(msg, []).append(v.get("detail") or "")
+    return bad
+
+
+def generate_all(ctx, steps, symbols_path, repairs=1):
+    """产品入口：候选为空则弃权；R2 失败时带违规清单重生成一次。"""
     cand = candidate_messages(ctx, symbols_path)
     if not cand:
         return {"status": "abstained",
                 "reason": "inputs contain no message/SIB names",
                 "candidates": [], "messages": [], "calls": 0}
+    table = json.load(open(symbols_path, encoding="utf-8"))
     msgs = [generate_ie(ctx, steps, m, symbols_path) for m in cand]
-    return {"status": "generated", "candidates": cand, "messages": msgs, "calls": len(cand)}
+    calls, used = len(cand), 0
+    for _ in range(max(0, repairs)):
+        violations = validate.validate(
+            {"case_id": ctx.get("case_id", ""), "steps": steps, "messages": msgs}, table)
+        bad = _r2_messages(violations)
+        if not bad:
+            break
+        for msg, feedback in list(bad.items())[:3]:
+            idx = next((i for i, m in enumerate(msgs)
+                        if (m.get("message") or "") == msg), None)
+            if idx is None:
+                continue
+            msgs[idx] = generate_ie(ctx, steps, msg, symbols_path, feedback=feedback)
+            calls += 1
+            used += 1
+    return {"status": "generated", "candidates": cand, "messages": msgs,
+            "calls": calls, "repairs": used}
 
 
 if __name__ == "__main__":

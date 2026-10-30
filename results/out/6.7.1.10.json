@@ -50,7 +50,7 @@
   "messages": [
     {
       "message": "SIB25",
-      "derivation_path": "default_template_fields:SIB25",
+      "derivation_path": "default_template_fields",
       "ies": [
         {
           "name": "coverageAreaInfoList-r18",
@@ -61,19 +61,19 @@
         {
           "name": "tn-AreaId-r18",
           "value": "1",
-          "condition": "coverageAreaInfoList-r18[0]",
+          "condition": "included in coverageAreaInfoList-r18",
           "_known": true
         },
         {
           "name": "tn-ReferenceLocation-r18",
-          "value": "latitude=0, longitude=0, altitude=0",
-          "condition": "coverageAreaInfoList-r18[0]",
+          "value": "included",
+          "condition": "included in coverageAreaInfoList-r18",
           "_known": true
         },
         {
           "name": "tn-DistanceRadius-r18",
-          "value": "1000",
-          "condition": "coverageAreaInfoList-r18[0]",
+          "value": "10000",
+          "condition": "included in coverageAreaInfoList-r18",
           "_known": true
         },
         {
@@ -87,7 +87,7 @@
     },
     {
       "message": "SIB4",
-      "derivation_path": "SIB4 ASN.1 (38.331) -> InterFreqCarrierFreqList -> InterFreqCarrierFreqInfo-v1900",
+      "derivation_path": "default_template_fields",
       "ies": [
         {
           "name": "interFreqCarrierFreqList",
@@ -97,87 +97,69 @@
         },
         {
           "name": "dl-CarrierFreq",
-          "value": "630000",
-          "condition": "InterFreqCarrierFreqInfo[0]",
+          "value": "100",
+          "condition": "",
           "_known": true
         },
         {
           "name": "frequencyBandList",
-          "value": "n78",
-          "condition": "InterFreqCarrierFreqInfo[0]",
-          "_known": true
-        },
-        {
-          "name": "ssbSubcarrierSpacing",
-          "value": "kHz15",
-          "condition": "InterFreqCarrierFreqInfo[0]",
-          "_known": true
-        },
-        {
-          "name": "deriveSSB-IndexFromCell",
-          "value": "true",
-          "condition": "InterFreqCarrierFreqInfo[0]",
+          "value": "78",
+          "condition": "",
           "_known": true
         },
         {
           "name": "q-RxLevMin",
-          "value": "-60",
-          "condition": "InterFreqCarrierFreqInfo[0]",
+          "value": "-50",
+          "condition": "",
           "_known": true
         },
         {
-          "name": "p-Max",
-          "value": "23",
-          "condition": "InterFreqCarrierFreqInfo[0]",
-          "_known": true
-        },
-        {
-          "name": "q-OffsetFreq",
-          "value": "dB0",
-          "condition": "InterFreqCarrierFreqInfo[0]",
+          "name": "q-QualMin",
+          "value": "-18",
+          "condition": "",
           "_known": true
         },
         {
           "name": "cellReselectionPriority",
-          "value": "5",
-          "condition": "InterFreqCarrierFreqInfo[0]",
+          "value": "7",
+          "condition": "",
           "_known": true
         },
         {
           "name": "cellReselectionSubPriority",
-          "value": "oDot4",
-          "condition": "InterFreqCarrierFreqInfo[0]",
+          "value": "oDot2",
+          "condition": "",
           "_known": true
         },
         {
           "name": "interFreqNeighCellList",
           "value": "1 entry",
-          "condition": "InterFreqCarrierFreqInfo[0]",
+          "condition": "tn-AreaIdList includes this TN cell",
           "_known": true
         },
         {
           "name": "physCellId",
           "value": "1",
-          "condition": "interFreqNeighCellList[0]",
+          "condition": "",
           "_known": true
         },
         {
           "name": "q-OffsetCell",
           "value": "dB0",
-          "condition": "interFreqNeighCellList[0]",
-          "_known": true
-        },
-        {
-          "name": "interFreqCarrierFreqList-v1900",
-          "value": "1 entry",
           "condition": "",
           "_known": true
         },
         {
-          "name": "tn-AreaIdList-r19",
+          "name": "q-RxLevMinOffsetCell",
           "value": "1",
-          "condition": "InterFreqCarrierFreqInfo-v1900[0]; TN measurement skipping",
-          "_known": false
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "q-QualMinOffsetCell",
+          "value": "1",
+          "condition": "",
+          "_known": true
         }
       ],
       "_stop": "end_turn"
@@ -208,12 +190,7 @@
       "ok": true
     }
   ],
-  "violations": [
-    {
-      "rule": "R2",
-      "path": "messages[SIB4].ies[14].name",
-      "detail": "unknown field 'tn-AreaIdList-r19' for SIB4"
-    }
-  ],
-  "verdict": "reject"
+  "violations": [],
+  "verdict": "pass",
+  "repairs": 0
 }

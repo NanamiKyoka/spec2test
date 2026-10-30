@@ -1,0 +1,89 @@
+{
+  "case_id": "6.7.1.3",
+  "text": "{\"steps\":[{\"st\":1,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"MIB\"},{\"st\":2,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB1\"},{\"st\":3,\"actor\":\"UE\",\"direction\":\"U->S\",\"message\":\"\"},{\"st\":4,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB1\"},{\"st\":5,\"actor\":\"UE\",\"direction\":\"U->S\",\"message\":\"\"},{\"st\":6,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB1\"},{\"st\":7,\"actor\":\"UE\",\"direction\":\"U->S\",\"message\":\"\"}],\"messages\":[{\"message\":\"MIB\",\"ies\":[{\"name\":\"cellBarred\",\"value\":\"barred\"}]},{\"message\":\"SIB1\",\"ies\":[{\"name\":\"cellBarredNTN\",\"value\":\"not present\"}]},{\"message\":\"SIB1\",\"ies\":[{\"name\":\"cellBarredNTN\",\"value\":\"not barred\"}]},{\"message\":\"SIB1\",\"ies\":[{\"name\":\"cellBarredNTN\",\"value\":\"barred\"}]}]}",
+  "stop_reason": "end_turn",
+  "backend_model": "deepseek-v4.1-flash",
+  "steps": [
+    {
+      "st": 1,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "MIB"
+    },
+    {
+      "st": 2,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1"
+    },
+    {
+      "st": 3,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": ""
+    },
+    {
+      "st": 4,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1"
+    },
+    {
+      "st": 5,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": ""
+    },
+    {
+      "st": 6,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1"
+    },
+    {
+      "st": 7,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": ""
+    }
+  ],
+  "messages": [
+    {
+      "message": "MIB",
+      "ies": [
+        {
+          "name": "cellBarred",
+          "value": "barred"
+        }
+      ]
+    },
+    {
+      "message": "SIB1",
+      "ies": [
+        {
+          "name": "cellBarredNTN",
+          "value": "not present"
+        }
+      ]
+    },
+    {
+      "message": "SIB1",
+      "ies": [
+        {
+          "name": "cellBarredNTN",
+          "value": "not barred"
+        }
+      ]
+    },
+    {
+      "message": "SIB1",
+      "ies": [
+        {
+          "name": "cellBarredNTN",
+          "value": "barred"
+        }
+      ]
+    }
+  ],
+  "calls": 1
+}

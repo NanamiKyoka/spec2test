@@ -1,0 +1,208 @@
+{
+  "case_id": "6.7.1.1",
+  "text": "{\"steps\":[{\"st\":1,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB1, SIB19\"},{\"st\":2,\"actor\":\"UE\",\"direction\":\"U->S\",\"message\":\"\"},{\"st\":3,\"actor\":\"SS\",\"direction\":\"U->S\",\"message\":\"\"},{\"st\":4,\"actor\":\"UE\",\"direction\":\"U->S\",\"message\":\"\"},{\"st\":5,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB19\"},{\"st\":6,\"actor\":\"UE\",\"direction\":\"U->S\",\"message\":\"RRCSetupRequest\"},{\"st\":7,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"RRCSetup\"},{\"st\":8,\"actor\":\"UE\",\"direction\":\"U->S\",\"message\":\"RRCSetupComplete\"},{\"st\":9,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"DLInformationTransfer\"}],\"messages\":[{\"message\":\"SIB1\",\"ies\":[{\"name\":\"cellAccessRelatedInfo.plmn-IdentityList[0].plmn-Identity.mcc\",\"value\":\"001\"},{\"name\":\"cellAccessRelatedInfo.plmn-IdentityList[0].plmn-Identity.mnc\",\"value\":\"01\"},{\"name\":\"cellAccessRelatedInfo.trackingAreaCode\",\"value\":\"000001\"},{\"name\":\"cellAccessRelatedInfo.cellIdentity\",\"value\":\"000000001\"},{\"name\":\"cellAccessRelatedInfo.cellReservedForOperatorUse\",\"value\":\"notReserved\"},{\"name\":\"si-SchedulingInfo.schedulingInfoList[0].sibType\",\"value\":\"SIB19\"},{\"name\":\"servingCellConfigCommon\",\"value\":\"configured for NR NTN\"}]},{\"message\":\"SIB19\",\"ies\":[{\"name\":\"ntn-Config-r17.ephemerisInfo-r17\",\"value\":\"valid\"},{\"name\":\"ntn-Config-r17.ta-Info-r17\",\"value\":\"valid\"},{\"name\":\"ntn-Config-r17.epochTime-r17\",\"value\":\"valid\"},{\"name\":\"ntn-Config-r17.cellSpecificKoffset-r17\",\"value\":\"configured\"},{\"name\":\"ntn-Config-r17.ntn-UlSyncValidityDuration-r17\",\"value\":\"configured\"},{\"name\":\"t-Service-r17\",\"value\":\"configured\"}]},{\"message\":\"RRCSetupRequest\",\"ies\":[{\"name\":\"rrcSetupRequest.ue-Identity.randomValue\",\"value\":\"0x0000000000000000000000000000000000000000\"},{\"name\":\"rrcSetupRequest.establishmentCause\",\"value\":\"mo-Signalling\"}]},{\"message\":\"RRCSetup\",\"ies\":[{\"name\":\"rrc-TransactionIdentifier\",\"value\":\"0\"},{\"name\":\"radioBearerConfig.srb-ToAddModList[0]\",\"value\":\"SRB1\"},{\"name\":\"masterCellGroup\",\"value\":\"configured\"}]},{\"message\":\"RRCSetupComplete\",\"ies\":[{\"name\":\"rrc-TransactionIdentifier\",\"value\":\"0\"},{\"name\":\"selectedPLMN-Identity\",\"value\":\"1\"},{\"name\":\"dedicatedNAS-Message\",\"value\":\"Registration Request\"},{\"name\":\"guami-Type\",\"value\":\"native\"}]},{\"message\":\"Registration Request\",\"ies\":[{\"name\":\"5GS registration type\",\"value\":\"initial registration\"},{\"name\":\"ngKSI\",\"value\":\"default\"},{\"name\":\"5GMM capability\",\"value\":\"supported\"},{\"name\":\"requested NSSAI\",\"value\":\"configured\"}]},{\"message\":\"DLInformationTransfer\",\"ies\":[{\"name\":\"dedicatedNAS-Message\",\"value\":\"Registration Accept\"}]}]}",
+  "stop_reason": "end_turn",
+  "backend_model": "deepseek-v4.1-flash",
+  "steps": [
+    {
+      "st": 1,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1, SIB19"
+    },
+    {
+      "st": 2,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": ""
+    },
+    {
+      "st": 3,
+      "actor": "SS",
+      "direction": "U->S",
+      "message": ""
+    },
+    {
+      "st": 4,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": ""
+    },
+    {
+      "st": 5,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB19"
+    },
+    {
+      "st": 6,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "RRCSetupRequest"
+    },
+    {
+      "st": 7,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "RRCSetup"
+    },
+    {
+      "st": 8,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "RRCSetupComplete"
+    },
+    {
+      "st": 9,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "DLInformationTransfer"
+    }
+  ],
+  "messages": [
+    {
+      "message": "SIB1",
+      "ies": [
+        {
+          "name": "cellAccessRelatedInfo.plmn-IdentityList[0].plmn-Identity.mcc",
+          "value": "001"
+        },
+        {
+          "name": "cellAccessRelatedInfo.plmn-IdentityList[0].plmn-Identity.mnc",
+          "value": "01"
+        },
+        {
+          "name": "cellAccessRelatedInfo.trackingAreaCode",
+          "value": "000001"
+        },
+        {
+          "name": "cellAccessRelatedInfo.cellIdentity",
+          "value": "000000001"
+        },
+        {
+          "name": "cellAccessRelatedInfo.cellReservedForOperatorUse",
+          "value": "notReserved"
+        },
+        {
+          "name": "si-SchedulingInfo.schedulingInfoList[0].sibType",
+          "value": "SIB19"
+        },
+        {
+          "name": "servingCellConfigCommon",
+          "value": "configured for NR NTN"
+        }
+      ]
+    },
+    {
+      "message": "SIB19",
+      "ies": [
+        {
+          "name": "ntn-Config-r17.ephemerisInfo-r17",
+          "value": "valid"
+        },
+        {
+          "name": "ntn-Config-r17.ta-Info-r17",
+          "value": "valid"
+        },
+        {
+          "name": "ntn-Config-r17.epochTime-r17",
+          "value": "valid"
+        },
+        {
+          "name": "ntn-Config-r17.cellSpecificKoffset-r17",
+          "value": "configured"
+        },
+        {
+          "name": "ntn-Config-r17.ntn-UlSyncValidityDuration-r17",
+          "value": "configured"
+        },
+        {
+          "name": "t-Service-r17",
+          "value": "configured"
+        }
+      ]
+    },
+    {
+      "message": "RRCSetupRequest",
+      "ies": [
+        {
+          "name": "rrcSetupRequest.ue-Identity.randomValue",
+          "value": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "name": "rrcSetupRequest.establishmentCause",
+          "value": "mo-Signalling"
+        }
+      ]
+    },
+    {
+      "message": "RRCSetup",
+      "ies": [
+        {
+          "name": "rrc-TransactionIdentifier",
+          "value": "0"
+        },
+        {
+          "name": "radioBearerConfig.srb-ToAddModList[0]",
+          "value": "SRB1"
+        },
+        {
+          "name": "masterCellGroup",
+          "value": "configured"
+        }
+      ]
+    },
+    {
+      "message": "RRCSetupComplete",
+      "ies": [
+        {
+          "name": "rrc-TransactionIdentifier",
+          "value": "0"
+        },
+        {
+          "name": "selectedPLMN-Identity",
+          "value": "1"
+        },
+        {
+          "name": "dedicatedNAS-Message",
+          "value": "Registration Request"
+        },
+        {
+          "name": "guami-Type",
+          "value": "native"
+        }
+      ]
+    },
+    {
+      "message": "Registration Request",
+      "ies": [
+        {
+          "name": "5GS registration type",
+          "value": "initial registration"
+        },
+        {
+          "name": "ngKSI",
+          "value": "default"
+        },
+        {
+          "name": "5GMM capability",
+          "value": "supported"
+        },
+        {
+          "name": "requested NSSAI",
+          "value": "configured"
+        }
+      ]
+    },
+    {
+      "message": "DLInformationTransfer",
+      "ies": [
+        {
+          "name": "dedicatedNAS-Message",
+          "value": "Registration Accept"
+        }
+      ]
+    }
+  ],
+  "calls": 1
+}
