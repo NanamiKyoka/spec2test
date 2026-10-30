@@ -118,6 +118,19 @@ cd ../..
   能对上用例就返回用例号并执行，对不上就用自然语言引导；精确用例号仍走本地快速路径。
 - `results/symbols/rrc_symbols.json` 是符号表快照，保证没有 `data/` 时字段证据抽屉仍可用。
 
+## 测试与 CI
+
+```bash
+# 后端：静态路径安全、任务持久化、会话并发、HTTP 冒烟
+py -3.12 -m pip install -r requirements-dev.txt
+py -3.12 -m pytest -q
+
+# 前端：类型检查 + 构建 + 浏览器冒烟（需先启动 scripts/serve.py）
+cd app && npm ci && npm run build && npm run smoke
+```
+
+CI（`.github/workflows/ci.yml`）在每次 push 跑三组：pytest、前端构建、Playwright UI 冒烟。
+
 ## 模型通道（三选一，禁止写死）
 
 | `LLM_PROVIDER` | 需要的环境变量 | 说明 |

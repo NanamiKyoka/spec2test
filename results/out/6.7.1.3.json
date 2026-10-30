@@ -1,0 +1,105 @@
+{
+  "case_id": "6.7.1.3",
+  "steps": [
+    {
+      "st": 1,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "MIB",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 2,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1 (cellBarredNTN not present)",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 3,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 4,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1 (cellBarredNTN not barred)",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 5,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 6,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1 (cellBarredNTN barred)",
+      "tp_ref": [
+        3
+      ]
+    },
+    {
+      "st": 7,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        3
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "message": "SIB1",
+      "derivation_path": "SIB1 ASN.1 CellAccessRelatedInfo -> cellBarredNTN-r17; SIB1 default_template_fields includes cellBarredNTN-r17",
+      "ies": [
+        {
+          "name": "cellBarredNTN-r17",
+          "value": "Not present",
+          "condition": "Case (1): SIB1 for NR NTN cell; cellBarredNTN-r17 absent, UE considers the cell barred",
+          "_known": true
+        },
+        {
+          "name": "cellBarredNTN-r17",
+          "value": "notBarred",
+          "condition": "Case (2): SIB1 for NR NTN cell; cellBarredNTN-r17 present and set to notBarred, UE considers the cell suitable and camps on it",
+          "_known": true
+        },
+        {
+          "name": "cellBarredNTN-r17",
+          "value": "barred",
+          "condition": "Case (3): SIB1 for NR NTN cell; cellBarredNTN-r17 changes to barred, UE considers the cell barred",
+          "_known": true
+        }
+      ],
+      "_stop": "end_turn"
+    }
+  ],
+  "status": "generated",
+  "reason": "",
+  "_stage2": {
+    "candidates": [
+      "SIB1"
+    ],
+    "calls": 1
+  },
+  "verdict": "pass",
+  "violations": []
+}

@@ -283,6 +283,22 @@ export function CaseView({ caseId }: { caseId: string }) {
   const sysMsgs = out?.messages || [];
   const violations = out?.violations || [];
 
+  // 首屏关键字段：生成物里前 6 个不重复 IE，点开即看证据
+  const keyIes: { msg: string; ie: IeField }[] = (() => {
+    const seen = new Set<string>();
+    const outList: { msg: string; ie: IeField }[] = [];
+    for (const m of sysMsgs) {
+      for (const f of m.ies || []) {
+        const k = (m.message || "") + "|" + f.name;
+        if (seen.has(k)) continue;
+        seen.add(k);
+        outList.push({ msg: m.message || "", ie: f });
+        if (outList.length >= 6) return outList;
+      }
+    }
+    return outList;
+  })();
+
   const pickedGoldSet = useMemo(
     () => (picked ? goldForMessage(ie as IeFileLite | null | undefined, picked.msg) : null),
     [ie, picked]
@@ -345,7 +361,7 @@ export function CaseView({ caseId }: { caseId: string }) {
             <CardBody className="space-y-2">
               <div className="text-[13px] font-semibold">{ctx.title || "（无标题）"}</div>
               {ctx.test_purpose && (
-                <details open className="rounded-md border border-line">
+                <details className="rounded-md border border-line">
                   <summary className="cursor-pointer px-3 py-2 text-[12px] text-muted">
                     测试目的（TP 原文）
                   </summary>
@@ -413,6 +429,27 @@ export function CaseView({ caseId }: { caseId: string }) {
                   调用数 <span className="num font-mono text-ink">{report?.calls ?? DASH}</span>
                 </span>
               </div>
+              {explain?.headline && (
+                <p className="mt-2 text-[13px] font-medium text-ink">{explain.headline}</p>
+              )}
+              {keyIes.length > 0 && (
+                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                  <span className="text-[11.5px] text-muted">关键字段</span>
+                  {keyIes.map(({ msg, ie }) => (
+                    <button
+                      key={msg + "|" + ie.name}
+                      onClick={(e) => {
+                        triggerRef.current = e.currentTarget;
+                        setPicked({ msg, ie });
+                      }}
+                      className="rounded-full border border-line bg-canvas px-2 py-0.5 font-mono text-[11.5px] text-ink hover:border-accent/40 hover:bg-accent/5"
+                      title="查看证据"
+                    >
+                      {ie.name}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </CardBody>
         </Card>

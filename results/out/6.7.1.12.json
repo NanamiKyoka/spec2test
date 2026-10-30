@@ -1,0 +1,130 @@
+{
+  "case_id": "6.7.1.12",
+  "steps": [
+    {
+      "st": 1,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SystemInformation",
+      "tp_ref": [
+        1,
+        2
+      ]
+    },
+    {
+      "st": 2,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "RRCConnectionRelease",
+      "tp_ref": [
+        1,
+        2
+      ]
+    },
+    {
+      "st": 3,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        1,
+        2
+      ]
+    },
+    {
+      "st": 4,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SystemInformation",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 5,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 6,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 7,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 8,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "RRCRelease",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 9,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SystemInformation",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 10,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 11,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 12,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "",
+      "tp_ref": [
+        2
+      ]
+    }
+  ],
+  "messages": [],
+  "_backend_model": "deepseek-v4.1-flash",
+  "_stage1": {
+    "stop": "end_turn",
+    "defects": [],
+    "repairs": 0
+  },
+  "_stage2": {
+    "candidates": [],
+    "calls": 0
+  },
+  "status": "abstained",
+  "reason": "inputs contain no message/SIB names",
+  "calls": 0
+}

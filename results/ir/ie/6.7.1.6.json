@@ -1,0 +1,220 @@
+{
+  "case_id": "6.7.1.6",
+  "message_tables": [
+    {
+      "table_ref": "6.7.1.6.3.3-2",
+      "message": "SIB2",
+      "step": null,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "SIB2",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "SIB2 ::= SEQUENCE {"
+        },
+        {
+          "name": "cellReselectionServingFreqInfo",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "cellReselectionServingFreqInfo SEQUENCE {"
+        },
+        {
+          "name": "s-NonIntraSearch",
+          "value": "5",
+          "comment": "10 dB",
+          "condition": "",
+          "raw": "s-NonIntraSearch"
+        },
+        {
+          "name": "threshServingLowP",
+          "value": "10",
+          "comment": "20 dB",
+          "condition": "NR Cell 11",
+          "raw": "threshServingLowP"
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "5",
+          "comment": "",
+          "condition": "NR Cell 1 and NR Cell 11",
+          "raw": "cellReselectionPriority"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "s-NonIntraSearch",
+          "value": "5",
+          "comment": "10 dB",
+          "condition": "",
+          "raw": "s-NonIntraSearch"
+        },
+        {
+          "name": "threshServingLowP",
+          "value": "10",
+          "comment": "20 dB",
+          "condition": "NR Cell 11",
+          "raw": "threshServingLowP"
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "5",
+          "comment": "",
+          "condition": "NR Cell 1 and NR Cell 11",
+          "raw": "cellReselectionPriority"
+        }
+      ]
+    },
+    {
+      "table_ref": "6.7.1.6.3.3-3",
+      "message": "SIB4",
+      "step": null,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "SIB4",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "SIB4 ::= SEQUENCE {"
+        },
+        {
+          "name": "interFreqCarrierFreqList",
+          "value": "1 entry",
+          "comment": "",
+          "condition": "",
+          "raw": "interFreqCarrierFreqList SEQUENCE (SIZE (1..maxFreq)) OF InterFreqCarrierFreqInfo {"
+        },
+        {
+          "name": "InterFreqCarrierFreqInfo",
+          "value": "",
+          "comment": "entry 1",
+          "condition": "",
+          "raw": "InterFreqCarrierFreqInfo[1] SEQUENCE {"
+        },
+        {
+          "name": "dl-CarrierFreq",
+          "value": "Same downlink ARFCN as used for NR Cell 12",
+          "comment": "",
+          "condition": "NR Cell 11",
+          "raw": "dl-CarrierFreq"
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "5",
+          "comment": "",
+          "condition": "NR Cell 12",
+          "raw": "cellReselectionPriority"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "dl-CarrierFreq",
+          "value": "Same downlink ARFCN as used for NR Cell 12",
+          "comment": "",
+          "condition": "NR Cell 11",
+          "raw": "dl-CarrierFreq"
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "5",
+          "comment": "",
+          "condition": "NR Cell 12",
+          "raw": "cellReselectionPriority"
+        }
+      ]
+    },
+    {
+      "table_ref": "6.7.1.6.3.3-4",
+      "message": "SIB19",
+      "step": 0,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "SIB19-r17",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "SIB19-r17 ::= SEQUENCE {"
+        },
+        {
+          "name": "t-service-r17",
+          "value": "Time as applied in Universal time and local time zone IE at step 1 of Table 6.7.1.6.3.2-2 + 6mins",
+          "comment": "",
+          "condition": "NR Cell 1",
+          "raw": "t-service-r17"
+        },
+        {
+          "name": "referenceLocation-r17",
+          "value": "'2273BAD66355'H",
+          "comment": "",
+          "condition": "",
+          "raw": "referenceLocation-r17"
+        },
+        {
+          "name": "distanceThresh-r17",
+          "value": "20000",
+          "comment": "",
+          "condition": "",
+          "raw": "distanceThresh-r17"
+        },
+        {
+          "name": "Note",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "Note 1: Value is calculated in multiples of 10 ms after 00:00:00 on Gregorian calendar date 1 January 1900."
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "t-service-r17",
+          "value": "Time as applied in Universal time and local time zone IE at step 1 of Table 6.7.1.6.3.2-2 + 6mins",
+          "comment": "",
+          "condition": "NR Cell 1",
+          "raw": "t-service-r17"
+        },
+        {
+          "name": "referenceLocation-r17",
+          "value": "'2273BAD66355'H",
+          "comment": "",
+          "condition": "",
+          "raw": "referenceLocation-r17"
+        },
+        {
+          "name": "distanceThresh-r17",
+          "value": "20000",
+          "comment": "",
+          "condition": "",
+          "raw": "distanceThresh-r17"
+        }
+      ]
+    },
+    {
+      "table_ref": "6.7.1.6.3.3-5",
+      "message": "REGISTRATION",
+      "step": 4,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "Equivalent",
+          "value": "002-11",
+          "comment": "PLMN 2",
+          "condition": "Step 4",
+          "raw": "Equivalent PLMNs"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "Equivalent",
+          "value": "002-11",
+          "comment": "PLMN 2",
+          "condition": "Step 4",
+          "raw": "Equivalent PLMNs"
+        }
+      ]
+    }
+  ]
+}

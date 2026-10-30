@@ -98,6 +98,7 @@ def load_jobs():
             job["id"] = jid
             if job.get("state") in ("queued", "running"):
                 job["state"] = "failed"
+                job["error"] = "restarted"
                 job["finished"] = job.get("finished") or time.time()
                 job.setdefault("log", []).append(
                     {"t": round(time.time(), 3), "msg": "服务重启，任务中断"}
@@ -469,12 +470,16 @@ def start_job(cid, dry_run=False, conversation_id=None):
                       "verdict": None, "stages": [], "started": None, "finished": None}
     save_job(_jobs[jid])
     s = load_settings()
+    _jobs[jid].update({"provider": s["provider"], "model": s["model"],
+                       "mode": "dry" if dry_run else "live"})
+    save_job(_jobs[jid])
 
     def worker():
         job = _jobs[jid]
         job["state"] = "running"
         job["started"] = time.time()
         save_job(job)
+        last_t = time.time()
         cmd = [sys.executable, RUN_ONE, cid]
         if dry_run:
             cmd.append("--dry-run")
@@ -503,30 +508,44 @@ def start_job(cid, dry_run=False, conversation_id=None):
                 if stage == "score":
                     job["result"] = ev
                     job["verdict"] = (ev.get("detail") or {}).get("verdict", job.get("verdict"))
+                now = time.time()
+                if stage and stage != "verdict":
+                    st = job.setdefault("stage_seconds", {})
+                    st[stage] = round(st.get(stage, 0) + (now - last_t), 2)
+                last_t = now
                 save_job(job)
             try:
                 proc.wait(timeout=15)
             except subprocess.TimeoutExpired:
                 proc.kill()
                 proc.wait(timeout=5)
+                job["error"] = "timeout"
                 job["log"].append({"t": round(time.time(), 3), "msg": "进程超时，已终止"})
             if proc.returncode != 0:
                 job["state"] = "failed"
+                job.setdefault("error", "process_exit_%d" % proc.returncode)
             else:
                 job["state"] = "done"
             save_job(job)
         except Exception as e:
             job["state"] = "failed"
+            job["error"] = str(e)[:200]
             job["log"].append({"t": round(time.time(), 3), "msg": "执行异常：%s" % e})
             save_job(job)
         finally:
             job["finished"] = time.time()
             job["verdict"] = _job_verdict(job)
-            append_run({"job_id": jid, "case": job.get("case"), "state": job.get("state"),
-                        "verdict": job.get("verdict"),
-                        "started": job.get("started"), "finished": job.get("finished"),
-                        "seconds": round(job["finished"] - job["started"], 2)
-                        if job.get("started") else None})
+            rec = {"job_id": jid, "case": job.get("case"), "state": job.get("state"),
+                   "verdict": job.get("verdict"),
+                   "started": job.get("started"), "finished": job.get("finished"),
+                   "seconds": round(job["finished"] - job["started"], 2)
+                   if job.get("started") else None,
+                   "mode": job.get("mode"), "provider": job.get("provider"),
+                   "model": job.get("model"), "conversation_id": job.get("conversation_id"),
+                   "stages": job.get("stage_seconds") or {}}
+            if job.get("error"):
+                rec["error"] = job["error"]
+            append_run(rec)
             if conversation_id:
                 try:
                     _attach_job_result(conversation_id, jid, job)
@@ -591,6 +610,56 @@ def _attach_job_result(conversation_id, jid, job):
 
 
 # ---------- http ----------
+def resolve_static_path(root, path):
+    """把 URL 解析为静态文件路径；只允许 web/、data/、results/ 三棵树。
+
+    返回 __denied__ 表示拒绝（路径穿越、settings.json、目录、源码等）。
+    """
+    clean = urllib.parse.unquote(urllib.parse.urlparse(path).path)
+    denied = os.path.join(root, "__denied__")
+    if "\x00" in clean:
+        return denied
+    if not (clean == "/web" or clean.startswith("/web/")
+            or clean.startswith("/data/") or clean.startswith("/results/")):
+        return denied
+
+    def inside(base, rel):
+        target = os.path.realpath(os.path.join(base, rel.lstrip("/")))
+        if target != base and not target.startswith(base + os.sep):
+            return None
+        if os.path.isdir(target):
+            return None
+        return target
+
+    data_root = os.path.realpath(os.path.join(root, "data"))
+    results_root = os.path.realpath(os.path.join(root, "results"))
+    if clean.startswith("/data/"):
+        rel = clean[len("/data/"):]
+        target = inside(data_root, rel)
+        if not target or os.path.basename(target).lower() == "settings.json":
+            return denied
+        if os.path.exists(target):
+            return target
+        snap = inside(results_root, rel)
+        if snap and os.path.exists(snap):
+            return snap
+        return target
+    if clean.startswith("/results/"):
+        rel = clean[len("/results/"):]
+        target = inside(results_root, rel)
+        return target or denied
+    # web/ 静态站点：目录映射到 index.html，路径必须在 web/ 内
+    web_root = os.path.realpath(os.path.join(root, "web"))
+    rel = clean[len("/web/"):] if clean.startswith("/web/") else ""
+    target = os.path.realpath(os.path.join(web_root, rel))
+    if target != web_root and not target.startswith(web_root + os.sep):
+        return denied
+    if os.path.isdir(target):
+        idx = os.path.join(target, "index.html")
+        return idx if os.path.exists(idx) else denied
+    return target
+
+
 class Handler(http.server.SimpleHTTPRequestHandler):
     root = "."
 
@@ -603,43 +672,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         return "live" if live else "snapshot"
 
     def translate_path(self, path):
-        clean = urllib.parse.unquote(urllib.parse.urlparse(path).path)
-        denied = os.path.join(self.root, "__denied__")
-        if "\x00" in clean:
-            return denied
-        # 只允许 web/、data/、results/ 三棵静态树，避免暴露源码、.git、日志等
-        if not (clean == "/web" or clean.startswith("/web/")
-                or clean.startswith("/data/") or clean.startswith("/results/")):
-            return denied
-        if clean.startswith("/data/"):
-            rel = clean[len("/data/"):].lstrip("/")
-            data_root = os.path.realpath(os.path.join(self.root, "data"))
-            results_root = os.path.realpath(os.path.join(self.root, "results"))
-            target = os.path.realpath(os.path.join(data_root, rel))
-            # 任何层级的 settings.json 一律拒绝
-            if os.path.basename(target).lower() == "settings.json":
-                return denied
-            if target != data_root and not target.startswith(data_root + os.sep):
-                return denied
-            if os.path.isdir(target):
-                return denied
-            if os.path.exists(target):
-                return target
-            snap = os.path.realpath(os.path.join(results_root, rel))
-            if (snap != results_root and snap.startswith(results_root + os.sep)
-                    and not os.path.isdir(snap) and os.path.exists(snap)):
-                return snap
-            return target
-        if clean.startswith("/results/"):
-            rel = clean[len("/results/"):].lstrip("/")
-            results_root = os.path.realpath(os.path.join(self.root, "results"))
-            target = os.path.realpath(os.path.join(results_root, rel))
-            if target != results_root and not target.startswith(results_root + os.sep):
-                return denied
-            if os.path.isdir(target):
-                return denied
-            return target
-        return super().translate_path(path)
+        resolved = resolve_static_path(self.root, path)
+        if resolved is None:
+            return super().translate_path(path)
+        return resolved
 
     def _json(self, obj, code=200):
         body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
@@ -714,10 +750,52 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                                "state": j.get("state"), "verdict": _job_verdict(j),
                                "started": j.get("started"), "finished": j.get("finished"),
                                "seconds": round(j["finished"] - j["started"], 2)
-                               if j.get("started") and j.get("finished") else None}
+                               if j.get("started") and j.get("finished") else None,
+                               "mode": j.get("mode"), "provider": j.get("provider"),
+                               "model": j.get("model"),
+                               "conversation_id": j.get("conversation_id"),
+                               "stages": j.get("stage_seconds") or {}}
+                if j.get("error"):
+                    merged[jid]["error"] = j["error"]
             runs = list(merged.values())
             runs.sort(key=lambda x: -(x.get("started") or x.get("finished") or 0))
             return self._json(runs[:limit])
+        if path == "/api/metrics":
+            with _jobs_lock:
+                live = {jid: j for jid, j in _jobs.items()}
+            merged = {r["job_id"]: r for r in load_runs() if r.get("job_id")}
+            for jid, j in live.items():
+                merged[jid] = {
+                    "job_id": jid, "case": j.get("case"), "state": j.get("state"),
+                    "verdict": _job_verdict(j), "error": j.get("error"),
+                    "finished": j.get("finished"),
+                    "seconds": round(j["finished"] - j["started"], 2)
+                    if j.get("started") and j.get("finished") else None,
+                }
+            rows = list(merged.values())
+            by_state, by_verdict = {}, {}
+            for r in rows:
+                by_state[r.get("state")] = by_state.get(r.get("state"), 0) + 1
+                v = str(r.get("verdict"))
+                by_verdict[v] = by_verdict.get(v, 0) + 1
+            secs = sorted(r["seconds"] for r in rows
+                          if isinstance(r.get("seconds"), (int, float)))
+
+            def pct(p):
+                if not secs:
+                    return None
+                return secs[min(len(secs) - 1, int(round((len(secs) - 1) * p)))]
+
+            now = time.time()
+            last24 = sum(1 for r in rows if (r.get("finished") or 0) >= now - 86400)
+            failures = [{"job_id": r.get("job_id"), "case": r.get("case"),
+                         "error": r.get("error")}
+                        for r in rows if r.get("state") == "failed"][-5:]
+            return self._json({"runs_total": len(rows), "by_state": by_state,
+                               "by_verdict": by_verdict,
+                               "seconds_p50": pct(0.5), "seconds_p95": pct(0.95),
+                               "runs_last_24h": last24,
+                               "recent_failures": failures})
         if path == "/api/cases":
             return self._json(list_cases())
         m = re.match(r"^/api/case/([0-9.]+)$", path)

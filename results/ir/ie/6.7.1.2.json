@@ -1,0 +1,150 @@
+{
+  "case_id": "6.7.1.2",
+  "message_tables": [
+    {
+      "table_ref": "6.7.1.2.3.3-1",
+      "message": "SIB1",
+      "step": null,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "SIB1",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "SIB1 ::= SEQUENCE {"
+        },
+        {
+          "name": "cellAccessRelatedInfo",
+          "value": "CellAccessRelatedInfo",
+          "comment": "Table 6.7.1.2.3.3- 2A",
+          "condition": "",
+          "raw": "cellAccessRelatedInfo"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "cellAccessRelatedInfo",
+          "value": "CellAccessRelatedInfo",
+          "comment": "Table 6.7.1.2.3.3- 2A",
+          "condition": "",
+          "raw": "cellAccessRelatedInfo"
+        }
+      ]
+    },
+    {
+      "table_ref": "6.7.1.2.3.3-2",
+      "message": "SIB1",
+      "step": null,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "SIB1",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "SIB1 ::= SEQUENCE {"
+        },
+        {
+          "name": "cellAccessRelatedInfo",
+          "value": "CellAccessRelatedInfo",
+          "comment": "Table 6.7.1.2.3.3- 2A",
+          "condition": "",
+          "raw": "cellAccessRelatedInfo"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "cellAccessRelatedInfo",
+          "value": "CellAccessRelatedInfo",
+          "comment": "Table 6.7.1.2.3.3- 2A",
+          "condition": "",
+          "raw": "cellAccessRelatedInfo"
+        }
+      ]
+    },
+    {
+      "table_ref": "6.7.1.2.3.3-2",
+      "message": "A",
+      "step": null,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "CellAccessRelatedInfo",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "CellAccessRelatedInfo ::= SEQUENCE {"
+        },
+        {
+          "name": "plmn-IdentityInfoList",
+          "value": "PLMN-IdentityInfoList",
+          "comment": "Table 6.7.1.2.3.3- 2B",
+          "condition": "",
+          "raw": "plmn-IdentityInfoList"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "plmn-IdentityInfoList",
+          "value": "PLMN-IdentityInfoList",
+          "comment": "Table 6.7.1.2.3.3- 2B",
+          "condition": "",
+          "raw": "plmn-IdentityInfoList"
+        }
+      ]
+    },
+    {
+      "table_ref": "6.7.1.2.3.3-2",
+      "message": "B",
+      "step": null,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "PLMN-IdentityInfoList",
+          "value": "1 entry",
+          "comment": "",
+          "condition": "",
+          "raw": "PLMN-IdentityInfoList ::= SEQUENCE (SIZE (1..maxPLMN)) OF PLMN-IdentityInfo {"
+        },
+        {
+          "name": "PLMN-IdentityInfo",
+          "value": "",
+          "comment": "entry 1",
+          "condition": "",
+          "raw": "PLMN-IdentityInfo[1] SEQUENCE {"
+        },
+        {
+          "name": "trackingAreaList-r17",
+          "value": "2 entries",
+          "comment": "",
+          "condition": "",
+          "raw": "trackingAreaList-r17 SEQUENCE (SIZE (1..maxTAC-r17)) OF TrackingAreaCode {"
+        },
+        {
+          "name": "TrackingAreaCode",
+          "value": "1",
+          "comment": "entry 1",
+          "condition": "",
+          "raw": "TrackingAreaCode[1]"
+        },
+        {
+          "name": "TrackingAreaCode",
+          "value": "2",
+          "comment": "entry 2",
+          "condition": "",
+          "raw": "TrackingAreaCode[2]"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "TrackingAreaCode",
+          "value": "1",
+          "comment": "entry 1",
+          "condition": "",
+          "raw": "TrackingAreaCode[1]"
+        }
+      ]
+    }
+  ]
+}

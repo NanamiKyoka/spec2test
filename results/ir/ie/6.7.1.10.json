@@ -1,0 +1,64 @@
+{
+  "case_id": "6.7.1.10",
+  "message_tables": [
+    {
+      "table_ref": "6.7.1.10.3.3-2",
+      "message": "SIB25",
+      "step": 2,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "SIB25-r18",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "SIB25-r18 ::= SEQUENCE {"
+        },
+        {
+          "name": "coverageAreaInfoList-r18",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "coverageAreaInfoList-r18 SEQUENCE (SIZE (1..maxTN-AreaInfo-r18)) OF CoverageAreaInfo-r18 {"
+        },
+        {
+          "name": "CoverageAreaInfo-r18",
+          "value": "",
+          "comment": "entry 1",
+          "condition": "",
+          "raw": "CoverageAreaInfo-r18 [1] SEQUENCE {"
+        },
+        {
+          "name": "tn-ReferenceLocation-r18",
+          "value": "ReferenceLocation with condition RefLocation_1",
+          "comment": "",
+          "condition": "",
+          "raw": "tn-ReferenceLocation-r18"
+        },
+        {
+          "name": "tn-DistanceRadius-r18",
+          "value": "10000",
+          "comment": "10 km",
+          "condition": "preamble",
+          "raw": "tn-DistanceRadius-r18"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "tn-ReferenceLocation-r18",
+          "value": "ReferenceLocation with condition RefLocation_1",
+          "comment": "",
+          "condition": "",
+          "raw": "tn-ReferenceLocation-r18"
+        },
+        {
+          "name": "tn-DistanceRadius-r18",
+          "value": "10000",
+          "comment": "10 km",
+          "condition": "preamble",
+          "raw": "tn-DistanceRadius-r18"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,182 @@
+{
+  "case_id": "6.7.1.5",
+  "message_tables": [
+    {
+      "table_ref": "6.7.1.5.3.3-2",
+      "message": "SIB2",
+      "step": null,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "SIB2",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "SIB2 ::= SEQUENCE {"
+        },
+        {
+          "name": "cellReselectionServingFreqInfo",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "cellReselectionServingFreqInfo SEQUENCE {"
+        },
+        {
+          "name": "s-NonIntraSearch",
+          "value": "5",
+          "comment": "10 dB",
+          "condition": "",
+          "raw": "s-NonIntraSearch"
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "5",
+          "comment": "",
+          "condition": "NR Cell 1 and NR Cell 2",
+          "raw": "cellReselectionPriority"
+        },
+        {
+          "name": "intraFreqCellReselectionInfo",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "intraFreqCellReselectionInfo SEQUENCE {"
+        },
+        {
+          "name": "s-IntraSearchP",
+          "value": "5",
+          "comment": "10 dB",
+          "condition": "",
+          "raw": "s-IntraSearchP"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "s-NonIntraSearch",
+          "value": "5",
+          "comment": "10 dB",
+          "condition": "",
+          "raw": "s-NonIntraSearch"
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "5",
+          "comment": "",
+          "condition": "NR Cell 1 and NR Cell 2",
+          "raw": "cellReselectionPriority"
+        },
+        {
+          "name": "s-IntraSearchP",
+          "value": "5",
+          "comment": "10 dB",
+          "condition": "",
+          "raw": "s-IntraSearchP"
+        }
+      ]
+    },
+    {
+      "table_ref": "6.7.1.5.3.3-3",
+      "message": "SIB4",
+      "step": null,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "SIB4",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "SIB4 ::= SEQUENCE {"
+        },
+        {
+          "name": "interFreqCarrierFreqList",
+          "value": "1 entry",
+          "comment": "",
+          "condition": "",
+          "raw": "interFreqCarrierFreqList SEQUENCE (SIZE (1..maxFreq)) OF InterFreqCarrierFreqInfo {"
+        },
+        {
+          "name": "InterFreqCarrierFreqInfo",
+          "value": "",
+          "comment": "entry 1",
+          "condition": "",
+          "raw": "InterFreqCarrierFreqInfo[1] SEQUENCE {"
+        },
+        {
+          "name": "dl-CarrierFreq",
+          "value": "Same downlink ARFCN as used for NR Cell 3",
+          "comment": "",
+          "condition": "NR Cell 2",
+          "raw": "dl-CarrierFreq"
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "5",
+          "comment": "",
+          "condition": "NR Cell 3",
+          "raw": "cellReselectionPriority"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "dl-CarrierFreq",
+          "value": "Same downlink ARFCN as used for NR Cell 3",
+          "comment": "",
+          "condition": "NR Cell 2",
+          "raw": "dl-CarrierFreq"
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "5",
+          "comment": "",
+          "condition": "NR Cell 3",
+          "raw": "cellReselectionPriority"
+        }
+      ]
+    },
+    {
+      "table_ref": "6.7.1.5.3.3-4",
+      "message": "SIB19",
+      "step": null,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "SIB19-r17",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "SIB19-r17 ::= SEQUENCE {"
+        },
+        {
+          "name": "referenceLocation-r17",
+          "value": "'2273BAD66355'H",
+          "comment": "",
+          "condition": "",
+          "raw": "referenceLocation-r17"
+        },
+        {
+          "name": "distanceThresh-r17",
+          "value": "500",
+          "comment": "",
+          "condition": "",
+          "raw": "distanceThresh-r17"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "referenceLocation-r17",
+          "value": "'2273BAD66355'H",
+          "comment": "",
+          "condition": "",
+          "raw": "referenceLocation-r17"
+        },
+        {
+          "name": "distanceThresh-r17",
+          "value": "500",
+          "comment": "",
+          "condition": "",
+          "raw": "distanceThresh-r17"
+        }
+      ]
+    }
+  ]
+}

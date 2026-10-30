@@ -1,0 +1,215 @@
+{
+  "case_id": "6.7.1.5",
+  "steps": [
+    {
+      "st": 1,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SystemInformation",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 2,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "RRCRelease",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 3,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 4,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 5,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 6,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 7,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SystemInformation",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 8,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 9,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 10,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 11,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "",
+      "tp_ref": [
+        2
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "message": "SIB19",
+      "derivation_path": "SIB19 default_template_fields",
+      "ies": [
+        {
+          "name": "ntn-Config-r17",
+          "value": "Present",
+          "condition": "serving cell provides access by NR NTN",
+          "_known": true
+        },
+        {
+          "name": "referenceLocation-r17",
+          "value": "latitude=0, longitude=0, altitude=0",
+          "condition": "serving cell referenceLocation; UE distance to referenceLocation > distanceThresh",
+          "_known": true
+        },
+        {
+          "name": "distanceThresh-r17",
+          "value": "0",
+          "condition": "location-based measurement threshold; used for test (1) with Sintrasearch non-zero and test (2) with Snonintrasearch non-zero",
+          "_known": true
+        },
+        {
+          "name": "ntn-NeighCellConfigList-r17",
+          "value": "Not present",
+          "condition": "no neighbour NTN cell configuration required",
+          "_known": true
+        },
+        {
+          "name": "lateNonCriticalExtension",
+          "value": "Not present",
+          "condition": "",
+          "_known": true
+        }
+      ],
+      "_stop": "end_turn"
+    },
+    {
+      "message": "SIB2",
+      "derivation_path": "default_template_fields",
+      "ies": [
+        {
+          "name": "s-IntraSearchP",
+          "value": "10",
+          "condition": "intraFreqCellReselectionInfo; non-zero Sintrasearch for intra-frequency measurements when UE distance to referenceLocation > distanceThresh",
+          "_known": true
+        },
+        {
+          "name": "s-IntraSearchQ",
+          "value": "Not present",
+          "condition": "intraFreqCellReselectionInfo",
+          "_known": true
+        },
+        {
+          "name": "s-NonIntraSearchP",
+          "value": "10",
+          "condition": "cellReselectionServingFreqInfo; non-zero Snonintrasearch for inter-frequency measurements when UE distance to referenceLocation > distanceThresh",
+          "_known": true
+        },
+        {
+          "name": "s-NonIntraSearchQ",
+          "value": "Not present",
+          "condition": "cellReselectionServingFreqInfo",
+          "_known": true
+        },
+        {
+          "name": "q-RxLevMin",
+          "value": "-60",
+          "condition": "intraFreqCellReselectionInfo; used for Srxlev calculation",
+          "_known": true
+        },
+        {
+          "name": "q-QualMin",
+          "value": "Not present",
+          "condition": "intraFreqCellReselectionInfo",
+          "_known": true
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "7",
+          "condition": "cellReselectionServingFreqInfo; serving frequency priority higher than lower-priority inter-frequency cell",
+          "_known": true
+        },
+        {
+          "name": "distanceThresh-r17",
+          "value": "1000",
+          "condition": "ntn-CellReselectionInfo-r17; UE distance to serving cell referenceLocation exceeds this threshold",
+          "_known": true
+        },
+        {
+          "name": "referenceLocation-r17",
+          "value": "latitude=0, longitude=0",
+          "condition": "ntn-CellReselectionInfo-r17; serving cell reference location configured",
+          "_known": true
+        }
+      ],
+      "_stop": "end_turn"
+    }
+  ],
+  "status": "generated",
+  "reason": "",
+  "_stage2": {
+    "candidates": [
+      "SIB19",
+      "SIB2"
+    ],
+    "calls": 2
+  },
+  "verdict": "pass",
+  "violations": []
+}

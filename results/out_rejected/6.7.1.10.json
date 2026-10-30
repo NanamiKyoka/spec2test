@@ -1,0 +1,212 @@
+{
+  "case_id": "6.7.1.10",
+  "steps": [
+    {
+      "st": 1,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 2,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB4",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 3,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB25",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 4,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 5,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 6,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 7,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "Paging",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 8,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "RRCSetupRequest",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 9,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "RRCSetup",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 10,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "RRCSetupComplete",
+      "tp_ref": [
+        1
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "message": "SIB25",
+      "derivation_path": "SIB25-r18 -> coverageAreaInfoList-r18 -> CoverageAreaInfo-r18 -> tn-AreaId-r18 / tn-ReferenceLocation-r18 / tn-DistanceRadius-r18; lateNonCriticalExtension",
+      "ies": [
+        {
+          "name": "coverageAreaInfoList-r18",
+          "value": "1 entry",
+          "condition": "SIB25 carries TN coverage area information for TN measurement skipping",
+          "_known": true
+        },
+        {
+          "name": "tn-AreaId-r18",
+          "value": "1",
+          "condition": "entry 1 in coverageAreaInfoList-r18",
+          "_known": true
+        },
+        {
+          "name": "tn-ReferenceLocation-r18",
+          "value": "latitude=0, longitude=0, altitude=0",
+          "condition": "entry 1 in coverageAreaInfoList-r18",
+          "_known": true
+        },
+        {
+          "name": "tn-DistanceRadius-r18",
+          "value": "1000",
+          "condition": "entry 1 in coverageAreaInfoList-r18",
+          "_known": true
+        },
+        {
+          "name": "lateNonCriticalExtension",
+          "value": "Not present",
+          "condition": "not included",
+          "_known": true
+        }
+      ],
+      "_stop": "end_turn"
+    },
+    {
+      "message": "SIB4",
+      "derivation_path": "SIB4 default template with interFreqCarrierFreqList-v1900 extension",
+      "ies": [
+        {
+          "name": "interFreqCarrierFreqList",
+          "value": "1 entry",
+          "condition": "TN NR frequency configured for reselection",
+          "_known": true
+        },
+        {
+          "name": "dl-CarrierFreq",
+          "value": "620000",
+          "condition": "TN NR cell frequency on n78",
+          "_known": true
+        },
+        {
+          "name": "frequencyBandList",
+          "value": "n78",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "5",
+          "condition": "TN NR cell becomes higher ranked than serving cell",
+          "_known": true
+        },
+        {
+          "name": "q-RxLevMin",
+          "value": "-60",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "interFreqNeighCellList",
+          "value": "1 entry",
+          "condition": "TN neighbour cell in tn-AreaIdList",
+          "_known": true
+        },
+        {
+          "name": "physCellId",
+          "value": "1",
+          "condition": "TN neighbour cell",
+          "_known": true
+        },
+        {
+          "name": "interFreqCarrierFreqList-v1900",
+          "value": "1 entry",
+          "condition": "Rel-19 TN measurement skipping configuration",
+          "_known": true
+        },
+        {
+          "name": "tn-AreaIdList-r19",
+          "value": "1 entry (TN-AreaId = 1)",
+          "condition": "SIB4 contains tn-AreaIdList where TN measurement can be skipped",
+          "_known": false
+        }
+      ],
+      "_stop": "end_turn"
+    }
+  ],
+  "status": "generated",
+  "reason": "",
+  "_stage2": {
+    "candidates": [
+      "SIB25",
+      "SIB4"
+    ],
+    "calls": 2
+  },
+  "verdict": "reject",
+  "violations": [
+    {
+      "rule": "R2",
+      "path": "messages[None].ies[8].name",
+      "detail": "unknown field 'tn-AreaIdList-r19' for SIB4"
+    }
+  ]
+}

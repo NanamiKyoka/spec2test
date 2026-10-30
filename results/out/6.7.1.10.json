@@ -1,0 +1,189 @@
+{
+  "case_id": "6.7.1.10",
+  "steps": [
+    {
+      "st": 1,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB25",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 2,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB4",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 3,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 4,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 5,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "message": "SIB25",
+      "derivation_path": "default_template_fields",
+      "ies": [
+        {
+          "name": "coverageAreaInfoList-r18",
+          "value": "1 entry",
+          "condition": "present when SIB25 provides TN coverage area information",
+          "_known": true
+        },
+        {
+          "name": "lateNonCriticalExtension",
+          "value": "Not present",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "tn-AreaId-r18",
+          "value": "1",
+          "condition": "in coverageAreaInfoList-r18",
+          "_known": true
+        },
+        {
+          "name": "tn-ReferenceLocation-r18",
+          "value": "latitude=0, longitude=0",
+          "condition": "in coverageAreaInfoList-r18",
+          "_known": true
+        },
+        {
+          "name": "tn-DistanceRadius-r18",
+          "value": "10000",
+          "condition": "in coverageAreaInfoList-r18",
+          "_known": true
+        }
+      ],
+      "_stop": "end_turn"
+    },
+    {
+      "message": "SIB4",
+      "derivation_path": "38.331 SIB4 -> interFreqCarrierFreqList -> InterFreqCarrierFreqInfo-v1800 -> tn-AreaIdList-r18",
+      "ies": [
+        {
+          "name": "interFreqCarrierFreqList",
+          "value": "1 entry",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "dl-CarrierFreq",
+          "value": "630000",
+          "condition": "TN NR frequency",
+          "_known": true
+        },
+        {
+          "name": "frequencyBandList",
+          "value": "n78",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "q-RxLevMin",
+          "value": "-60",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "t-ReselectionNR",
+          "value": "1",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "threshX-HighP",
+          "value": "5",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "threshX-LowP",
+          "value": "5",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "3",
+          "condition": "TN NR frequency can become higher ranked than serving cell",
+          "_known": true
+        },
+        {
+          "name": "interFreqNeighCellList",
+          "value": "1 entry",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "physCellId",
+          "value": "1",
+          "condition": "TN NR cell in tn-AreaIdList",
+          "_known": true
+        },
+        {
+          "name": "q-OffsetCell",
+          "value": "dB0",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "interFreqCarrierFreqList-v1800",
+          "value": "1 entry",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "tn-AreaIdList-r18",
+          "value": "TN-AreaId-1",
+          "condition": "UE is in coverage of this TN area; TN measurement skipping applies",
+          "_known": true
+        }
+      ],
+      "_stop": "end_turn"
+    }
+  ],
+  "_backend_model": "deepseek-v4.1-flash",
+  "_stage1": {
+    "stop": "end_turn",
+    "defects": [],
+    "repairs": 0
+  },
+  "_stage2": {
+    "candidates": [
+      "SIB25",
+      "SIB4"
+    ],
+    "calls": 2
+  },
+  "status": "generated",
+  "calls": 2
+}

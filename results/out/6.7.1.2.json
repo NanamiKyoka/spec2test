@@ -1,0 +1,105 @@
+{
+  "case_id": "6.7.1.2",
+  "steps": [
+    {
+      "st": 1,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 2,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "MIB",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 3,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 4,
+      "actor": "UE",
+      "direction": "S->U",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 5,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "message": "SIB1",
+      "derivation_path": "SIB1 default_template_fields -> cellAccessRelatedInfo -> trackingAreaList",
+      "ies": [
+        {
+          "name": "cellAccessRelatedInfo",
+          "value": "present",
+          "condition": "SIB1 includes cell access related information",
+          "_known": true
+        },
+        {
+          "name": "plmn-IdentityList",
+          "value": "1 PLMN",
+          "condition": "inside cellAccessRelatedInfo",
+          "_known": true
+        },
+        {
+          "name": "trackingAreaList",
+          "value": "2",
+          "condition": "inside cellAccessRelatedInfo; more than one TAC per PLMN",
+          "_known": true
+        },
+        {
+          "name": "cellIdentity",
+          "value": "valid",
+          "condition": "inside cellAccessRelatedInfo",
+          "_known": true
+        },
+        {
+          "name": "cellSelectionInfo",
+          "value": "present",
+          "condition": "UE is able to find a suitable NR NTN cell",
+          "_known": true
+        },
+        {
+          "name": "cellBarredNTN-r17",
+          "value": "notBarred",
+          "condition": "NR NTN access allowed",
+          "_known": true
+        }
+      ],
+      "_stop": "end_turn"
+    }
+  ],
+  "status": "generated",
+  "reason": "",
+  "_stage2": {
+    "candidates": [
+      "SIB1"
+    ],
+    "calls": 1
+  },
+  "verdict": "pass",
+  "violations": []
+}

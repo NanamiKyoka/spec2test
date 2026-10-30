@@ -25,7 +25,7 @@ import {
   type Violation,
 } from "../lib/api";
 import { STAGE_LABEL, buildStages, conclusionOf, verdictOf, violationsOf } from "../lib/stages";
-import { Button, Card, Chip, Empty, Term, useToast } from "../ui";
+import { Button, Card, CardBody, Chip, Empty, Term, useToast } from "../ui";
 
 const GUIDE_KEY = "s2t-chat-guide";
 const CONV_KEY = "s2t-current-conv";
@@ -294,6 +294,7 @@ export function ChatView() {
   const [stopped, setStopped] = React.useState(false);
   const [elapsed, setElapsed] = React.useState(0);
   const [liveJob, setLiveJob] = React.useState<Job | null>(null);
+  const [pendingRun, setPendingRun] = React.useState<{ caseId: string; say: string; cid: string } | null>(null);
   const [liveExplain, setLiveExplain] = React.useState<string | null>(null);
   const [atBottom, setAtBottom] = React.useState(true);
   const [guideOpen, setGuideOpen] = React.useState(() => localStorage.getItem(GUIDE_KEY) !== "1");
@@ -623,6 +624,7 @@ export function ChatView() {
     setBusy(true);
     setElapsed(0);
     setLiveExplain(null);
+    setPendingRun(null);
     try {
       const cid = await ensureConv();
       if (!cid) return;
@@ -641,7 +643,9 @@ export function ChatView() {
           guide = null;
         }
         if (guide?.action === "run" && guide.case) {
-          caseId = guide.case;
+          // 语义匹配到的用例先走确认卡，避免自动烧一次模型调用
+          setPendingRun({ caseId: guide.case, say: guide.say || "", cid });
+          return;
         } else {
           const content =
             guide?.say ||
@@ -680,6 +684,31 @@ export function ChatView() {
       sendingRef.current = false;
       setBusy(false);
     });
+  };
+
+  const confirmPending = () => {
+    const p = pendingRun;
+    setPendingRun(null);
+    if (!p || sendingRef.current) return;
+    sendingRef.current = true;
+    lastCaseRef.current = p.caseId;
+    setError(null);
+    setStopped(false);
+    setBusy(true);
+    runForCase(p.caseId, p.cid).finally(() => {
+      sendingRef.current = false;
+      setBusy(false);
+    });
+  };
+
+  const cancelPending = () => {
+    const p = pendingRun;
+    setPendingRun(null);
+    if (!p) return;
+    const content = "已取消，未发起运行。";
+    pushLocal({ role: "assistant", content, at: Date.now() });
+    api.appendMessage(p.cid, "assistant", content).catch(() => undefined);
+    requestAnimationFrame(() => scrollBottom(true));
   };
 
   /* ---------- 键盘 ---------- */
@@ -855,6 +884,29 @@ export function ChatView() {
                   <StoredAssistant m={m} onCopy={copy} />
                 </div>
               )
+            )}
+
+            {pendingRun && (
+              <Card className="border-accent/30 bg-accent/5">
+                <CardBody className="space-y-2">
+                  <div className="text-[12px] text-muted">即将运行（语义匹配结果，确认后才调用模型）</div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-[13px]">{pendingRun.caseId}</span>
+                    <Chip tone="muted">预计 1 次模型调用</Chip>
+                  </div>
+                  {pendingRun.say && (
+                    <p className="text-[12.5px] leading-relaxed text-ink">{pendingRun.say}</p>
+                  )}
+                  <div className="flex gap-2">
+                    <Button variant="primary" size="sm" onClick={confirmPending}>
+                      <Check className="h-3.5 w-3.5" /> 确认运行
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={cancelPending}>
+                      取消
+                    </Button>
+                  </div>
+                </CardBody>
+              </Card>
             )}
 
             {liveJob && (

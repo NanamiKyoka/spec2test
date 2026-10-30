@@ -1,0 +1,140 @@
+{
+  "case_id": "6.7.1.4",
+  "message_tables": [
+    {
+      "table_ref": "6.7.1.4.3.3-1",
+      "message": "SIB19",
+      "step": null,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "SIB19-r17",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "SIB19-r17 ::= SEQUENCE {"
+        },
+        {
+          "name": "ntn-Config-r17",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "ntn-Config-r17 SEQUENCE {"
+        },
+        {
+          "name": "ephemerisInfo-r17",
+          "value": "Refer to the Second cell in TS 38.508-1[4] Table 6.3.4.1-1",
+          "comment": "",
+          "condition": "GSO",
+          "raw": "ephemerisInfo-r17"
+        },
+        {
+          "name": "ephemerisInfo-r17",
+          "value": "Refer to the Second cell in TS 38.508-1[4] Table 6.3.4.2-1",
+          "comment": "",
+          "condition": "NGSO",
+          "raw": "ephemerisInfo-r17"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "ephemerisInfo-r17",
+          "value": "Refer to the Second cell in TS 38.508-1[4] Table 6.3.4.1-1",
+          "comment": "",
+          "condition": "GSO",
+          "raw": "ephemerisInfo-r17"
+        }
+      ]
+    },
+    {
+      "table_ref": "6.7.1.4.3.3-2",
+      "message": "SIB19",
+      "step": null,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "SIB19-r17",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "SIB19-r17 ::= SEQUENCE {"
+        },
+        {
+          "name": "ntn-Config-r17",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "ntn-Config-r17 SEQUENCE {"
+        },
+        {
+          "name": "ephemerisInfo-r17",
+          "value": "Refer to the First cell in TS 38.508-1[4] Table 6.3.4.1-1",
+          "comment": "",
+          "condition": "GSO",
+          "raw": "ephemerisInfo-r17"
+        },
+        {
+          "name": "ephemerisInfo-r17",
+          "value": "Refer to the First cell in TS 38.508-1[4] Table 6.3.4.2-1",
+          "comment": "",
+          "condition": "NGSO",
+          "raw": "ephemerisInfo-r17"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "ephemerisInfo-r17",
+          "value": "Refer to the First cell in TS 38.508-1[4] Table 6.3.4.1-1",
+          "comment": "",
+          "condition": "GSO",
+          "raw": "ephemerisInfo-r17"
+        }
+      ]
+    },
+    {
+      "table_ref": "6.7.1.4.3.3-3",
+      "message": "SIB19",
+      "step": null,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "SIB19-r17",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "SIB19-r17 ::= SEQUENCE {"
+        },
+        {
+          "name": "ntn-Config-r17",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "ntn-Config-r17 SEQUENCE {"
+        },
+        {
+          "name": "ephemerisInfo-r17",
+          "value": "Refer to the Third cell in TS 38.508-1[4] Table 6.3.4.1-1",
+          "comment": "",
+          "condition": "GSO",
+          "raw": "ephemerisInfo-r17"
+        },
+        {
+          "name": "ephemerisInfo-r17",
+          "value": "Refer to the Third cell in TS 38.508-1[4] Table 6.3.4.2-1",
+          "comment": "",
+          "condition": "NGSO",
+          "raw": "ephemerisInfo-r17"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "ephemerisInfo-r17",
+          "value": "Refer to the Third cell in TS 38.508-1[4] Table 6.3.4.1-1",
+          "comment": "",
+          "condition": "GSO",
+          "raw": "ephemerisInfo-r17"
+        }
+      ]
+    }
+  ]
+}

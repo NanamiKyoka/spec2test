@@ -1,0 +1,390 @@
+{
+  "case_id": "6.7.1.12",
+  "message_tables": [
+    {
+      "table_ref": "6.7.1.12.3.3-1",
+      "message": "SystemInformationBlockType3",
+      "step": null,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "SystemInformationBlockType3",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "SystemInformationBlockType3 ::= SEQUENCE {"
+        },
+        {
+          "name": "cellReselectionServingFreqInfo",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "cellReselectionServingFreqInfo SEQUENCE {"
+        },
+        {
+          "name": "threshServingLow",
+          "value": "10",
+          "comment": "20 dB",
+          "condition": "",
+          "raw": "threshServingLow"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "threshServingLow",
+          "value": "10",
+          "comment": "20 dB",
+          "condition": "",
+          "raw": "threshServingLow"
+        }
+      ]
+    },
+    {
+      "table_ref": "6.7.1.12.3.3-2",
+      "message": "SystemInformationBlockType24",
+      "step": 7,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "SystemInformationBlockType24-r15",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "SystemInformationBlockType24-r15 ::= SEQUENCE {"
+        },
+        {
+          "name": "carrierFreqListNR-r15",
+          "value": "1 entry",
+          "comment": "",
+          "condition": "",
+          "raw": "carrierFreqListNR-r15 SEQUENCE (SIZE (1..maxFreq)) OF CarrierFreqNR-r15 {"
+        },
+        {
+          "name": "CarrierFreqNR-r15",
+          "value": "",
+          "comment": "entry 1",
+          "condition": "",
+          "raw": "CarrierFreqNR-r15[1] SEQUENCE {"
+        },
+        {
+          "name": "carrierFreq-r15",
+          "value": "Downlink NR ARFCN of SSB for NR Cell 1",
+          "comment": "",
+          "condition": "",
+          "raw": "carrierFreq-r15"
+        },
+        {
+          "name": "multiBandInfoList-r15",
+          "value": "1 entry",
+          "comment": "",
+          "condition": "",
+          "raw": "multiBandInfoList-r15 [n] SEQUENCE (SIZE (1..maxMultiBandsNR-r15)) OF FreqBandIndicatorNR-r15 {"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "carrierFreq-r15",
+          "value": "Downlink NR ARFCN of SSB for NR Cell 1",
+          "comment": "",
+          "condition": "",
+          "raw": "carrierFreq-r15"
+        }
+      ]
+    },
+    {
+      "table_ref": "6.7.1.12.3.3-3",
+      "message": "SystemInformationBlockType33",
+      "step": null,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "SystemInformationBlockType33-r18",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "SystemInformationBlockType33-r18 ::= SEQUENCE {"
+        },
+        {
+          "name": "neighSatelliteInfoListNR-r19",
+          "value": "1 entry",
+          "comment": "",
+          "condition": "",
+          "raw": "neighSatelliteInfoListNR-r19 SEQUENCE (SIZE(1..maxSat-r19)) OF NeighSatelliteInfoNR-r19 {"
+        },
+        {
+          "name": "NeighSatelliteInfoNR-r19",
+          "value": "",
+          "comment": "entry 1",
+          "condition": "",
+          "raw": "NeighSatelliteInfoNR-r19 [1] SEQUENCE {"
+        },
+        {
+          "name": "ephemerisInfo-r19",
+          "value": "Refer to the First cellin TS 38.508-1 [4] Table 6.3.4.1-1",
+          "comment": "",
+          "condition": "GSO",
+          "raw": "ephemerisInfo-r19"
+        },
+        {
+          "name": "nta-CommonParametersNR-r19",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "nta-CommonParametersNR-r19 SEQUENCE {"
+        },
+        {
+          "name": "nta-CommonNR-r19",
+          "value": "Refer to the First cellin TS 38.508-1 [4] Table 6.3.4.1-1",
+          "comment": "",
+          "condition": "GSO",
+          "raw": "nta-CommonNR-r19"
+        },
+        {
+          "name": "k-Mac-r19",
+          "value": "Not present",
+          "comment": "",
+          "condition": "GSO",
+          "raw": "k-Mac-r19"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "ephemerisInfo-r19",
+          "value": "Refer to the First cellin TS 38.508-1 [4] Table 6.3.4.1-1",
+          "comment": "",
+          "condition": "GSO",
+          "raw": "ephemerisInfo-r19"
+        },
+        {
+          "name": "nta-CommonNR-r19",
+          "value": "Refer to the First cellin TS 38.508-1 [4] Table 6.3.4.1-1",
+          "comment": "",
+          "condition": "GSO",
+          "raw": "nta-CommonNR-r19"
+        },
+        {
+          "name": "k-Mac-r19",
+          "value": "Not present",
+          "comment": "",
+          "condition": "GSO",
+          "raw": "k-Mac-r19"
+        }
+      ]
+    },
+    {
+      "table_ref": "6.7.1.12.3.3-4",
+      "message": "SIB2",
+      "step": null,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "SIB2",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "SIB2 ::= SEQUENCE {"
+        },
+        {
+          "name": "cellReselectionServingFreqInfo",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "cellReselectionServingFreqInfo SEQUENCE {"
+        },
+        {
+          "name": "threshServingLowP",
+          "value": "10",
+          "comment": "20 dB",
+          "condition": "",
+          "raw": "threshServingLowP"
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "3",
+          "comment": "",
+          "condition": "",
+          "raw": "cellReselectionPriority"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "threshServingLowP",
+          "value": "10",
+          "comment": "20 dB",
+          "condition": "",
+          "raw": "threshServingLowP"
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "3",
+          "comment": "",
+          "condition": "",
+          "raw": "cellReselectionPriority"
+        }
+      ]
+    },
+    {
+      "table_ref": "6.7.1.12.3.3-5",
+      "message": "SIB5",
+      "step": null,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "SIB5",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "SIB5 ::= SEQUENCE {"
+        },
+        {
+          "name": "carrierFreqListEUTRA",
+          "value": "1 entry",
+          "comment": "",
+          "condition": "",
+          "raw": "carrierFreqListEUTRA SEQUENCE (SIZE (1..maxEUTRA-Carrier)) OF CarrierFreqEUTRA {"
+        },
+        {
+          "name": "CarrierFreqEUTRA",
+          "value": "",
+          "comment": "entry 1",
+          "condition": "",
+          "raw": "CarrierFreqEUTRA[1] SEQUENCE {"
+        },
+        {
+          "name": "carrierFreq",
+          "value": "Downlink EUTRA ARFCN as E-UTRA Cell 1 used",
+          "comment": "",
+          "condition": "",
+          "raw": "carrierFreq"
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "5",
+          "comment": "",
+          "condition": "",
+          "raw": "cellReselectionPriority"
+        },
+        {
+          "name": "threshX-High",
+          "value": "10",
+          "comment": "20 dB",
+          "condition": "",
+          "raw": "threshX-High"
+        },
+        {
+          "name": "threshX-Low",
+          "value": "20",
+          "comment": "40 dB",
+          "condition": "",
+          "raw": "threshX-Low"
+        },
+        {
+          "name": "t-ReselectionEUTRA",
+          "value": "7",
+          "comment": "",
+          "condition": "",
+          "raw": "t-ReselectionEUTRA"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "carrierFreq",
+          "value": "Downlink EUTRA ARFCN as E-UTRA Cell 1 used",
+          "comment": "",
+          "condition": "",
+          "raw": "carrierFreq"
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "5",
+          "comment": "",
+          "condition": "",
+          "raw": "cellReselectionPriority"
+        },
+        {
+          "name": "threshX-High",
+          "value": "10",
+          "comment": "20 dB",
+          "condition": "",
+          "raw": "threshX-High"
+        },
+        {
+          "name": "threshX-Low",
+          "value": "20",
+          "comment": "40 dB",
+          "condition": "",
+          "raw": "threshX-Low"
+        },
+        {
+          "name": "t-ReselectionEUTRA",
+          "value": "7",
+          "comment": "",
+          "condition": "",
+          "raw": "t-ReselectionEUTRA"
+        }
+      ]
+    },
+    {
+      "table_ref": "6.7.1.12.3.3-6",
+      "message": "Paging",
+      "step": 8,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "Paging",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "Paging ::= SEQUENCE {"
+        },
+        {
+          "name": "systemInfoModification",
+          "value": "True",
+          "comment": "",
+          "condition": "",
+          "raw": "systemInfoModification"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "systemInfoModification",
+          "value": "True",
+          "comment": "",
+          "condition": "",
+          "raw": "systemInfoModification"
+        }
+      ]
+    },
+    {
+      "table_ref": "6.7.1.12.3.3-7",
+      "message": "SystemInformationBlockType1",
+      "step": 7,
+      "derivation_path": "",
+      "ies": [
+        {
+          "name": "SystemInformationBlockType1",
+          "value": "",
+          "comment": "",
+          "condition": "",
+          "raw": "SystemInformationBlockType1 ::= SEQUENCE {"
+        },
+        {
+          "name": "systemInfoValueTag",
+          "value": "1",
+          "comment": "Previous value is 0",
+          "condition": "",
+          "raw": "systemInfoValueTag"
+        }
+      ],
+      "leaf_ies": [
+        {
+          "name": "systemInfoValueTag",
+          "value": "1",
+          "comment": "Previous value is 0",
+          "condition": "",
+          "raw": "systemInfoValueTag"
+        }
+      ]
+    }
+  ]
+}

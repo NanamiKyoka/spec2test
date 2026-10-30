@@ -1,0 +1,253 @@
+{
+  "case_id": "6.7.1.4",
+  "steps": [
+    {
+      "st": 1,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 2,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 3,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 4,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "RRCSetupRequest",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 5,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "RRCSetup",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 6,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "RRCSetupComplete",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 7,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "RegistrationRequest",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 8,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "AuthenticationRequest",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 9,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "AuthenticationResponse",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 10,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SecurityModeCommand",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 11,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "SecurityModeComplete",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 12,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "RegistrationAccept",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 13,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "RegistrationComplete",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 14,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "RRCRelease",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 15,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 16,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 17,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "RRCSetupRequest",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 18,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "RRCSetup",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 19,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "RRCSetupComplete",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 20,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "RegistrationRequest",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 21,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "AuthenticationRequest",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 22,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "AuthenticationResponse",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 23,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SecurityModeCommand",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 24,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "SecurityModeComplete",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 25,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "RegistrationAccept",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 26,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "RegistrationComplete",
+      "tp_ref": [
+        1
+      ]
+    }
+  ],
+  "messages": [],
+  "_backend_model": "deepseek-v4.1-flash",
+  "_stage1": {
+    "stop": "end_turn",
+    "defects": [],
+    "repairs": 0
+  },
+  "_stage2": {
+    "candidates": [],
+    "calls": 0
+  },
+  "status": "abstained",
+  "reason": "inputs contain no message/SIB names",
+  "calls": 0
+}
