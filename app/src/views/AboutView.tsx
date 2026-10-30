@@ -8,6 +8,13 @@ const ROWS: [string, string][] = [
   ["局限", "切片仅 8 个 NTN 用例；L3 召回受输入信息量限制；消息序列（L2）不计分。"],
 ];
 
+const ROUTE: [string, string, string][] = [
+  ["1", "看一条通过的用例", "6.7.1.3"],
+  ["2", "看一条被拒收的用例", "6.7.1.10"],
+  ["3", "看一条弃权的用例", "6.7.1.12"],
+  ["4", "回数据页看逐例矩阵与失败筛选", ""],
+];
+
 export function AboutView() {
   return (
     <div className="h-full overflow-y-auto scroll-thin">
@@ -43,6 +50,30 @@ export function AboutView() {
               <li>暂无专利或软件著作权，真实性由可复现性担保：脚本与基准可重跑。</li>
               <li>消息序列（L2）不计分：全库仅 16 个交换，样本量不支持统计结论。</li>
             </ul>
+          </CardBody>
+        </Card>
+
+        <Card className="mt-4">
+          <CardHead>
+            <span className="text-[13px] font-medium">5 分钟评审路线</span>
+            <Chip tone="ok" className="ml-auto">推荐</Chip>
+          </CardHead>
+          <CardBody className="space-y-1.5">
+            {ROUTE.map(([n, label, caseId]) => (
+              <button
+                key={n}
+                onClick={() => {
+                  window.location.hash = caseId ? `#/case?case=${caseId}` : "#/data";
+                }}
+                className="flex w-full items-center gap-3 rounded-md border border-line px-3 py-2 text-left text-[13px] hover:border-accent/40 hover:bg-accent/5"
+              >
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/10 text-[11px] font-medium text-accent">
+                  {n}
+                </span>
+                <span className="flex-1">{label}</span>
+                <ArrowRight className="h-3.5 w-3.5 text-muted" />
+              </button>
+            ))}
           </CardBody>
         </Card>
 

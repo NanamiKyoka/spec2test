@@ -7,6 +7,7 @@ import { ChatView } from "./views/ChatView";
 import { ApiView } from "./views/ApiView";
 import { AboutView } from "./views/AboutView";
 import { CaseView } from "./views/CaseView";
+import { OfflineBanner } from "./components/OfflineBanner";
 
 type Theme = "system" | "light" | "dark";
 const VIEWS: ViewKey[] = ["data", "chat", "api", "about"];
@@ -37,6 +38,9 @@ export default function App() {
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem("s2t-theme") as Theme) || "system");
   const [health, setHealth] = useState<any>(null);
   const [offline, setOffline] = useState(false);
+  const [netOffline, setNetOffline] = useState(
+    () => typeof navigator !== "undefined" && !navigator.onLine
+  );
 
   useEffect(() => {
     const onHash = () => {
@@ -66,6 +70,17 @@ export default function App() {
     return () => window.clearInterval(id);
   }, []);
 
+  useEffect(() => {
+    const on = () => setNetOffline(false);
+    const off = () => setNetOffline(true);
+    window.addEventListener("online", on);
+    window.addEventListener("offline", off);
+    return () => {
+      window.removeEventListener("online", on);
+      window.removeEventListener("offline", off);
+    };
+  }, []);
+
   const nav = (v: ViewKey) => {
     if (v === "chat") {
       const id = localStorage.getItem("s2t-current-conv");
@@ -81,9 +96,9 @@ export default function App() {
         view={caseId ? "data" : view}
         onNav={nav}
         status={
-          <Chip tone={offline ? "bad" : "ok"}>
-            <span className={`h-1.5 w-1.5 rounded-full ${offline ? "dot-bad" : "dot-ok"}`} />
-            {offline ? "后端未连接" : `${health?.provider ?? "—"} · ${health?.model ?? "—"}`}
+          <Chip tone={netOffline ? "warn" : offline ? "bad" : "ok"}>
+            <span className={`h-1.5 w-1.5 rounded-full ${netOffline || offline ? "dot-bad" : "dot-ok"}`} />
+            {netOffline ? "离线" : offline ? "后端未连接" : `${health?.provider ?? "—"} · ${health?.model ?? "—"}`}
           </Chip>
         }
         right={
@@ -99,11 +114,7 @@ export default function App() {
         }
       />
 
-      {offline && (
-        <div className="border-b border-bad/30 bg-bad/10 px-4 py-1.5 text-[12px] text-bad">
-          无法连接后端（127.0.0.1:8000）。请先启动 <code className="font-mono">scripts/serve.py</code>。
-        </div>
-      )}
+      <OfflineBanner netOffline={netOffline} backendOffline={offline} />
 
       <main className="min-h-0 flex-1 overflow-hidden">
         {caseId ? (

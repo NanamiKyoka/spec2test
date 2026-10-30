@@ -145,10 +145,10 @@ export const api = {
 
   runs: (limit = 20) => call<RunRec[]>("/api/runs" + qs({ limit })),
 
-  chatGuide: (message: string) =>
+  chatGuide: (message: string, conversationId?: string) =>
     call<{ action: "run" | "reply"; case?: string; say: string; source?: string; model?: string }>(
       "/api/chat",
-      { method: "POST", body: JSON.stringify({ message }) }
+      { method: "POST", body: JSON.stringify({ message, conversation_id: conversationId }) }
     ),
 
   run: (caseId: string, instruction: string, conversationId?: string) =>
@@ -181,7 +181,54 @@ export async function pollJob(
   return last;
 }
 
-/** 发起并轮询任务。 */
+/** SSE 订阅任务；不可用/断开时返回 fallback，由调用方回退到 pollJob。 */
+export function streamJob(
+  jobId: string,
+  onUpdate: (job: Job) => void,
+  signal: AbortSignal
+): Promise<{ mode: "done" | "fallback"; job?: Job }> {
+  return new Promise((resolve) => {
+    if (typeof EventSource === "undefined") {
+      resolve({ mode: "fallback" });
+      return;
+    }
+    let es: EventSource | null = null;
+    let settled = false;
+    let last: Job | undefined;
+    const finish = (r: { mode: "done" | "fallback"; job?: Job }) => {
+      if (settled) return;
+      settled = true;
+      signal.removeEventListener("abort", onAbort);
+      es?.close();
+      resolve(r);
+    };
+    const onAbort = () => finish({ mode: "fallback", job: last });
+    if (signal.aborted) {
+      resolve({ mode: "fallback", job: last });
+      return;
+    }
+    signal.addEventListener("abort", onAbort);
+    try {
+      es = new EventSource(`/api/job/${jobId}/stream`);
+    } catch {
+      finish({ mode: "fallback" });
+      return;
+    }
+    es.onmessage = (ev) => {
+      try {
+        const job = JSON.parse(ev.data) as Job;
+        last = job;
+        onUpdate(job);
+        if (job.state === "done" || job.state === "failed") finish({ mode: "done", job });
+      } catch {
+        /* 忽略坏帧，继续等下一帧 */
+      }
+    };
+    es.onerror = () => finish({ mode: "fallback", job: last });
+  });
+}
+
+/** 发起任务：优先 SSE，失败回退轮询。 */
 export async function runJob(
   caseId: string,
   instruction: string,
@@ -192,5 +239,8 @@ export async function runJob(
 ): Promise<Job> {
   const { job_id } = await api.run(caseId, instruction, conversationId);
   onJobId?.(job_id);
-  return pollJob(job_id, onUpdate, signal);
+  const r = await streamJob(job_id, onUpdate, signal);
+  if (signal.aborted) return r.job ?? { state: "done", log: [] };
+  if (r.mode === "fallback") return pollJob(job_id, onUpdate, signal);
+  return r.job ?? { state: "done", log: [] };
 }

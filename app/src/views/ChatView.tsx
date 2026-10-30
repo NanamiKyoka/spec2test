@@ -17,6 +17,7 @@ import {
   ApiError,
   pollJob,
   runJob,
+  streamJob,
   type CaseItem,
   type Conversation,
   type ConversationDetail,
@@ -372,9 +373,15 @@ export function ChatView() {
         const first = await api.job(ref.jobId);
         if (first.state === "running" || first.state === "queued") {
           setLiveJob(first);
-          const job = await pollJob(ref.jobId, (j) => setLiveJob(j), ac.signal);
+          const r = await streamJob(ref.jobId, (j) => setLiveJob(j), ac.signal);
           if (ac.signal.aborted) return;
-          setLiveJob(job);
+          if (r.mode === "fallback") {
+            const job = await pollJob(ref.jobId, (j) => setLiveJob(j), ac.signal);
+            if (ac.signal.aborted) return;
+            setLiveJob(job);
+          } else {
+            setLiveJob(r.job ?? null);
+          }
         } else {
           setLiveJob(null);
         }
@@ -638,7 +645,7 @@ export function ChatView() {
         // 本地没有精确命中：交给 LLM 判断意图（语义匹配到用例，或自然地引导用户）
         let guide: { action: string; case?: string; say: string } | null = null;
         try {
-          guide = await api.chatGuide(t);
+          guide = await api.chatGuide(t, cid);
         } catch {
           guide = null;
         }

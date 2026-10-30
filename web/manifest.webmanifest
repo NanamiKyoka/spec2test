@@ -1,0 +1,10 @@
+{
+  "name": "Spec2Test · 测试意图编译器",
+  "short_name": "Spec2Test",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0d12",
+  "theme_color": "#4d6bfe"
+}

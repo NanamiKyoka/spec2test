@@ -23,6 +23,8 @@ import urllib.request
 import uuid
 import webbrowser
 
+import secret_store
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 SETTINGS = os.path.join(ROOT, "data", "settings.json")
@@ -115,6 +117,25 @@ def load_jobs():
         pass
 
 
+def get_job(jid):
+    """内存优先，未命中回读磁盘并缓存。"""
+    with _jobs_lock:
+        job = _jobs.get(jid)
+    if job:
+        return job
+    p = _job_path(jid)
+    if not os.path.exists(p):
+        return None
+    try:
+        with open(p, encoding="utf-8") as f:
+            job = json.load(f)
+        job["id"] = job.get("id") or jid
+        _jobs[jid] = job
+        return job
+    except Exception:
+        return None
+
+
 # ---------- settings ----------
 def load_settings():
     s = {
@@ -140,18 +161,25 @@ def load_settings():
     s["base_url"] = norm_base(s["base_url"])
     if not s["model"]:
         s["model"] = DEFAULTS[s["provider"]][1]
+    # 密钥不写明文：优先安全存储，其次环境变量，最后兼容旧 settings.json
+    s["api_key"] = (s.get("api_key") or "").strip() or secret_store.load_key()
     return s
 
 
 def save_settings(patch):
     cur = load_settings()
-    for k in ("provider", "base_url", "model", "temperature", "api_key"):
+    key = (patch.get("api_key") or "").strip()
+    for k in ("provider", "base_url", "model", "temperature"):
         if k in patch and patch[k] not in (None, ""):
             cur[k] = patch[k]
+    if key:
+        cur["_key_storage"] = secret_store.store_key(key)
+        cur["api_key"] = key
     cur["base_url"] = norm_base(cur.get("base_url", "")) or DEFAULTS[cur["provider"]][0]
     os.makedirs(os.path.dirname(SETTINGS), exist_ok=True)
+    disk = {k: v for k, v in cur.items() if k not in ("api_key", "_key_storage")}
     with open(SETTINGS, "w", encoding="utf-8") as f:
-        json.dump(cur, f, ensure_ascii=False, indent=2)
+        json.dump(disk, f, ensure_ascii=False, indent=2)
     try:
         os.chmod(SETTINGS, 0o600)
     except Exception:
@@ -263,6 +291,42 @@ def append_message(cid, role, content, **extra):
             conv["title"] = content[:20]
         _save_conv(conv)
         return msg
+
+
+def update_conv_state(cid, **kw):
+    """更新会话工作记忆：active_case / last_job_id / last_verdict 等。"""
+    with _conv_lock:
+        conv = _load_conv(cid)
+        if conv is None:
+            return
+        state = conv.setdefault("state", {})
+        state.update({k: v for k, v in kw.items() if v is not None})
+        _save_conv(conv)
+
+
+def conversation_context(cid, limit=8):
+    """给自然语言入口的工作记忆：最近 N 轮 + 会话状态（不读全文、不注入密钥）。"""
+    conv = _load_conv(cid)
+    if conv is None:
+        return {"messages": [], "state": {}}
+    msgs = (conv.get("messages") or [])[-limit:]
+    state = dict(conv.get("state") or {})
+    if not state:
+        active = last_job = last_verdict = None
+        for m in reversed(conv.get("messages") or []):
+            if not active and m.get("case"):
+                active = m["case"]
+            if not last_job and m.get("job_id"):
+                last_job = m["job_id"]
+            if not last_verdict and m.get("verdict"):
+                last_verdict = m["verdict"]
+        state = {"active_case": active, "last_job_id": last_job,
+                 "last_verdict": last_verdict}
+    return {
+        "messages": [{"role": m.get("role"), "content": (m.get("content") or "")[:300]}
+                     for m in msgs],
+        "state": state,
+    }
 
 
 # ---------- run history ----------
@@ -607,6 +671,8 @@ def _attach_job_result(conversation_id, jid, job):
                    job_id=jid, case=job.get("case"),
                    stages=job.get("stages") or [],
                    verdict=verdict, L1=L1, L3=L3, status=status)
+    update_conv_state(conversation_id, active_case=job.get("case"),
+                      last_job_id=jid, last_verdict=verdict)
 
 
 # ---------- http ----------
@@ -701,6 +767,41 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return json.loads(self.rfile.read(n).decode("utf-8"))
         except Exception:
             return {}
+
+    def _stream_job(self, jid):
+        """SSE：任务 updated 变化时推一帧，终态后关闭；15 分钟上限。"""
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Connection", "keep-alive")
+        self.send_header("X-Accel-Buffering", "no")
+        self.end_headers()
+        last_sig = None
+        last_ping = time.time()
+        deadline = time.time() + 900
+        try:
+            while time.time() < deadline:
+                job = get_job(jid)
+                if job is None:
+                    self.wfile.write(b'event: error\ndata: {"error":"job_not_found"}\n\n')
+                    self.wfile.flush()
+                    return
+                sig = job.get("updated") or job.get("finished") or 0
+                if sig != last_sig:
+                    payload = json.dumps(job, ensure_ascii=False)
+                    self.wfile.write(("data: %s\n\n" % payload).encode("utf-8"))
+                    self.wfile.flush()
+                    last_sig = sig
+                if job.get("state") in ("done", "failed"):
+                    return
+                now = time.time()
+                if now - last_ping >= 10:
+                    self.wfile.write(b": ping\n\n")
+                    self.wfile.flush()
+                    last_ping = now
+                time.sleep(0.4)
+        except (BrokenPipeError, ConnectionResetError):
+            return
 
     def do_GET(self):
         path = urllib.parse.urlparse(self.path).path
@@ -801,18 +902,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         m = re.match(r"^/api/case/([0-9.]+)$", path)
         if m:
             return self._json({"case": m.group(1), "stages": case_stages(m.group(1))})
+        m = re.match(r"^/api/job/([0-9a-f]+)/stream$", path)
+        if m:
+            return self._stream_job(m.group(1))
         m = re.match(r"^/api/job/([0-9a-f]+)$", path)
         if m:
             jid = m.group(1)
-            with _jobs_lock:
-                job = _jobs.get(jid)
-            if not job and os.path.exists(_job_path(jid)):
-                try:
-                    with open(_job_path(jid), encoding="utf-8") as f:
-                        job = json.load(f)
-                    _jobs[jid] = job
-                except Exception:
-                    job = None
+            job = get_job(jid)
             if not job:
                 return self._json({"error": "job_not_found"}, 404)
             return self._json(job)
@@ -888,11 +984,21 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 return self._json(fallback)
             cases = list_cases()
             system = build_guide_system(cases)
+            conv_id = (body.get("conversation_id") or "").strip() or None
+            mem = (conversation_context(conv_id)
+                   if conv_id and _load_conv(conv_id) else {"messages": [], "state": {}})
+            user_content = msg
+            if mem.get("messages") or mem.get("state"):
+                user_content = (msg + "\n\n[会话上下文]\n"
+                                + json.dumps(mem, ensure_ascii=False))
+                system += ("\n\n你会收到 [会话上下文]：最近对话与会话状态。"
+                           "用户可能用“它/这个用例/刚才那个”指代 state.active_case；"
+                           "若 action=run 未给出 case，可沿用 active_case。")
             probe = (
                 "import sys,json;"
                 "sys.path.insert(0,'tools');"
                 "import llm;"
-                "msg=" + json.dumps(msg, ensure_ascii=False) + ";"
+                "msg=" + json.dumps(user_content, ensure_ascii=False) + ";"
                 "system=" + json.dumps(system, ensure_ascii=False) + ";"
                 "txt,stop=llm.complete([{'role':'user','content':msg}],system=system,"
                 "temperature=0,max_tokens=400,timeout=60);"
@@ -915,7 +1021,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     return self._json(fallback)
                 parsed = payload.get("parsed") or {}
                 valid = {c.get("case") for c in cases}
-                cid = (parsed.get("case") or "").strip()
+                cid = (parsed.get("case") or "").strip() or \
+                      ((mem.get("state") or {}).get("active_case") or "")
                 say = (parsed.get("say") or "").strip()
                 if parsed.get("action") == "run":
                     if cid in valid:
@@ -1029,6 +1136,7 @@ def main():
         raise SystemExit("找不到 web/index.html，请在仓库根下运行")
 
     Handler.root = ROOT
+    secret_store.migrate()
     load_jobs()
     url = "http://%s:%d/web/" % (args.host, args.port)
     handler = functools.partial(Handler, directory=ROOT)

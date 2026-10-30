@@ -232,6 +232,8 @@ export function DataView() {
   const [cases, setCases] = useState<Record<string, string>>({});
   const [runs, setRuns] = useState<RunRec[] | null>(null);
   const [runsError, setRunsError] = useState<string | null>(null);
+  const [verdicts, setVerdicts] = useState<Record<string, "pass" | "reject" | "abstained" | "unknown">>({});
+  const [filter, setFilter] = useState<"all" | "pass" | "reject" | "abstained" | "unknown">("all");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -239,6 +241,29 @@ export function DataView() {
     (async () => {
       const [score, abs, gv] = await Promise.all([loadScore(), loadAbstain(), loadGoldValidate()]);
       if (!alive) return;
+      // 逐例判定：正式产物优先，缺判定时回退 out_rejected（与单例页口径一致）
+      const entries = await Promise.all(
+        (score.data || []).map(async (r) => {
+          const [out, rej] = await Promise.all([
+            fetchJson<{ status?: string; verdict?: string | null }>(
+              `/data/out/${r.case}.json`, `/results/out/${r.case}.json`
+            ),
+            fetchJson<{ verdict?: string | null }>(
+              `/data/out_rejected/${r.case}.json`, `/results/out_rejected/${r.case}.json`
+            ),
+          ]);
+          const o = out.data;
+          let v: "pass" | "reject" | "abstained" | "unknown" = "unknown";
+          if (o?.status === "abstained") v = "abstained";
+          else if (o?.verdict === "reject") v = "reject";
+          else if (o?.verdict === "pass") v = "pass";
+          else if (rej.data?.verdict === "reject") v = "reject";
+          else if (r.status === "abstained") v = "abstained";
+          return [r.case, v] as const;
+        })
+      );
+      if (!alive) return;
+      setVerdicts(Object.fromEntries(entries));
       setRows(score.data);
       setAbstain(abs.data);
       setGold(gv.data);
@@ -287,6 +312,15 @@ export function DataView() {
     const l1Ok = (rows || []).filter((r) => r.L1 === 1).length;
     return { n, goldTotal, abstained, vCases, vViol, l1Ok };
   }, [rows, gold]);
+
+  const counts = useMemo(() => {
+    const c = { all: 0, pass: 0, reject: 0, abstained: 0, unknown: 0 };
+    for (const r of rows || []) {
+      c.all++;
+      c[verdicts[r.case] ?? "unknown"]++;
+    }
+    return c;
+  }, [rows, verdicts]);
 
   if (loading) {
     return (
@@ -420,6 +454,29 @@ export function DataView() {
             <span className="ml-auto text-[12px] text-muted">点击行查看单例全链条</span>
           </CardHead>
           <CardBody className="p-0">
+            <div className="flex flex-wrap items-center gap-1.5 border-b border-line px-3 py-2">
+              {(
+                [
+                  ["all", "全部"],
+                  ["pass", "通过"],
+                  ["reject", "已拒收"],
+                  ["abstained", "弃权"],
+                  ["unknown", "未判定"],
+                ] as const
+              ).map(([k, label]) => (
+                <button
+                  key={k}
+                  onClick={() => setFilter(k)}
+                  className={`rounded-full border px-2.5 py-1 text-[11.5px] ${
+                    filter === k
+                      ? "border-accent bg-accent/10 text-accent"
+                      : "border-line text-muted hover:bg-surface"
+                  }`}
+                >
+                  {label} <span className="num">{counts[k]}</span>
+                </button>
+              ))}
+            </div>
             <Table>
               <thead>
                 <tr>
@@ -439,7 +496,9 @@ export function DataView() {
                 </tr>
               </thead>
               <tbody>
-                {(rows || []).map((r) => (
+                {(rows || [])
+                  .filter((r) => filter === "all" || (verdicts[r.case] ?? "unknown") === filter)
+                  .map((r) => (
                   <tr
                     key={r.case}
                     className="cursor-pointer hover:bg-surface"
@@ -451,13 +510,21 @@ export function DataView() {
                     <Td className="max-w-[380px] truncate" title={cases[r.case] || ""}>
                       {cases[r.case] || <span className="text-muted">（标题不可用）</span>}
                     </Td>
-                    <Td>{statusChip(r.status)}</Td>
+                    <Td>{statusChip(r.status, verdicts[r.case] ?? null)}</Td>
                     <Td className="num text-right">{r.calls ?? DASH}</Td>
                     <Td className="num text-right">{fmtNum(r.L1)}</Td>
                     <Td className="num text-right">{fmtL3(r.L3_recall)}</Td>
                     <Td className="num text-right">{r.gold_ie_n ?? DASH}</Td>
                   </tr>
                 ))}
+                {filter !== "all" &&
+                  !(rows || []).some((r) => (verdicts[r.case] ?? "unknown") === filter) && (
+                    <tr>
+                      <Td colSpan={7} className="py-6 text-center text-[12.5px] text-muted">
+                        没有符合条件的用例。
+                      </Td>
+                    </tr>
+                  )}
               </tbody>
             </Table>
           </CardBody>
