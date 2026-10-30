@@ -16,6 +16,17 @@ SYSTEM = (
 MAX_MSG = 12
 
 SIB_RE = re.compile(r"\bSIB\s?(\d{1,2})\b")
+SIBTYPE_RE = re.compile(r"\bSystemInformationBlockType\s?(\d{1,2})\b", re.I)
+FIELD_TOKEN = re.compile(r"[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*")
+FIELD_STOP = {"one", "two", "three", "four", "five", "six", "seven", "eight",
+              "true", "false", "not", "present", "barred", "none", "all",
+              "setup", "release", "add", "mod", "spare", "normal", "critical"}
+
+
+def _field_like(tok):
+    """过滤枚举/布尔字面量（如 one/two/true），只保留 ASN.1 字段样式的 token。"""
+    return (len(tok) >= 4 and (any(c.isupper() for c in tok) or "-" in tok)
+            and tok.lower() not in FIELD_STOP)
 RRC_RE = re.compile(
     r"\b(RRCSetupRequest|RRCSetupComplete|RRCSetup|RRCReconfigurationComplete|"
     r"RRCReconfiguration|RRCRelease|RRCReestablishment|RRCResumeRequest|RRCResumeComplete|"
@@ -30,6 +41,19 @@ def load_symbols(path):
     return d["messages"], set(d.get("global_identifiers", [])), set(d.get("all_defined_names", []))
 
 
+def _input_text(ctx):
+    return " ".join(str(ctx.get(k, "")) for k in
+                    ("test_purpose", "conformance_requirements", "pre_test_conditions"))
+
+
+def _explicit_positions(text):
+    """输入里显式出现的 SIB / RRC 消息名及首次位置。"""
+    found = [(m.start(), f"SIB{int(m.group(1))}") for m in SIB_RE.finditer(text)]
+    found += [(m.start(), f"SIB{int(m.group(1))}") for m in SIBTYPE_RE.finditer(text)]
+    found += [(m.start(), m.group(1)) for m in RRC_RE.finditer(text)]
+    return found
+
+
 def distinct_messages(steps):
     out, seen = [], set()
     for s in steps or []:
@@ -42,12 +66,8 @@ def distinct_messages(steps):
 
 def messages_from_inputs(ctx):
     """只读输入侧三个字段，抽取实际出现的消息/SIB 名，按首次出现排序去重。"""
-    text = " ".join(str(ctx.get(k, "")) for k in
-                    ("test_purpose", "conformance_requirements", "pre_test_conditions"))
-    found = [(m.start(), f"SIB{int(m.group(1))}") for m in SIB_RE.finditer(text)]
-    found += [(m.start(), m.group(1)) for m in RRC_RE.finditer(text)]
     out, seen = [], set()
-    for _, name in sorted(found):
+    for _, name in sorted(_explicit_positions(_input_text(ctx))):
         if name not in seen:
             seen.add(name)
             out.append(name)
@@ -55,9 +75,36 @@ def messages_from_inputs(ctx):
 
 
 def candidate_messages(ctx, symbols_path):
+    """候选消息：显式消息名优先，再用符号表把输入中出现的字段反查回所属消息。"""
     table, _, _ = load_symbols(symbols_path)
-    return [m for m in messages_from_inputs(ctx)
-            if m in table or re.fullmatch(r"SIB\d{1,2}", m)][:MAX_MSG]
+    text = _input_text(ctx)
+    explicit = messages_from_inputs(ctx)
+
+    field_index = {}
+    for msg, meta in table.items():
+        for f in meta.get("fields") or []:
+            field_index.setdefault(f, []).append(msg)
+
+    counts, first_pos = {}, {}
+    for m in FIELD_TOKEN.finditer(text):
+        if not _field_like(m.group(0)):
+            continue
+        for msg in field_index.get(m.group(0), [])[:3]:
+            counts[msg] = counts.get(msg, 0) + 1
+            if msg not in first_pos or m.start() < first_pos[msg]:
+                first_pos[msg] = m.start()
+    derived = sorted(counts, key=lambda m: (-counts[m], first_pos[m]))
+
+    out, seen = [], set()
+    for name in explicit + derived:
+        if name in seen:
+            continue
+        if name in table or re.fullmatch(r"SIB\d{1,2}", name):
+            seen.add(name)
+            out.append(name)
+        if len(out) >= MAX_MSG:
+            break
+    return out
 
 
 def generate_ie(ctx, steps, message, symbols_path):

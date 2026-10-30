@@ -28,6 +28,8 @@ def norm_ie(s):
 
 
 def l1_ok(ir):
+    """结构合法率：步骤可解析为 IR（主体/方向/消息字段类型合法）。
+    注意：空 message 仍算结构合法；消息质量看 step_msg_coverage。"""
     if not isinstance(ir, dict) or "steps" not in ir:
         return 0.0
     steps = ir.get("steps") or []
@@ -38,6 +40,15 @@ def l1_ok(ir):
                and s.get("direction") in ("S->U", "U->S")
                and isinstance(s.get("message"), str))
     return round(good / len(steps), 3)
+
+
+def step_msg_coverage(ir):
+    """步骤消息覆盖率：非空 message 的步骤 / 总步骤。"""
+    steps = (ir or {}).get("steps") or []
+    if not steps:
+        return 0.0
+    filled = sum(1 for s in steps if isinstance(s.get("message"), str) and s["message"].strip())
+    return round(filled / len(steps), 3)
 
 
 TOKEN = re.compile(r"[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*")
@@ -100,6 +111,7 @@ def main(gold_steps_dir, gold_ie_dir, out_dir, base_dir, report_dir):
         rows.append({
             "case": cid,
             "L1": l1_ok(gen),
+            "L1_msg_cov": step_msg_coverage(gen),
             "status": gen.get("status", "generated"),
             "calls": gen.get("calls", (gen.get("_stage2") or {}).get("calls")),
             "L3_recall": "abstained" if abstained else

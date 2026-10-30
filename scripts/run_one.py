@@ -18,6 +18,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 TOOLS = os.path.join(ROOT, "tools")
 sys.path.insert(0, TOOLS)
+from ir import parse_test_purpose as parse_tp
 
 SYMBOLS = os.path.join(ROOT, "data", "symbols", "rrc_symbols.json")
 BENCH = os.path.join(ROOT, "data", "benchmark", "v0")
@@ -184,7 +185,8 @@ def main():
             import gen_steps
             steps, meta = gen_steps.generate_steps(ctx)
             ie = gen_ie.generate_all(ctx, steps, sym_path)
-            ir = {"case_id": case, "steps": steps, "messages": ie["messages"],
+            ir = {"case_id": case, "tp": parse_tp(ctx.get("test_purpose", "")),
+                  "steps": steps, "messages": ie["messages"],
                   "status": ie["status"], "reason": ie.get("reason", ""),
                   "_stage2": {"candidates": ie.get("candidates", []), "calls": ie.get("calls", 0)}}
             emit("generate", "ok", "生成完成",

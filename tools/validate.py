@@ -97,19 +97,29 @@ def validate(ir, symbols):
             if not nm:
                 continue
             if nm not in fields and nm not in gids:
-                out.append({"rule": "R2", "path": f"messages[{mt.get('step')}].ies[{k}].name",
+                out.append({"rule": "R2", "path": f"messages[{msg}].ies[{k}].name",
                             "detail": f"unknown field {nm!r} for {msg}"})
 
-    # R3：每条 TP 必须被至少一个步骤的 tp 列引用（规范自身即如此标注）
+    # R3：每条 TP 必须被至少一个步骤引用（兼容 tp_ref 列表与旧 tp 字符串）
     refs = set()
     for s in ir.get("steps") or []:
-        v = str(s.get("tp") or "").strip()
-        if re.fullmatch(r"\d+", v):
-            refs.add(int(v))
-    for tp in ir.get("tp") or []:
-        if tp.get("index") not in refs:
-            out.append({"rule": "R3", "path": f"tp[{tp.get('index')}]",
-                        "detail": "该 TP 无任何步骤引用（tp 列未出现）"})
+        raw = s.get("tp_ref")
+        vals = raw if isinstance(raw, list) else [s.get("tp")]
+        for v in vals:
+            for part in re.split(r"[,/\s]+", str(v or "").strip()):
+                if part.isdigit():
+                    refs.add(int(part))
+    tps = ir.get("tp") or []
+    if isinstance(tps, list):
+        for tp in tps:
+            idx = tp.get("index") if isinstance(tp, dict) else tp
+            try:
+                idx = int(idx)
+            except (TypeError, ValueError):
+                continue
+            if idx not in refs:
+                out.append({"rule": "R3", "path": f"tp[{idx}]",
+                            "detail": "该 TP 无任何步骤引用（tp 列未出现）"})
     return out
 
 
