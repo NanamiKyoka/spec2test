@@ -88,3 +88,12 @@ def test_cache_file_payload(monkeypatch):
     assert data["stop_reason"] == "end_turn"
     assert data["model"] == "test-model"
     assert isinstance(data["created"], int)
+
+
+def test_different_max_tokens_is_different_key(monkeypatch):
+    calls = []
+    monkeypatch.setattr(llm, "_post", _fake(PROXY_OK, calls))
+    messages = [{"role": "user", "content": "max tokens"}]
+    llm.complete(messages, max_tokens=1)
+    llm.complete(messages, max_tokens=100)
+    assert len(calls) == 2

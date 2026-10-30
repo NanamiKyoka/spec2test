@@ -32,7 +32,7 @@ def l1_ok(ir):
     注意：空 message 仍算结构合法；消息质量看 step_msg_coverage。"""
     if not isinstance(ir, dict) or "steps" not in ir:
         return 0.0
-    steps = ir.get("steps") or []
+    steps = [s for s in (ir.get("steps") or []) if isinstance(s, dict)]
     if not steps:
         return 0.0
     good = sum(1 for s in steps
@@ -44,7 +44,7 @@ def l1_ok(ir):
 
 def step_msg_coverage(ir):
     """步骤消息覆盖率：非空 message 的步骤 / 总步骤。"""
-    steps = (ir or {}).get("steps") or []
+    steps = [s for s in ((ir or {}).get("steps") or []) if isinstance(s, dict)]
     if not steps:
         return 0.0
     filled = sum(1 for s in steps if isinstance(s.get("message"), str) and s["message"].strip())
@@ -97,12 +97,14 @@ def relaxed_recall(gen_names, gold_names):
 
 def struct_ies(struct):
     return [norm_ie(i.get("name", "")) for m in (struct.get("messages") or [])
-            for i in (m.get("ies") or [])]
+            if isinstance(m, dict)
+            for i in (m.get("ies") or []) if isinstance(i, dict)]
 
 
 def struct_ies_raw(struct):
     return [i.get("name", "") for m in (struct.get("messages") or [])
-            for i in (m.get("ies") or [])]
+            if isinstance(m, dict)
+            for i in (m.get("ies") or []) if isinstance(i, dict)]
 
 
 def gold_leaf_raw(gold_path):

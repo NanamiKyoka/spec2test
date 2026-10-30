@@ -27,6 +27,7 @@ import {
 } from "../lib/api";
 import { STAGE_LABEL, buildStages, conclusionOf, verdictOf, violationsOf } from "../lib/stages";
 import { Button, Card, CardBody, Chip, Empty, Term, useToast } from "../ui";
+import { CasePicker } from "../components/CasePicker";
 
 const GUIDE_KEY = "s2t-chat-guide";
 const CONV_KEY = "s2t-current-conv";
@@ -65,10 +66,9 @@ function syncConvLocation(id: string | null) {
 }
 
 const SAMPLES = [
-  { label: "6.7.1.3 生成测试步骤", text: "6.7.1.3 生成测试步骤" },
-  { label: "6.7.1.12 需要哪些信令内容", text: "6.7.1.12 需要哪些信令内容" },
-  { label: "禁用 GNSS 后允许注册吗", text: "禁用 GNSS 后允许注册吗" },
-  { label: "Sintrasearch 的重选条件是什么", text: "Sintrasearch 的重选条件是什么" },
+  { tone: "ok" as const, label: "通过", text: "6.7.1.3 生成测试步骤", note: "完整生成并通过校验" },
+  { tone: "bad" as const, label: "已拒收", text: "6.7.1.10 生成测试步骤", note: "字段非法，被校验器拒收" },
+  { tone: "muted" as const, label: "弃权", text: "6.7.1.12 需要哪些信令内容", note: "输入信息不足，不调用模型" },
 ];
 
 const CASE_RE = /\b6\.7\.1\.\d{1,2}\b/;
@@ -429,6 +429,25 @@ export function ChatView() {
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, [openConv, resumeLive]);
+
+  // 从数据页示例跳转过来时，预填输入框
+  React.useEffect(() => {
+    try {
+      const s = localStorage.getItem("s2t-suggest");
+      if (!s) return;
+      localStorage.removeItem("s2t-suggest");
+      setInput(s);
+      requestAnimationFrame(() => {
+        const el = inputRef.current;
+        if (!el) return;
+        el.focus();
+        el.style.height = "auto";
+        el.style.height = Math.min(el.scrollHeight, 200) + "px";
+      });
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   // 卸载时停止轮询：否则切走后仍在 setState，且白耗请求（后端任务不受影响）
   React.useEffect(() => {
@@ -864,15 +883,20 @@ export function ChatView() {
                   title="今天想测哪一段？输入用例编号或描述一个场景，系统会给出结论、六阶段与校验结果。"
                   icon={<Sparkles className="h-5 w-5" />}
                 />
-                <div className="flex flex-wrap justify-center gap-2">
+                <div className="grid gap-2 md:grid-cols-3">
                   {SAMPLES.map((s) => (
                     <button
                       key={s.text}
                       disabled={busy}
                       onClick={() => send(s.text)}
-                      className="rounded-full border border-line bg-canvas px-3 py-1.5 text-[12px] text-ink transition-colors hover:border-accent/40 hover:bg-accent/5 disabled:opacity-50"
+                      className="flex flex-col items-start gap-1 rounded-lg border border-line bg-canvas px-3 py-2 text-left transition-colors hover:border-accent/40 hover:bg-accent/5 disabled:opacity-50"
                     >
-                      {s.label}
+                      <div className="flex items-center gap-1.5">
+                        <Chip tone={s.tone}>{s.label}</Chip>
+                        <span className="num font-mono text-[11.5px] text-muted">{s.text.split(" ")[0]}</span>
+                      </div>
+                      <span className="text-[12.5px] text-ink">{s.text}</span>
+                      <span className="text-[11.5px] text-muted">{s.note}</span>
                     </button>
                   ))}
                 </div>
@@ -964,6 +988,15 @@ export function ChatView() {
         )}
 
         <div className="border-t border-line bg-canvas px-4 py-3">
+          <div className="mx-auto w-full max-w-[820px]">
+            <CasePicker
+              disabled={busy}
+              onPick={(id) => {
+                setInput(id);
+                requestAnimationFrame(() => inputRef.current?.focus());
+              }}
+            />
+          </div>
           <div className="mx-auto flex w-full max-w-[820px] items-end gap-2">
             <textarea
               ref={inputRef}

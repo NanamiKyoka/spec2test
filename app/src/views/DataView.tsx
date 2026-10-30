@@ -164,57 +164,91 @@ function MetricCard({
    首屏引导（三步，关闭后不再弹）
    ============================================================ */
 
-const GUIDE_KEY = "s2t-guide-data";
-
-function GuideCard({ onGoChat }: { onGoChat: () => void }) {
-  const [seen, setSeen] = useState(() => {
+function StartCard({ onGoChat }: { onGoChat: () => void }) {
+  const [open, setOpen] = useState(true);
+  const ask = (text: string) => {
     try {
-      return localStorage.getItem(GUIDE_KEY) === "1";
+      localStorage.setItem("s2t-suggest", text);
     } catch {
-      return false;
+      /* ignore */
     }
-  });
-  if (seen) return null;
-  const dismiss = () => {
-    try {
-      localStorage.setItem(GUIDE_KEY, "1");
-    } catch {
-      /* 忽略隐私模式限制 */
-    }
-    setSeen(true);
+    window.location.hash = "#/chat";
   };
+  const goCase = (id: string) => {
+    window.location.hash = `#/case?case=${id}`;
+  };
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="mt-4 flex w-full items-center gap-2 rounded-md border border-line bg-surface px-3 py-2 text-left text-[12px] text-muted hover:bg-canvas"
+      >
+        <BookOpenCheck className="h-4 w-4 text-accent" />
+        三步看懂这个产品（展开）
+      </button>
+    );
+  }
   return (
     <Card className="mt-4 border-accent/30 bg-accent/[0.04]">
       <CardBody className="space-y-2.5">
         <div className="flex items-center gap-2">
           <BookOpenCheck className="h-4 w-4 text-accent" />
           <span className="text-[13px] font-medium">三步看懂这个产品</span>
-          <Button variant="subtle" size="sm" className="ml-auto" onClick={dismiss}>
-            知道了
+          <Button variant="subtle" size="sm" className="ml-auto" onClick={() => setOpen(false)}>
+            收起
           </Button>
         </div>
-        <ol className="grid gap-2 text-[12.5px] leading-relaxed md:grid-cols-3">
-          <li>
-            <b>1. 这是什么</b>
-            <div className="text-muted">
+        <div className="grid gap-3 md:grid-cols-3">
+          <div>
+            <b className="text-[12.5px]">1. 这是什么</b>
+            <div className="mt-1 text-[12px] leading-relaxed text-muted">
               把 3GPP 规范条款编译成可执行测试意图，再用
-              <Term term="确定性校验器" desc="不调用模型，只用符号表与规则判定：消息是否存在、字段是否合法、测试目的是否被步骤覆盖。" />
+              <Term
+                term="确定性校验器"
+                desc="不调用模型，只用符号表与规则判定：消息是否存在、字段是否合法、测试目的是否被步骤覆盖。"
+              />
               判对错。
             </div>
-          </li>
-          <li>
-            <b>2. 怎么看结果</b>
-            <div className="text-muted">先看结论（通过/拒收/弃权），再看六阶段，最后看校验违规。</div>
-          </li>
-          <li>
-            <b>3. 从哪开始</b>
-            <div className="mt-1">
-              <Button variant="primary" size="sm" onClick={onGoChat}>
-                <MessageSquare className="h-3.5 w-3.5" /> 开始对话
-              </Button>
+          </div>
+          <div>
+            <b className="text-[12.5px]">2. 能问什么</b>
+            <div className="mt-1 flex flex-col gap-1">
+              {[
+                ["通过", "6.7.1.3 生成测试步骤"],
+                ["拒收", "6.7.1.10 生成测试步骤"],
+                ["弃权", "6.7.1.12 需要哪些信令内容"],
+              ].map(([label, text]) => (
+                <button
+                  key={text}
+                  onClick={() => ask(text)}
+                  className="text-left text-[12px] text-accent hover:underline"
+                >
+                  {label}：{text}
+                </button>
+              ))}
             </div>
-          </li>
-        </ol>
+          </div>
+          <div>
+            <b className="text-[12.5px]">3. 结果怎么读</b>
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              <button onClick={() => goCase("6.7.1.3")} title="看一条通过的用例">
+                <Chip tone="ok">通过</Chip>
+              </button>
+              <button onClick={() => goCase("6.7.1.10")} title="看一条被拒收的用例">
+                <Chip tone="bad">已拒收</Chip>
+              </button>
+              <button onClick={() => goCase("6.7.1.12")} title="看一条弃权的用例">
+                <Chip tone="muted">弃权</Chip>
+              </button>
+            </div>
+            <div className="mt-1 text-[11.5px] text-muted">点颜色看对应单例；结论以校验器为准。</div>
+          </div>
+        </div>
+        <div>
+          <Button variant="primary" size="sm" onClick={onGoChat}>
+            <MessageSquare className="h-3.5 w-3.5" /> 开始对话
+          </Button>
+        </div>
       </CardBody>
     </Card>
   );
@@ -377,7 +411,7 @@ export function DataView() {
           </p>
         )}
 
-        <GuideCard onGoChat={() => (window.location.hash = "#/chat")} />
+        <StartCard onGoChat={() => (window.location.hash = "#/chat")} />
 
         {/* 指标 */}
         <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">

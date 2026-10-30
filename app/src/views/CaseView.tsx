@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ChevronDown, Info, MessageSquare, ShieldAlert, ShieldCheck, XCircle } from "lucide-react";
-import { Button, Card, CardBody, CardHead, Chip, Empty, Modal, Table, Td, Term, Th } from "../ui";
+import { Button, Card, CardBody, CardHead, Chip, Modal, Table, Td, Term, Th } from "../ui";
+import { AsyncState } from "../components/AsyncState";
 import {
   goldForMessage,
   loadSymbols,
@@ -311,7 +312,11 @@ export function CaseView({ caseId }: { caseId: string }) {
     : "";
 
   if (loading) {
-    return <div className="flex h-full items-center justify-center text-[13px] text-muted">正在读取用例 {caseId}…</div>;
+    return (
+      <div className="mx-auto max-w-[1100px] px-6 py-6">
+        <AsyncState state="loading" title={`正在读取用例 ${caseId}…`} />
+      </div>
+    );
   }
 
   if (ie === null && out === null && !report) {
@@ -321,16 +326,23 @@ export function CaseView({ caseId }: { caseId: string }) {
           <Button variant="subtle" onClick={() => (window.location.hash = "#/data")}>
             <ArrowLeft className="h-4 w-4" /> 返回数据面板
           </Button>
-          <Card className="mt-4">
-            <Empty
-              title={`快照中没有 ${caseId} 的产物数据。运行 scripts/repro.sh 生成后再查看。`}
+          <div className="mt-4">
+            <AsyncState
+              state="empty"
+              title={`快照中没有 ${caseId} 的产物数据`}
+              message="运行 scripts/repro.sh 生成后刷新，或去对话页重新跑一次。"
               action={
-                <Button variant="primary" onClick={() => (window.location.hash = "#/data")}>
-                  返回数据面板
-                </Button>
+                <>
+                  <Button variant="primary" onClick={() => (window.location.hash = "#/data")}>
+                    返回数据面板
+                  </Button>
+                  <Button variant="subtle" onClick={() => (window.location.hash = "#/chat")}>
+                    去对话页重跑
+                  </Button>
+                </>
               }
             />
-          </Card>
+          </div>
         </div>
       </div>
     );

@@ -13,6 +13,7 @@ import {
 } from "../ui";
 import { api, ApiError, type ModelsResp, type Settings } from "../lib/api";
 import { cn } from "../lib/cn";
+import { AsyncState } from "../components/AsyncState";
 
 type Provider = "proxy" | "openai" | "anthropic";
 
@@ -172,20 +173,42 @@ export function ApiView() {
   const keySet = !!settings?.key_set;
   const needsKey = NO_KEY_PROVIDERS.includes(provider);
 
-  return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-6">
+  const header = (
+    <>
       <h1 className="text-[20px] font-semibold tracking-tight">API 管理</h1>
       <p className="mt-1 text-[13px] leading-relaxed text-muted">
         选择模型通道并配置凭据。凭据只保存在本机{" "}
         <code className="rounded bg-surface px-1 py-0.5 font-mono text-[12px]">data/settings.json</code>
         （已被 gitignore），页面只显示掩码，不会回传明文。
       </p>
+    </>
+  );
 
-      {loadError && (
-        <div className="mt-4 rounded-md border border-bad/40 bg-bad/5 px-3 py-2 text-[12px] text-bad">
-          读取配置失败：{loadError}
+  if (!settings && !loadError) {
+    return (
+      <div className="mx-auto w-full max-w-3xl px-4 py-6">
+        {header}
+        <div className="mt-4">
+          <AsyncState state="loading" title="正在读取配置…" />
         </div>
-      )}
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="mx-auto w-full max-w-3xl px-4 py-6">
+        {header}
+        <div className="mt-4">
+          <AsyncState state="error" title="读取配置失败" message={loadError} onRetry={load} />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto w-full max-w-3xl px-4 py-6">
+      {header}
 
       {/* 三种通道怎么选 */}
       <Card className="mt-4">

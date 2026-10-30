@@ -133,7 +133,13 @@ export function Term({ term, desc }: { term: string; desc: string }) {
   return (
     <Tooltip.Root delayDuration={150}>
       <Tooltip.Trigger asChild>
-        <span className="inline-flex cursor-help items-center gap-0.5 border-b border-dotted border-muted text-inherit">
+        <span
+          tabIndex={0}
+          role="button"
+          aria-label={`${term}：${desc}`}
+          onClick={(e) => e.currentTarget.focus()}
+          className="inline-flex cursor-help items-center gap-0.5 rounded-sm border-b border-dotted border-muted text-inherit focus:outline-none focus:ring-2 focus:ring-accent/30"
+        >
           {term}
           <HelpCircle className="h-3 w-3 opacity-60" />
         </span>

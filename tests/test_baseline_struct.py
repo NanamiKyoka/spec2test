@@ -82,3 +82,14 @@ def test_prose_only_falls_back(tmp_path):
     assert row["L1_base"] == 1.0
     assert row["L3_base"] is None
     assert row["L1_base_cov"] is None
+
+
+def test_malformed_baseline_does_not_crash():
+    struct = {
+        "steps": ["bad", {"actor": "SS", "direction": "S->U", "message": "SIB1"}],
+        "messages": ["bad", {"message": "SIB1", "ies": ["x", {"name": "cellBarredNTN-r17"}]}],
+    }
+    m = score.baseline_metrics(struct, [score.norm_ie("cellBarredNTN-r17")])
+    assert m["L1_base"] == 1.0
+    assert m["L1_base_cov"] == 1.0
+    assert m["L3_base"] == 1.0

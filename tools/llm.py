@@ -39,11 +39,13 @@ CACHE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file_
                          "data", "cache", "llm")
 
 
-def _cache_key(temperature, system, messages):
+def _cache_key(temperature, max_tokens, system, messages):
     payload = {
         "provider": PROVIDER,
+        "base": BASE,
         "model": MODEL,
         "temperature": temperature,
+        "max_tokens": max_tokens,
         "system": system or "",
         "messages": messages,
     }
@@ -64,7 +66,7 @@ def _cache_write(key, text, stop_reason):
     try:
         os.makedirs(CACHE_DIR, exist_ok=True)
         path = os.path.join(CACHE_DIR, key + ".json")
-        tmp = path + ".tmp"
+        tmp = "%s.%s.tmp" % (path, uuid.uuid4().hex[:8])
         with open(tmp, "w", encoding="utf-8") as f:
             json.dump({"text": text, "stop_reason": stop_reason,
                        "model": LAST_MODEL, "created": int(time.time())},
@@ -105,11 +107,11 @@ def complete(messages, temperature=None, max_tokens=None, system=None, timeout=3
     temperature = TEMPERATURE if temperature is None else temperature
     max_tokens = MAX_TOKENS if max_tokens is None else max_tokens
     no_cache = os.environ.get("LLM_NO_CACHE") == "1"
-    cache_key = None if no_cache else _cache_key(temperature, system, messages)
+    cache_key = None if no_cache else _cache_key(temperature, max_tokens, system, messages)
     if cache_key:
         hit = _cache_read(cache_key)
         if hit is not None:
-            LAST_MODEL = hit.get("model") or LAST_MODEL
+            LAST_MODEL = hit.get("model") or MODEL
             return hit.get("text") or "", hit.get("stop_reason")
 
     if PROVIDER in ("proxy", "anthropic"):

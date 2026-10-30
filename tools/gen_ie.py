@@ -28,7 +28,8 @@ FIELD_STOP = {"one", "two", "three", "four", "five", "six", "seven", "eight",
 
 def _field_like(tok):
     """过滤枚举/布尔字面量（如 one/two/true），只保留 ASN.1 字段样式的 token。"""
-    return (len(tok) >= 4 and (any(c.isupper() for c in tok) or "-" in tok)
+    return (len(tok) >= 4
+            and (any(c.isupper() for c in tok) or "-" in tok or any(c.isdigit() for c in tok))
             and tok.lower() not in FIELD_STOP)
 RRC_RE = re.compile(
     r"\b(RRCSetupRequest|RRCSetupComplete|RRCSetup|RRCReconfigurationComplete|"
@@ -89,10 +90,15 @@ def candidate_messages(ctx, symbols_path):
             field_index.setdefault(f, []).append(msg)
 
     counts, first_pos = {}, {}
+    seen_pairs = set()
     for m in FIELD_TOKEN.finditer(text):
-        if not _field_like(m.group(0)):
+        token = m.group(0)
+        if not _field_like(token):
             continue
-        for msg in field_index.get(m.group(0), [])[:3]:
+        for msg in field_index.get(token, [])[:3]:
+            if (token, msg) in seen_pairs:
+                continue
+            seen_pairs.add((token, msg))
             counts[msg] = counts.get(msg, 0) + 1
             if msg not in first_pos or m.start() < first_pos[msg]:
                 first_pos[msg] = m.start()
@@ -168,7 +174,10 @@ def generate_all(ctx, steps, symbols_path, repairs=1):
                         if (m.get("message") or "") == msg), None)
             if idx is None:
                 continue
-            msgs[idx] = generate_ie(ctx, steps, msg, symbols_path, feedback=feedback)
+            repaired = generate_ie(ctx, steps, msg, symbols_path, feedback=feedback)
+            # 修复解析失败（空 ies）时保留原消息，避免越修越空
+            if repaired.get("ies") or not (msgs[idx].get("ies") or []):
+                msgs[idx] = repaired
             calls += 1
             used += 1
     return {"status": "generated", "candidates": cand, "messages": msgs,

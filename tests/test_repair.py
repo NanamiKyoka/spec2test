@@ -59,3 +59,15 @@ def test_repair_stops_after_one_round_even_if_still_bad(tmp_path, monkeypatch):
     assert res["calls"] == 2
     assert len(calls) == 2                       # 只重试一次，不无限循环
     assert res["messages"][0]["ies"][0]["name"] == "badField"
+
+
+def test_repair_parse_failure_keeps_old_message(tmp_path, monkeypatch):
+    def gen(ctx, steps, msg, path, feedback=None):
+        if feedback:
+            return {"message": msg, "ies": []}
+        return {"message": msg, "ies": [{"name": "badField"}]}
+
+    sym = _patched(monkeypatch, tmp_path, gen)
+    res = gen_ie.generate_all({}, [], sym, repairs=1)
+    assert res["repairs"] == 1
+    assert res["messages"][0]["ies"][0]["name"] == "badField"
