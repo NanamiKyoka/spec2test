@@ -592,7 +592,15 @@ export function ChatView() {
       })();
     } catch (e) {
       if (ac.signal.aborted) return;
-      setError(e instanceof ApiError ? e.message : (e as Error).message);
+      const friendly =
+        e instanceof ApiError && e.code === "run_in_progress"
+          ? "这个会话已有任务在运行，请等它结束或先停止。"
+          : e instanceof ApiError && e.code === "too_many_runs"
+            ? "同时运行的任务太多，请稍后再试。"
+            : e instanceof ApiError
+              ? e.message
+              : (e as Error).message;
+      setError(friendly);
     } finally {
       // 切页导致的中止保留 job 锚点，回来后可恢复；正常结束才清
       if (!ac.signal.aborted) clearLiveJob();

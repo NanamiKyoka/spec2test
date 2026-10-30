@@ -117,7 +117,7 @@ export function SettingsDialog({
           <div className="space-y-3">
             <div>
               <label className={label}>通道</label>
-              <select className={field} value={s.provider} onChange={(e) => changeProvider(e.target.value)}>
+              <select aria-label="通道" className={field} value={s.provider} onChange={(e) => changeProvider(e.target.value)}>
                 <option value="proxy">proxy（本地代理，无需 Key）</option>
                 <option value="openai">openai（OpenAI 兼容）</option>
                 <option value="anthropic">anthropic（官方）</option>
@@ -125,16 +125,17 @@ export function SettingsDialog({
             </div>
             <div>
               <label className={label}>Base URL</label>
-              <input className={field} value={s.base_url} onChange={(e) => update({ base_url: e.target.value })} />
+              <input aria-label="Base URL" className={field} value={s.base_url} onChange={(e) => update({ base_url: e.target.value })} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={label}>模型</label>
-                <input className={field} value={s.model} onChange={(e) => update({ model: e.target.value })} />
+                <input aria-label="模型" className={field} value={s.model} onChange={(e) => update({ model: e.target.value })} />
               </div>
               <div>
                 <label className={label}>温度</label>
                 <input
+                  aria-label="温度"
                   type="number"
                   min={0}
                   max={1}
@@ -153,6 +154,7 @@ export function SettingsDialog({
                 </span>
               </label>
               <input
+                aria-label="API Key"
                 type="password"
                 autoComplete="off"
                 className={field}

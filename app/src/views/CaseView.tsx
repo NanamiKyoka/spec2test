@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ChevronDown, Info, MessageSquare, ShieldAlert, ShieldCheck, XCircle } from "lucide-react";
 import { Button, Card, CardBody, CardHead, Chip, Empty, Modal, Table, Td, Term, Th } from "../ui";
 import {
@@ -193,6 +193,16 @@ export function CaseView({ caseId }: { caseId: string }) {
   const [explain, setExplain] = useState<ExplainFile | null>(null);
   const [sym, setSym] = useState<SymbolTable | null>(null);
   const [picked, setPicked] = useState<{ msg: string; ie: IeField } | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const hadPicked = useRef(false);
+  useEffect(() => {
+    if (picked) {
+      hadPicked.current = true;
+    } else if (hadPicked.current) {
+      hadPicked.current = false;
+      triggerRef.current?.focus();
+    }
+  }, [picked]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -509,7 +519,10 @@ export function CaseView({ caseId }: { caseId: string }) {
                         {(m.ies || []).map((f, k) => (
                           <li key={k}>
                             <button
-                              onClick={() => setPicked({ msg: m.message || "", ie: f })}
+                              onClick={(e) => {
+                                triggerRef.current = e.currentTarget;
+                                setPicked({ msg: m.message || "", ie: f });
+                              }}
                               title="查看该字段的证据"
                               className="group flex w-full items-center justify-between gap-2 rounded px-1 py-0.5 text-left font-mono text-[11.5px] hover:bg-surface"
                             >

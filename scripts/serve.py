@@ -30,6 +30,7 @@ CONV_DIR = os.path.join(ROOT, "data", "conversations")
 RUNS_FILE = os.path.join(ROOT, "data", "runs.jsonl")
 JOBS_DIR = os.path.join(ROOT, "data", "jobs")
 JOBS_KEEP = 300
+MAX_CONCURRENT_RUNS = 4
 RUN_ONE = os.path.join(HERE, "run_one.py")
 
 CATALOG_PROXY = ["claude-sonnet-4-6[1M]", "claude-opus-4-8[1M]", "claude-haiku-4-5"]
@@ -58,6 +59,7 @@ def norm_base(url):
 
 _jobs = {}
 _jobs_lock = threading.Lock()
+_conv_lock = threading.RLock()
 
 
 def _job_path(jid):
@@ -207,13 +209,16 @@ def _load_conv(cid):
 def _save_conv(conv):
     os.makedirs(CONV_DIR, exist_ok=True)
     conv["updated"] = int(time.time())
-    with open(_conv_path(conv["id"]), "w", encoding="utf-8") as f:
+    p = _conv_path(conv["id"])
+    tmp = p + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
         json.dump(conv, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, p)
 
 
 def new_conv(title=None):
     cid = uuid.uuid4().hex[:8]
-    conv = {"id": cid, "title": (title or "新对话")[:40],
+    conv = {"id": cid, "schema": 1, "title": (title or "新对话")[:40],
             "created": int(time.time()), "updated": int(time.time()), "messages": []}
     _save_conv(conv)
     return conv
@@ -243,19 +248,20 @@ def list_convs():
 
 
 def append_message(cid, role, content, **extra):
-    conv = _load_conv(cid)
-    if conv is None:
-        return None
-    first_user = not any(m.get("role") == "user" for m in conv["messages"])
-    msg = {"role": role, "content": content, "at": int(time.time())}
-    for k, v in extra.items():
-        if v is not None or k in NULLABLE_FIELDS:   # L1/L3/status 允许显式 null
-            msg[k] = v
-    conv["messages"].append(msg)
-    if role == "user" and first_user and conv.get("title") in ("", "新对话"):
-        conv["title"] = content[:20]
-    _save_conv(conv)
-    return msg
+    with _conv_lock:
+        conv = _load_conv(cid)
+        if conv is None:
+            return None
+        first_user = not any(m.get("role") == "user" for m in conv["messages"])
+        msg = {"role": role, "content": content, "at": int(time.time())}
+        for k, v in extra.items():
+            if v is not None or k in NULLABLE_FIELDS:   # L1/L3/status 允许显式 null
+                msg[k] = v
+        conv["messages"].append(msg)
+        if role == "user" and first_user and conv.get("title") in ("", "新对话"):
+            conv["title"] = content[:20]
+        _save_conv(conv)
+        return msg
 
 
 # ---------- run history ----------
@@ -459,6 +465,7 @@ def start_job(cid, dry_run=False, conversation_id=None):
     with _jobs_lock:
         _jobs[jid] = {"id": jid, "state": "queued", "stage": "", "log": [], "result": None,
                       "created": time.time(), "updated": time.time(), "case": cid,
+                      "conversation_id": conversation_id,
                       "verdict": None, "stages": [], "started": None, "finished": None}
     save_job(_jobs[jid])
     s = load_settings()
@@ -733,12 +740,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return self._json(job)
         super().do_GET()
 
-    def do_POST(self):
+    def _origin_ok(self):
         orig = self.headers.get("Origin")
-        if orig:
-            port = self.server.server_address[1]
-            if orig not in ("http://127.0.0.1:%d" % port, "http://localhost:%d" % port):
-                return self._json({"error": "bad_origin"}, 403)
+        if not orig:
+            return True
+        port = self.server.server_address[1]
+        return orig in ("http://127.0.0.1:%d" % port, "http://localhost:%d" % port)
+
+    def do_POST(self):
+        if not self._origin_ok():
+            return self._json({"error": "bad_origin"}, 403)
         path = urllib.parse.urlparse(self.path).path
         if path == "/api/settings":
             body = self._body()
@@ -872,6 +883,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             conv_id = (body.get("conversation_id") or "").strip() or None
             if conv_id and _load_conv(conv_id) is None:
                 return self._json({"error": "conversation_not_found"}, 404)
+            with _jobs_lock:
+                active = [j for j in _jobs.values()
+                          if j.get("state") in ("queued", "running")]
+                if conv_id and any(j.get("conversation_id") == conv_id for j in active):
+                    return self._json({"error": "run_in_progress"}, 409)
+                if len(active) >= MAX_CONCURRENT_RUNS:
+                    return self._json({"error": "too_many_runs"}, 429)
             instruction = (body.get("instruction") or "").strip()
             if conv_id and instruction:
                 append_message(conv_id, "user", instruction)
@@ -879,33 +897,39 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         return self._json({"error": "not_found"}, 404)
 
     def do_PATCH(self):
+        if not self._origin_ok():
+            return self._json({"error": "bad_origin"}, 403)
         path = urllib.parse.urlparse(self.path).path
         m = re.match(r"^/api/conversations/([0-9a-f]{8})$", path)
         if not m:
             return self._json({"error": "not_found"}, 404)
         body = self._body()
         title = (body.get("title") or "").strip()
-        conv = _load_conv(m.group(1))
-        if conv is None:
-            return self._json({"error": "conversation_not_found"}, 404)
-        if title:
-            conv["title"] = title[:40]
-            _save_conv(conv)
+        with _conv_lock:
+            conv = _load_conv(m.group(1))
+            if conv is None:
+                return self._json({"error": "conversation_not_found"}, 404)
+            if title:
+                conv["title"] = title[:40]
+                _save_conv(conv)
         return self._json({"ok": True})
 
     def do_DELETE(self):
+        if not self._origin_ok():
+            return self._json({"error": "bad_origin"}, 403)
         path = urllib.parse.urlparse(self.path).path
         m = re.match(r"^/api/conversations/([0-9a-f]{8})$", path)
         if not m:
             return self._json({"error": "not_found"}, 404)
         cid = m.group(1)
         p = _conv_path(cid)
-        if not os.path.exists(p):
-            return self._json({"error": "conversation_not_found"}, 404)
-        try:
-            os.remove(p)
-        except Exception as e:
-            return self._json({"error": str(e)}, 500)
+        with _conv_lock:
+            if not os.path.exists(p):
+                return self._json({"error": "conversation_not_found"}, 404)
+            try:
+                os.remove(p)
+            except Exception as e:
+                return self._json({"error": str(e)}, 500)
         return self._json({"ok": True})
 
     def log_message(self, fmt, *args):
