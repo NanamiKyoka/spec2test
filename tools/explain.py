@@ -39,6 +39,9 @@ SECTION_TITLES = {
 SYSTEM = """你是 Spec2Test 的解读员。只依据用户给出的 JSON 证据写解读，不得补充证据之外的规范事实。
 面向没有 6G 背景的评委，用简体中文，每段不超过 120 字。
 判定必须与 numbers.verdict 一致：unknown 就是"未判定"，abstained 是"弃权"，绝不能把二者说成"通过"。
+口径：
+- pass/reject 且 gold=0 时，L3=null 表示该用例没有可计分的 gold 字段（L3 不适用），不得写成"弃权不计分"。
+- abstained 时必须明确"未调用模型、未生成信令内容"；若证据里仍有 steps，说明它只是结构解析产物，不是生成的信令流程。
 只输出一个 JSON 对象，不要 Markdown，不要额外解释。"""
 
 

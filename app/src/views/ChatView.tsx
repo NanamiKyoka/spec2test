@@ -32,6 +32,7 @@ import {
 import { STAGE_LABEL, buildStages, conclusionOf, verdictOf, violationsOf } from "../lib/stages";
 import { Button, Card, CardBody, Chip, Empty, Term, useToast } from "../ui";
 import { CasePicker } from "../components/CasePicker";
+import { plainOf } from "../lib/plain";
 
 const GUIDE_KEY = "s2t-chat-guide";
 const CONV_KEY = "s2t-current-conv";
@@ -203,6 +204,7 @@ function ExplainBlock({ data }: { data: ExplainData }) {
 function AssistantBlock({
   content,
   explain,
+  caseId,
   verdict,
   stageRows,
   violations,
@@ -213,6 +215,7 @@ function AssistantBlock({
 }: {
   content?: string;
   explain?: ExplainData | null;
+  caseId?: string;
   verdict?: string;
   stageRows: Row[];
   violations: Violation[];
@@ -233,8 +236,15 @@ function AssistantBlock({
   const hasBadges = !running && (verdict !== undefined || skipped || stopped === true || hasMeta);
   const hasHead = !running && (hasBadges || Boolean(content));
   const done = stageRows.filter((r) => r.status !== "pending").length;
+  const plain = plainOf(caseId);
   return (
     <div className="flex flex-col gap-4">
+      {plain && (
+        <p className="text-xs leading-relaxed text-muted">
+          <span className="font-medium text-ink">这条用例在测：</span>
+          {plain}
+        </p>
+      )}
       {hasHead && (
         <div className="flex flex-col gap-1.5">
           {hasBadges && (
@@ -343,6 +353,7 @@ function StoredAssistant({ m, onCopy }: { m: Message; onCopy: (t: string) => voi
     <AssistantBlock
       content={m.content}
       explain={m.explain}
+      caseId={m.case}
       verdict={m.verdict}
       stageRows={rows}
       violations={(m.violations as Violation[]) || []}
@@ -1103,6 +1114,7 @@ export function ChatView() {
                 <AssistantBlock
                   content={busy ? undefined : liveConclusion}
                   explain={busy || approvalCanceled ? null : liveExplain}
+                  caseId={lastCaseRef.current ?? undefined}
                   verdict={busy || approvalCanceled ? undefined : verdictOf(liveJob)}
                   stageRows={approvalCanceled ? [] : rowsOf(liveJob)}
                   violations={approvalCanceled ? [] : violationsOf(liveJob)}

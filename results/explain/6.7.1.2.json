@@ -1,0 +1,48 @@
+{
+  "case_id": "6.7.1.2",
+  "provider": "proxy",
+  "model": "deepseek-v4.1-flash",
+  "generated_at": "2026-10-31T08:01:48.836154+00:00",
+  "headline": "判定通过：多TAC信令流程已生成",
+  "sections": [
+    {
+      "key": "tests",
+      "title": "这条用例在验什么",
+      "body": "验证NR NTN空闲态UE在SIB1按PLMN广播多个TAC时，是否将trackingAreaList交给上层用于移动性管理，并完成小区重选。"
+    },
+    {
+      "key": "generated",
+      "title": "系统生成了什么",
+      "body": "生成5步流程：SS先下发MIB与SIB1，随后UE侧响应/上行；SIB1含cellAccessRelatedInfo、1条PLMN条目、TAC1与TAC2、cellBarredNTN-r17=notBarred。"
+    },
+    {
+      "key": "verdict",
+      "title": "为什么是这个判定",
+      "body": "numbers.verdict=pass，违规列表为空，实际违规0条，因此判定通过。"
+    },
+    {
+      "key": "data",
+      "title": "数据怎么读",
+      "body": "L1=1.0，L3_recall=0.333，gold=4，calls=1；表明生成调用1次，叶级覆盖4项，但L3召回仅0.333。"
+    },
+    {
+      "key": "caveats",
+      "title": "哪里还不确定",
+      "body": "部分步骤消息为空，UE动作与上行内容未明；L3召回0.333显示叶级覆盖不完整，且证据未列违规项，具体遗漏点需看原始步骤。"
+    }
+  ],
+  "numbers": {
+    "L1": 1.0,
+    "L3": 0.333,
+    "gold": 4,
+    "calls": 1,
+    "violations": 0,
+    "verdict": "pass"
+  },
+  "grounded_on": [
+    "data/ctx/6.7.1.2.json",
+    "data/out/6.7.1.2.json",
+    "data/score/report.json",
+    "data/ir/ie/6.7.1.2.json"
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "case_id": "6.7.1.4",
+  "provider": "proxy",
+  "model": "deepseek-v4.1-flash",
+  "generated_at": "2026-10-31T08:04:25.223626+00:00",
+  "headline": "判定为弃权：未生成信令内容",
+  "sections": [
+    {
+      "key": "tests",
+      "title": "这条用例在验什么",
+      "body": "验证配置 MinimumPeriodicSearchTimer 后，UE 驻留 NR-NTN VPLMN 且存在更高优先级 PLMN 时，不得使用小于该定时器的 T，并在定时器到期后选择最高优先级 PLMN 尝试位置注册。"
+    },
+    {
+      "key": "generated",
+      "title": "系统生成了什么",
+      "body": "证据记录 steps_count=26；但判定为弃权，未调用模型、未生成信令内容。steps 只是结构解析产物，不是生成的信令流程。"
+    },
+    {
+      "key": "verdict",
+      "title": "为什么是这个判定",
+      "body": "numbers.verdict=abstained，实际违规 0 条；原因是 inputs contain no message/SIB names，不能写成通过或未判定。"
+    },
+    {
+      "key": "data",
+      "title": "数据怎么读",
+      "body": "L1=1.0；L3=abstained（弃权）；gold=3；calls=0。"
+    },
+    {
+      "key": "caveats",
+      "title": "哪里还不确定",
+      "body": "证据仅给结构步骤与 gold 叶节点，缺少消息/SIB 名称，无法确认真实空口流程或 MinimumPeriodicSearchTimer 行为。"
+    }
+  ],
+  "numbers": {
+    "L1": 1.0,
+    "L3": null,
+    "gold": 3,
+    "calls": 0,
+    "violations": 0,
+    "verdict": "abstained"
+  },
+  "grounded_on": [
+    "data/ctx/6.7.1.4.json",
+    "data/out/6.7.1.4.json",
+    "data/score/report.json",
+    "data/ir/ie/6.7.1.4.json"
+  ]
+}
