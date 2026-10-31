@@ -19,6 +19,19 @@ def pick_ie(ir):
     return None, None
 
 
+def tp_ref_map(ir):
+    """TP index -> 引用它的步骤下标。兼容 tp_ref 列表与旧 tp 字符串。"""
+    refs = {}
+    for i, s in enumerate(ir.get("steps") or []):
+        raw = s.get("tp_ref")
+        vals = raw if isinstance(raw, list) else [s.get("tp")]
+        for v in vals:
+            for part in re.split(r"[,/\s]+", str(v or "").strip()):
+                if part.isdigit():
+                    refs.setdefault(int(part), []).append(i)
+    return refs
+
+
 def main(gold_dir, out_dir):
     os.makedirs(out_dir, exist_ok=True)
     n = 0
@@ -45,27 +58,30 @@ def main(gold_dir, out_dir):
             idx.append((f"{cid}_D1", "R2"))
             n += 1
 
-        # D2 抹掉某个 TP 引用
-        k = next((i for i, s in enumerate(ir.get("steps") or [])
-                  if str(s.get("tp") or "").strip().isdigit()), None)
-        if k is not None:
+        # D2 抹掉某个 TP 的全部引用（只抹一条可能仍被其他步骤覆盖，不构成缺陷）
+        refs = tp_ref_map(ir)
+        if refs:
+            tp_idx = next(iter(refs))
             d = copy.deepcopy(ir)
-            d["steps"][k]["tp"] = "-"
+            for i in refs[tp_idx]:
+                d["steps"][i]["tp"] = "-"
+                if "tp_ref" in d["steps"][i]:
+                    d["steps"][i]["tp_ref"] = []
             d["_expected_rule"] = "R3"
-            d["_defect"] = "D2 clear tp reference"
+            d["_defect"] = f"D2 clear all refs to tp {tp_idx}"
             json.dump(d, open(os.path.join(out_dir, f"{cid}_D2.json"), "w", encoding="utf-8"),
                       ensure_ascii=False, indent=2)
             idx.append((f"{cid}_D2", "R3"))
             n += 1
 
-        # D3 删除唯一引用该 TP 的步骤
-        us = [i for i, s in enumerate(ir.get("steps") or [])
-              if str(s.get("tp") or "").strip().isdigit()]
-        if us:
+        # D3 删除所有引用该 TP 的步骤（删一条可能仍被其他步骤覆盖，不构成缺陷）
+        if refs:
+            tp_idx = next(iter(refs))
+            drop = set(refs[tp_idx])
             d = copy.deepcopy(ir)
-            d["steps"] = [s for j, s in enumerate(d["steps"]) if j != us[0]]
+            d["steps"] = [s for j, s in enumerate(d["steps"]) if j not in drop]
             d["_expected_rule"] = "R3"
-            d["_defect"] = "D3 drop one U->S step"
+            d["_defect"] = f"D3 drop all steps referencing tp {tp_idx}"
             json.dump(d, open(os.path.join(out_dir, f"{cid}_D3.json"), "w", encoding="utf-8"),
                       ensure_ascii=False, indent=2)
             idx.append((f"{cid}_D3", "R3"))
