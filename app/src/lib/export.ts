@@ -197,7 +197,7 @@ export function renderIntentMarkdown(model: ExportModel): string {
 
   lines.push("## 来源");
   lines.push("");
-  lines.push(`Spec2Test · 确定性校验器判定 · 生成于 ${dateOnly(model.generatedAt)}`);
+  lines.push(`Spec2Test · 校验器判定 · 生成于 ${dateOnly(model.generatedAt)}`);
   if (model.status === "abstained") {
     lines.push("");
     lines.push(

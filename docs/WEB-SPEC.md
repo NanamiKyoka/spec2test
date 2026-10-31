@@ -34,7 +34,7 @@
 | `/web/#/chat` | `ChatView` | 对话式智能体 + HITL 审批卡 |
 | `/web/#/api` | `ApiView` | 通道、Base URL、模型、温度、Key（可写不可读） |
 | `/web/#/about` | `AboutView` | 5 分钟评审路径 + 诚实声明 |
-| `/web/#/case?case=6.7.1.3` | `CaseView` | 单例全链条、字段级证据、智能解读 |
+| `/web/#/case?case=6.7.1.3` | `CaseView` | 单例全链条、字段级证据、结果解读 |
 
 主导航：`数据 · 评测 · 对话 · API · 关于`，唯一实现在 `app/src/ui/index.tsx` 的 `NAV`；当前项用 `aria-current="page"` 标记。
 
@@ -46,7 +46,7 @@
 | POST | `/api/settings` | `{provider, base_url, model, temperature, api_key?}` | `{ok}`；`api_key` 缺省则不覆盖旧值 |
 | POST | `/api/test` | `{provider?, base_url?, model?, api_key?}` | `{ok, latency_ms, model_seen, error?}`（发一次最小请求） |
 | GET | `/api/cases` | — | `[{case, title, status, gold_ies}]` |
-| GET | `/api/explain` | — | `{cases:[caseId], source:"live"\|"snapshot"\|"none"}`，已有智能解读的用例索引 |
+| GET | `/api/explain` | — | `{cases:[caseId], source:"live"\|"snapshot"\|"none"}`，已有结果解读的用例索引 |
 | GET | `/api/case/<id>` | — | `{stages:[{stage, status, summary, detail}]}`，stage 顺序固定见上表 |
 | POST | `/api/run` | `{case, instruction?, conversation_id?, hitl?, dry_run?}` | `{job_id}`；`hitl=true` 时候选阶段后暂停等审批。错误码：`400`（缺/未知 case、无凭据）、`404`（会话不存在）、`409`（同会话已有任务）、`429`（全局并发已满） |
 | GET | `/api/job/<id>` | — | `{state:"queued\|running\|awaiting_approval\|done\|failed", stage, log:[{t,msg}], approval?, verdict?:"pass\|reject\|abstained\|canceled", result?}` |

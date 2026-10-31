@@ -328,7 +328,7 @@ export function EvalView() {
           <div>
             <h1 className="text-xl font-semibold tracking-tight">评测总览</h1>
             <p className="mt-1 max-w-prose text-sm text-muted">
-              8 个 NTN 用例逐例报数：与结构化解码基线配对对照，判对错由确定性校验器给出，不报平均数。
+              8 个 NTN 用例逐例报数：与结构化解码基线配对对照，判对错由规则校验器给出，不报平均数。
             </p>
           </div>
           <div className="ml-auto flex items-center gap-2">
@@ -549,7 +549,7 @@ export function EvalView() {
           <CardHead>
             <ShieldCheck className="h-4 w-4 text-muted" />
             <span className="text-sm font-medium">校验器能力</span>
-            <span className="ml-auto text-xs text-muted">确定性规则，不调用模型</span>
+            <span className="ml-auto text-xs text-muted">规则校验，不调用模型</span>
           </CardHead>
           <CardBody>
             <div className="grid gap-3 sm:grid-cols-3">
@@ -588,12 +588,12 @@ export function EvalView() {
                 ["拒收（当前快照）", `${counts.reject} 例 · 拒收不写入正式结果`],
                 ["L3 分母", `${goldDenom} 例（gold 字段为 0 的用例不计）`],
                 [
-                  "智能解读覆盖",
+                  "结果解读覆盖",
                   explainCount === null ? DASH : `${explainCount} / ${rows?.length ?? 0}`,
                 ],
                 ["L2", "16 条交换 · 样本不足，不计分"],
                 ["6G", "未标准化 · 结论基于 Rel-19"],
-                ["用户研究", "未做 · 适用人群为设计假设"],
+                ["用户研究", "未做用户研究"],
               ].map(([k, v]) => (
                 <div key={k} className="flex items-baseline justify-between gap-3 rounded-md bg-canvas px-3 py-2">
                   <span className="shrink-0 text-xs font-medium text-muted">{k}</span>

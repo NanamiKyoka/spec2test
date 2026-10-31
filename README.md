@@ -114,7 +114,7 @@ cd ../..
 
 实测：金标 `files=8 violations=0`（无误报）。
 
-## 智能解读与自然语言输入
+## 结果解读与自然语言输入
 
 - `tools/explain.py <case...>`：用当前模型通道为每个用例生成"结果 + 数据"的自然语言解读，写入
   `data/explain/` 与 `results/explain/`。页面优先读 `data/`，缺失时回落到 `results/` 快照。

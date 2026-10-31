@@ -477,11 +477,11 @@ export function CaseView({ caseId }: { caseId: string }) {
           </CardBody>
         </Card>
 
-        {/* 二、智能解读：紧贴结论，用浅色表头表明来源，不整块上色以免与结论争重心 */}
+        {/* 二、结果解读：紧贴结论，用浅色表头表明来源，不整块上色以免与结论争重心 */}
         <Card className="mt-4 bg-surface">
           <CardHead className="rounded-t-lg bg-accent/5">
             <span className="flex items-center gap-1.5 text-sm font-medium text-accent-ink">
-              <Info className="h-3.5 w-3.5" aria-hidden /> 智能解读
+              <Info className="h-3.5 w-3.5" aria-hidden /> 结果解读
             </span>
             <span className="ml-auto text-xs text-muted">
               {explain
@@ -509,15 +509,15 @@ export function CaseView({ caseId }: { caseId: string }) {
               </>
             ) : (
               <p className="max-w-[68ch] text-sm leading-relaxed text-muted">
-                该用例暂未生成智能解读；判定以校验器与下方证据为准。
+                该用例暂未生成结果解读；判定以校验器与下方证据为准。
               </p>
             )}
           </CardBody>
         </Card>
 
-        {/* 三、证据与过程：整块下沉到浅底，与上方「结论 / 解读」拉开分区 */}
+        {/* 三、明细：整块下沉到浅底，与上方「结论 / 解读」拉开分区 */}
         <div className="mt-5 rounded-lg bg-surface p-3 sm:p-4">
-          <SectionLabel meta="折叠项点击表头展开">证据与过程</SectionLabel>
+          <SectionLabel meta="点击展开">明细</SectionLabel>
 
         <Section
           title="条款依据"

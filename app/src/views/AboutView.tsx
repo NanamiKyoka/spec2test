@@ -3,7 +3,7 @@ import { ArrowRight, ShieldCheck } from "lucide-react";
 
 const ROWS: [string, string][] = [
   ["问题", "3GPP 测试用例要靠人从规范里抄条款、拼步骤、填 ASN.1 字段，规范每版更新都要重做。"],
-  ["方案", "把条款编译成结构化测试意图，再用确定性校验器判对错：消息是否存在、字段是否合法、TP 是否被覆盖。"],
+  ["方案", "把条款编译成结构化测试意图，再用规则校验器判对错：消息是否存在、字段是否合法、TP 是否被覆盖。"],
   ["效果", "结构合法率 100%（8/8）；校验器对官方答案误报 0/8，对生成输出误报 0/8；缺陷注入检出 31/31（修正 4 条无效注入后）。"],
   ["局限", "切片仅 8 个 NTN 用例；L3 召回受输入信息量限制；消息序列（L2）不计分。"],
 ];
@@ -12,7 +12,7 @@ const ROUTE: [string, string, string][] = [
   ["1", "看一条通过的用例", "6.7.1.3"],
   ["2", "看一条多字段的复杂用例", "6.7.1.10"],
   ["3", "看一条弃权的用例", "6.7.1.4"],
-  ["4", "回数据页看逐例矩阵与失败筛选", ""],
+  ["4", "回数据页看逐例矩阵", ""],
 ];
 
 const PERSONAS: [string, string, string, string][] = [
@@ -31,7 +31,7 @@ const PERSONAS: [string, string, string, string][] = [
   [
     "工具链 / 自动化团队",
     "条款更新后回归成本高，难以判断生成物是否合法。",
-    "同一套 CLI/API 跑批，确定性校验器给出可复现判定。",
+    "同一套 CLI/API 跑批，规则校验器给出可复现判定。",
     "接入 CI 做条款回归",
   ],
 ];
@@ -42,21 +42,17 @@ export function AboutView() {
       <div className="mx-auto max-w-[860px] px-6 py-8">
         <div className="flex items-center gap-2">
           <ShieldCheck className="h-5 w-5 text-accent" />
-          <h1 className="text-xl font-semibold tracking-tight">五分钟了解</h1>
+          <h1 className="text-xl font-semibold tracking-tight">项目概览</h1>
         </div>
-        <p className="mt-1 max-w-prose text-sm text-muted">没看过这个项目的人，从这里开始。</p>
 
         <Card className="mt-6">
           <CardHead>
-            <span className="text-sm font-medium">5 分钟评审路线</span>
+            <span className="text-sm font-medium">评审路线</span>
             <Chip tone="accent" className="ml-auto">
               推荐
             </Chip>
           </CardHead>
           <CardBody className="space-y-2">
-            <p className="max-w-prose text-sm leading-relaxed text-muted">
-              按顺序看：先看通过的证据，再看拒收与弃权，最后回数据页看逐例矩阵。
-            </p>
             {ROUTE.map(([n, label, caseId]) => (
               <button
                 key={n}
@@ -76,7 +72,7 @@ export function AboutView() {
         </Card>
 
         <details className="mt-6 rounded-lg border border-line bg-canvas px-4 py-3">
-          <summary className="cursor-pointer text-sm font-medium">5 分钟演示脚本（点击展开）</summary>
+          <summary className="cursor-pointer text-sm font-medium">演示步骤（5 分钟）</summary>
           <ol className="mt-3 max-w-prose list-decimal space-y-1.5 pl-5 text-sm leading-relaxed text-muted">
             <li>先看数据：8 例、L1 8/8、缺陷检出 31/31、官方误报 0/8；点指标卡 `?` 看口径。</li>
             <li>看通过证据：6.7.1.3 → 结论 → 字段抽屉 → 导出 Markdown/JSON。</li>
@@ -84,7 +80,6 @@ export function AboutView() {
             <li>试对话：精确命中直接跑；语义输入触发 HITL 审批卡，批准后才调用模型。</li>
             <li>看局限：评测页底部「已知限制」，含切片、L3 分母、解读覆盖与未验证项。</li>
           </ol>
-          <p className="mt-2 text-xs text-muted">详细版见仓库 `docs/PITCH.md`。</p>
         </details>
 
         <section className="mt-8 rounded-lg bg-surface px-4 py-3" aria-labelledby="about-summary">
@@ -113,7 +108,7 @@ export function AboutView() {
               适用人群与工作流
             </h2>
             <span className="rounded-full border border-line px-2 py-0.5 text-xs text-muted">
-              设计假设 · 未做用户研究
+              未做用户研究
             </span>
           </div>
           <div className="mt-3 overflow-x-auto">

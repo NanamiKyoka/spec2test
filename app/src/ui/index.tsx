@@ -315,7 +315,7 @@ export function TopBar({
     <header className="flex h-14 shrink-0 items-center gap-2 border-b border-line bg-canvas px-3 sm:gap-3 sm:px-4">
       <div className="flex shrink-0 items-baseline gap-2">
         <span className="text-base font-semibold tracking-tight">Spec2Test</span>
-        <span className="hidden text-xs text-muted md:inline">自证式测试意图编译器</span>
+        <span className="hidden text-xs text-muted md:inline">NR NTN 测试意图编译器</span>
       </div>
       <nav className="ml-2 flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto" aria-label="主导航">
         {NAV.map((n) => (

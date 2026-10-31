@@ -194,9 +194,9 @@ export function ApiView() {
     <>
       <h1 className="text-xl font-semibold tracking-tight">API 管理</h1>
       <p className="mt-1 max-w-[68ch] text-sm leading-relaxed text-muted">
-        选择模型通道并配置凭据。凭据只保存在本机{" "}
+        凭据只保存在本机{" "}
         <code className="rounded bg-surface px-1 py-0.5 font-mono text-xs">data/settings.json</code>
-        （已被 gitignore），页面只显示掩码，不会回传明文。
+        （已 gitignore），页面只显示掩码。
       </p>
     </>
   );

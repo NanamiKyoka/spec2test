@@ -34,7 +34,6 @@ import { Button, Card, CardBody, Chip, Empty, Term, useToast } from "../ui";
 import { CasePicker } from "../components/CasePicker";
 import { plainOf } from "../lib/plain";
 
-const GUIDE_KEY = "s2t-chat-guide";
 const CONV_KEY = "s2t-current-conv";
 const LIVE_KEY = "s2t-live-job";
 
@@ -71,9 +70,9 @@ function syncConvLocation(id: string | null) {
 }
 
 const SAMPLES = [
-  { tone: "ok" as const, label: "通过", text: "6.7.1.3 生成测试步骤", note: "完整生成并通过校验" },
-  { tone: "accent" as const, label: "复杂例", text: "6.7.1.10 生成测试步骤", note: "多字段 / 增强特性" },
-  { tone: "muted" as const, label: "弃权", text: "6.7.1.4 需要哪些信令内容", note: "输入信息不足，不调用模型" },
+  { tone: "ok" as const, label: "通过", text: "6.7.1.3 生成测试步骤" },
+  { tone: "accent" as const, label: "复杂例", text: "6.7.1.10 生成测试步骤" },
+  { tone: "muted" as const, label: "弃权", text: "6.7.1.4 需要哪些信令内容" },
 ];
 
 const CASE_RE = /\b6\.7\.1\.\d{1,2}\b/;
@@ -178,12 +177,12 @@ function VerdictChip({
   return null;
 }
 
-/** 助手消息：结论（主）→ 智能解读（辅）→ 六阶段 / 违规（证）→ 原始数据（备）。 */
+/** 助手消息：结论 → 结果解读 → 六阶段 / 违规 → 原始数据。 */
 function ExplainBlock({ data }: { data: ExplainData }) {
   const sections = (data.sections || []).filter((s) => s.title && s.body);
   return (
     <div className="border-l-2 border-accent/40 pl-3">
-      <div className="text-xs font-medium text-accent-ink">智能解读</div>
+      <div className="text-xs font-medium text-accent-ink">结果解读</div>
       {data.headline && (
         <p className="mt-0.5 text-sm font-medium leading-relaxed text-ink">{data.headline}</p>
       )}
@@ -378,7 +377,6 @@ export function ChatView() {
   const [approvalError, setApprovalError] = React.useState<string | null>(null);
   const [liveExplain, setLiveExplain] = React.useState<ExplainData | null>(null);
   const [atBottom, setAtBottom] = React.useState(true);
-  const [guideOpen, setGuideOpen] = React.useState(() => localStorage.getItem(GUIDE_KEY) !== "1");
   const [renaming, setRenaming] = React.useState<string | null>(null);
   const renamingRef = React.useRef<string | null>(null);
   const [renameText, setRenameText] = React.useState("");
@@ -518,25 +516,6 @@ export function ChatView() {
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, [openConv, resumeLive]);
-
-  // 从数据页示例跳转过来时，预填输入框
-  React.useEffect(() => {
-    try {
-      const s = localStorage.getItem("s2t-suggest");
-      if (!s) return;
-      localStorage.removeItem("s2t-suggest");
-      setInput(s);
-      requestAnimationFrame(() => {
-        const el = inputRef.current;
-        if (!el) return;
-        el.focus();
-        el.style.height = "auto";
-        el.style.height = Math.min(el.scrollHeight, 200) + "px";
-      });
-    } catch {
-      /* ignore */
-    }
-  }, []);
 
   // 卸载时停止轮询：否则切走后仍在 setState，且白耗请求（后端任务不受影响）
   React.useEffect(() => {
@@ -856,11 +835,6 @@ export function ChatView() {
     }
   };
 
-  const closeGuide = () => {
-    setGuideOpen(false);
-    localStorage.setItem(GUIDE_KEY, "1");
-  };
-
   const emptyState = messages.length === 0 && !liveJob;
   const currentTitle = convs.find((c) => c.id === current)?.title || "新对话";
   const awaitingApproval = liveJob?.state === "awaiting_approval";
@@ -966,36 +940,10 @@ export function ChatView() {
 
         <div ref={streamRef} onScroll={onScroll} className="scroll-thin min-h-0 flex-1 overflow-y-auto">
           <div className="mx-auto flex w-full max-w-[820px] flex-col gap-5 px-4 py-5">
-            {guideOpen && (
-              <Card className="border-line bg-surface">
-                <div className="flex items-start justify-between gap-3 px-4 py-3">
-                  <div className="min-w-0 space-y-1.5">
-                    <div className="text-sm font-semibold text-ink">三步看懂这里</div>
-                    <ol className="list-decimal space-y-1 pl-4 text-xs leading-relaxed text-muted">
-                      <li>
-                        这是<b className="text-ink">测试意图编译器</b>：把 3GPP 条款编译成步骤与信令，并用确定性校验器判对错。
-                      </li>
-                      <li>
-                        每条回答先看<b className="text-ink">结论</b>（通过 / 已拒收 /
-                        <Term term="弃权" desc="输入信息不足时不发起模型调用，不产出信令内容；不是失败，也不计 0 分。" />
-                        ），再看六阶段与违规。
-                      </li>
-                      <li>
-                        下面点一个<b className="text-ink">示例问题</b>就能看到完整链路；也可以直接输入用例号，如 <code className="font-mono">6.7.1.3</code>。
-                      </li>
-                    </ol>
-                  </div>
-                  <Button variant="subtle" size="sm" className="shrink-0" onClick={closeGuide} title="不再显示">
-                    知道了
-                  </Button>
-                </div>
-              </Card>
-            )}
-
             {emptyState && (
               <div className="flex flex-col gap-4">
                 <Empty
-                  title="今天想测哪一段？输入用例编号或描述一个场景，系统会给出结论、六阶段与校验结果。"
+                  title="输入用例号或描述场景，查看生成与校验结果。"
                   icon={<Sparkles className="h-5 w-5" />}
                 />
                 <div className="flex flex-col gap-2">
@@ -1006,14 +954,13 @@ export function ChatView() {
                         key={s.text}
                         disabled={busy}
                         onClick={() => send(s.text)}
-                        aria-label={`示例：${s.text}（${s.note}）`}
+                        aria-label={`示例：${s.text}`}
                         className="flex flex-col items-start gap-1.5 rounded-lg border border-line bg-canvas px-3 py-2.5 text-left transition-colors hover:border-accent/40 hover:bg-accent/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-50"
                       >
                         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                           <Chip tone={s.tone} className="px-2 text-xs font-medium">
                             {s.label}
                           </Chip>
-                          <span className="text-xs text-muted">{s.note}</span>
                         </div>
                         <span className="text-sm leading-snug text-ink">{s.text}</span>
                       </button>
@@ -1054,10 +1001,10 @@ export function ChatView() {
                     <CardBody className="flex flex-col gap-3">
                       <div className="flex flex-col gap-1">
                         <div className="text-xs font-medium text-ink">
-                          候选消息已就绪 · 调用模型前需确认
+                          待确认：候选消息
                         </div>
                         <div className="text-xs leading-relaxed text-muted">
-                          确认后才会发起 1 次模型调用；取消则不会生成任何信令内容。
+                          批准后发起 1 次模型调用；取消则不生成信令内容。
                         </div>
                       </div>
                       {approvalShown.length > 0 && (
@@ -1192,9 +1139,6 @@ export function ChatView() {
                 </Button>
               )}
             </div>
-            <p className="text-xs leading-relaxed text-muted">
-              判断依据：每条结论可指回条款；不合格产物会被拒收；输入信息不足时弃权而非编造。
-            </p>
           </div>
         </div>
       </section>

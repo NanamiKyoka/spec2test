@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  BookOpenCheck,
   HelpCircle,
   History,
   MessageSquare,
@@ -170,137 +169,6 @@ function MetricCard({
 }
 
 /* ============================================================
-   首屏引导（三步，关闭后不再弹）
-   ============================================================ */
-
-function StartCard({
-  onGoChat,
-  verdicts,
-}: {
-  onGoChat: () => void;
-  verdicts: Record<string, "pass" | "reject" | "abstained" | "unknown">;
-}) {
-  const [open, setOpen] = useState(() => {
-    try {
-      return localStorage.getItem("s2t-start-seen") !== "1";
-    } catch {
-      return true;
-    }
-  });
-  const collapse = () => {
-    try {
-      localStorage.setItem("s2t-start-seen", "1");
-    } catch {
-      /* ignore */
-    }
-    setOpen(false);
-  };
-  const ask = (text: string) => {
-    try {
-      localStorage.setItem("s2t-suggest", text);
-    } catch {
-      /* ignore */
-    }
-    window.location.hash = "#/chat";
-  };
-  const goCase = (id: string) => {
-    window.location.hash = `#/case?case=${id}`;
-  };
-  const firstOf = (v: "pass" | "reject" | "abstained") =>
-    Object.keys(verdicts).find((c) => verdicts[c] === v);
-  const passCase = firstOf("pass");
-  const rejectCase = firstOf("reject");
-  const abstainCase = firstOf("abstained");
-  if (!open) {
-    return (
-      <button
-        onClick={() => setOpen(true)}
-        className="mt-6 flex w-full items-center gap-2 rounded-md border border-line bg-surface px-3 py-2 text-left text-xs text-muted hover:bg-canvas"
-      >
-        <BookOpenCheck className="h-4 w-4 text-accent" />
-        三步看懂这个产品（展开）
-      </button>
-    );
-  }
-  return (
-    <Card className="mt-6 border-accent/30 bg-accent/[0.04]">
-      <CardBody className="space-y-2.5">
-        <div className="flex items-center gap-2">
-          <BookOpenCheck className="h-4 w-4 text-accent" />
-          <span className="text-sm font-medium">三步看懂这个产品</span>
-          <Button variant="subtle" size="sm" className="ml-auto" onClick={collapse}>
-            收起
-          </Button>
-        </div>
-        <div className="grid gap-3 md:grid-cols-3">
-          <div>
-            <b className="text-sm">1. 这是什么</b>
-            <div className="mt-1 text-xs leading-relaxed text-muted">
-              把 3GPP 规范条款编译成可执行测试意图，再用
-              <Term
-                term="确定性校验器"
-                desc="不调用模型，只用符号表与规则判定：消息是否存在、字段是否合法、测试目的是否被步骤覆盖。"
-              />
-              判对错。
-            </div>
-          </div>
-          <div>
-            <b className="text-sm">2. 能问什么</b>
-            <div className="mt-1 flex flex-col gap-1">
-              {[
-                ["通过", `${passCase || "6.7.1.3"} 生成测试步骤`],
-                [rejectCase ? "拒收" : "复杂例", `${rejectCase || "6.7.1.10"} 生成测试步骤`],
-                ["弃权", `${abstainCase || "6.7.1.4"} 需要哪些信令内容`],
-              ].map(([label, text]) => (
-                <button
-                  key={text}
-                  onClick={() => ask(text)}
-                  className="text-left text-xs text-accent-ink hover:underline"
-                >
-                  {label}：{text}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <b className="text-sm">3. 结果怎么读</b>
-            <div className="mt-1 flex flex-wrap gap-1.5">
-              {passCase ? (
-                <button onClick={() => goCase(passCase)} title={`看一条通过的用例：${passCase}`}>
-                  <Chip tone="ok">通过</Chip>
-                </button>
-              ) : (
-                <Chip tone="muted">暂无通过例</Chip>
-              )}
-              {rejectCase ? (
-                <button onClick={() => goCase(rejectCase)} title={`看一条被拒收的用例：${rejectCase}`}>
-                  <Chip tone="bad">已拒收</Chip>
-                </button>
-              ) : (
-                <Chip tone="muted">当前快照无拒收例</Chip>
-              )}
-              {abstainCase ? (
-                <button onClick={() => goCase(abstainCase)} title={`看一条弃权的用例：${abstainCase}`}>
-                  <Chip tone="muted">弃权</Chip>
-                </button>
-              ) : (
-                <Chip tone="muted">暂无弃权例</Chip>
-              )}
-            </div>
-            <div className="mt-1 text-xs text-muted">点颜色看对应单例；结论以校验器为准。</div>
-          </div>
-        </div>
-        <div>
-          <Button variant="primary" size="sm" onClick={onGoChat}>
-            <MessageSquare className="h-3.5 w-3.5" /> 开始对话
-          </Button>
-        </div>
-      </CardBody>
-    </Card>
-  );
-}
-
-/* ============================================================
    主视图
    ============================================================ */
 
@@ -461,8 +329,6 @@ export function DataView() {
           </p>
         )}
 
-        <StartCard onGoChat={() => (window.location.hash = "#/chat")} verdicts={verdicts} />
-
         {/* 指标 */}
         <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           <MetricCard
@@ -523,7 +389,7 @@ export function DataView() {
             sub={gold ? "对 gold IR 跑校验" : "快照未含 gold 校验产物"}
             explain={{
               title: "官方答案误报",
-              formula: "对官方答案（gold IR）运行确定性校验器，统计违规条目总数。",
+              formula: "对官方答案（gold IR）运行校验器，统计违规条目总数。",
               denominator: `分母 = 被校验的用例数（当前 ${metrics.vCases}）。`,
               limit: "该项只检查 R1 消息存在性（官方字段路径未全部比对）；生成输出另有独立误报率。",
             }}
@@ -539,9 +405,7 @@ export function DataView() {
           </CardHead>
           <CardBody className="p-0">
             <p className="border-b border-line px-3 py-2 text-xs leading-relaxed text-muted">
-              怎么读：每行一个用例；绿=通过、灰=弃权、红=拒收；L1/L3 点指标卡右上角
-              <HelpCircle className="mx-0.5 inline h-3 w-3" />
-              看口径；点用例号看字段级证据。
+              绿=通过；灰=弃权；红=拒收。点用例号看字段证据，L1/L3 见指标卡口径。
             </p>
             <div className="flex flex-wrap items-center gap-1.5 border-b border-line px-3 py-2">
               {(
@@ -690,7 +554,7 @@ export function DataView() {
         <Card className="mt-6">
           <CardHead>
             <ShieldCheck className="h-4 w-4 text-muted" />
-            <span className="text-sm font-medium">弃权 vs 无依据生成</span>
+            <span className="text-sm font-medium">弃权与基线对照</span>
             <span className="ml-auto text-xs text-muted">同一输入下，系统与裸 prompt 基线的对照</span>
           </CardHead>
           <CardBody className="p-0">
@@ -746,11 +610,6 @@ export function DataView() {
           </CardBody>
         </Card>
 
-        <p className="mt-6 max-w-prose text-xs leading-relaxed text-muted">
-          说明：本页只报逐例矩阵，不报平均数——8 个用例的样本量不支持统计结论。口径见每条指标的
-          <HelpCircle className="mx-0.5 inline h-3 w-3" />
-          说明。
-        </p>
       </div>
     </div>
   );
