@@ -142,6 +142,16 @@ function VerdictChip({
   skipped?: boolean;
   className?: string;
 }) {
+  if (verdict === "canceled")
+    return (
+      <Chip tone="muted" className={className}>
+        <span className="h-1.5 w-1.5 rounded-full bg-muted" />
+        <Term
+          term="已取消"
+          desc="候选消息未获批准或审批超时，未调用模型、未产出信令内容。不是失败，也不是弃权。"
+        />
+      </Chip>
+    );
   if (skipped || verdict === "abstained")
     return (
       <Chip tone="muted" className={className}>
