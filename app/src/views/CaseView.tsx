@@ -208,14 +208,27 @@ export function CaseView({ caseId }: { caseId: string }) {
     let alive = true;
     setLoading(true);
     (async () => {
-      const [score, abs, ieFile, outFile, ctxFile, explainFile] = await Promise.all([
+      const [score, abs, ieFile, outFile, ctxFile, explainIdx] = await Promise.all([
         loadScore(),
         loadAbstain(),
         fetchJson<IeFile>(`/data/ir/ie/${caseId}.json`, `/results/ir/ie/${caseId}.json`),
         fetchJson<OutFile>(`/data/out/${caseId}.json`, `/results/out/${caseId}.json`),
         fetchJson<CtxFile>(`/data/ctx/${caseId}.json`, `/results/ctx/${caseId}.json`),
-        fetchJson<ExplainFile>(`/data/explain/${caseId}.json`, `/results/explain/${caseId}.json`),
+        fetch("/api/explain", { cache: "no-store" })
+          .then((r) => (r.ok ? r.json() : null))
+          .catch(() => null),
       ]);
+      if (!alive) return;
+      const explainCases: string[] | null = Array.isArray(explainIdx?.cases)
+        ? explainIdx.cases
+        : null;
+      const explainFile =
+        explainCases === null || explainCases.includes(caseId)
+          ? await fetchJson<ExplainFile>(
+              `/data/explain/${caseId}.json`,
+              `/results/explain/${caseId}.json`
+            )
+          : { data: null };
       if (!alive) return;
       setReport((score.data || []).find((r) => r.case === caseId));
       setAbstain((abs.data || []).find((r) => r.case === caseId));
