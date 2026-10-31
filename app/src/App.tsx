@@ -3,6 +3,7 @@ import { Moon, Sun, MonitorSmartphone } from "lucide-react";
 import { api } from "./lib/api";
 import { Button, Chip, TopBar, type ViewKey } from "./ui";
 import { DataView } from "./views/DataView";
+import { EvalView } from "./views/EvalView";
 import { ChatView } from "./views/ChatView";
 import { ApiView } from "./views/ApiView";
 import { AboutView } from "./views/AboutView";
@@ -10,7 +11,7 @@ import { CaseView } from "./views/CaseView";
 import { OfflineBanner } from "./components/OfflineBanner";
 
 type Theme = "system" | "light" | "dark";
-const VIEWS: ViewKey[] = ["data", "chat", "api", "about"];
+const VIEWS: ViewKey[] = ["data", "eval", "chat", "api", "about"];
 
 /** 单例页使用独立 hash：#/case?case=6.7.1.3（不占用主导航的四个视图） */
 function readCaseId(): string | null {
@@ -122,6 +123,7 @@ export default function App() {
         ) : (
           <>
             {view === "data" && <DataView />}
+            {view === "eval" && <EvalView />}
             {view === "chat" && <ChatView />}
             {view === "api" && <ApiView />}
             {view === "about" && <AboutView />}

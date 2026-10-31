@@ -7,6 +7,7 @@
 API 见 docs/WEB-SPEC.md。密钥只写不读：GET /api/settings 只返回掩码。
 """
 import argparse
+import copy
 import functools
 import http.server
 import json
@@ -62,6 +63,7 @@ def norm_base(url):
 _jobs = {}
 _jobs_lock = threading.Lock()
 _conv_lock = threading.RLock()
+_approval_lock = threading.Lock()
 
 
 def _job_path(jid):
@@ -76,7 +78,7 @@ def save_job(job):
     try:
         os.makedirs(JOBS_DIR, exist_ok=True)
         job["updated"] = time.time()
-        tmp = _job_path(jid) + ".tmp"
+        tmp = _job_path(jid) + "." + uuid.uuid4().hex + ".tmp"
         with open(tmp, "w", encoding="utf-8") as f:
             json.dump(job, f, ensure_ascii=False)
         os.replace(tmp, _job_path(jid))
@@ -98,7 +100,7 @@ def load_jobs():
                 continue
             jid = job.get("id") or n[:-5]
             job["id"] = jid
-            if job.get("state") in ("queued", "running"):
+            if job.get("state") in ("queued", "running", "awaiting_approval"):
                 job["state"] = "failed"
                 job["error"] = "restarted"
                 job["finished"] = job.get("finished") or time.time()
@@ -118,11 +120,11 @@ def load_jobs():
 
 
 def get_job(jid):
-    """内存优先，未命中回读磁盘并缓存。"""
+    """内存优先，未命中回读磁盘并缓存。返回深拷贝，读方不得持有内部可变对象。"""
     with _jobs_lock:
         job = _jobs.get(jid)
-    if job:
-        return job
+        if job:
+            return copy.deepcopy(job)
     p = _job_path(jid)
     if not os.path.exists(p):
         return None
@@ -130,8 +132,12 @@ def get_job(jid):
         with open(p, encoding="utf-8") as f:
             job = json.load(f)
         job["id"] = job.get("id") or jid
-        _jobs[jid] = job
-        return job
+        with _jobs_lock:
+            cached = _jobs.get(jid)
+            if cached is not None:
+                return copy.deepcopy(cached)
+            _jobs[jid] = job
+        return copy.deepcopy(job)
     except Exception:
         return None
 
@@ -525,28 +531,61 @@ def case_stages(cid):
 
 
 # ---------- job runner ----------
-def start_job(cid, dry_run=False, conversation_id=None):
+def _apply_job_event(job, ev, last_t=None):
+    """把 run_one 的一行事件并入 job，返回本阶段计时的起点。"""
+    stage = ev.get("stage")
+    job["stage"] = stage or job["stage"]
+    if stage == "approval":
+        detail = ev.get("detail") or {}
+        status = ev.get("status") or ""
+        job["approval"] = {"status": status,
+                           "candidates": detail.get("candidates") or []}
+        job["state"] = "awaiting_approval" if status == "pending" else "running"
+    if stage and stage != "verdict":
+        job["stages"].append({"stage": stage, "status": ev.get("status"),
+                              "summary": (ev.get("summary") or "")[:200]})
+    job["log"].append({"t": round(time.time(), 3),
+                       "msg": "[%s] %s" % (stage, ev.get("summary"))})
+    if stage == "verdict":
+        job["verdict"] = "reject" if ev.get("status") == "rejected" else "pass"
+    if stage == "score":
+        job["result"] = ev
+        job["verdict"] = (ev.get("detail") or {}).get("verdict", job.get("verdict"))
+    now = time.time()
+    if stage and stage != "verdict" and last_t is not None:
+        st = job.setdefault("stage_seconds", {})
+        st[stage] = round(st.get(stage, 0) + (now - last_t), 2)
+    return now
+
+
+def start_job(cid, dry_run=False, conversation_id=None, hitl=False):
     jid = uuid.uuid4().hex[:12]
     with _jobs_lock:
         _jobs[jid] = {"id": jid, "state": "queued", "stage": "", "log": [], "result": None,
                       "created": time.time(), "updated": time.time(), "case": cid,
-                      "conversation_id": conversation_id,
+                      "conversation_id": conversation_id, "hitl": bool(hitl),
+                      "approval": None,
                       "verdict": None, "stages": [], "started": None, "finished": None}
-    save_job(_jobs[jid])
+    with _jobs_lock:
+        save_job(_jobs[jid])
     s = load_settings()
-    _jobs[jid].update({"provider": s["provider"], "model": s["model"],
-                       "mode": "dry" if dry_run else "live"})
-    save_job(_jobs[jid])
+    with _jobs_lock:
+        _jobs[jid].update({"provider": s["provider"], "model": s["model"],
+                           "mode": "dry" if dry_run else "live"})
+        save_job(_jobs[jid])
 
     def worker():
         job = _jobs[jid]
-        job["state"] = "running"
-        job["started"] = time.time()
-        save_job(job)
+        with _jobs_lock:
+            job["state"] = "running"
+            job["started"] = time.time()
+            save_job(job)
         last_t = time.time()
         cmd = [sys.executable, RUN_ONE, cid]
         if dry_run:
             cmd.append("--dry-run")
+        if hitl:
+            cmd.extend(["--hitl", "--job-id", jid])
         try:
             proc = subprocess.Popen(cmd, cwd=ROOT, env=child_env(s), text=True,
                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
@@ -558,65 +597,58 @@ def start_job(cid, dry_run=False, conversation_id=None):
                 try:
                     ev = json.loads(line)
                 except Exception:
-                    job["log"].append({"t": round(time.time(), 3), "msg": line[:300]})
+                    with _jobs_lock:
+                        job["log"].append({"t": round(time.time(), 3), "msg": line[:300]})
+                        save_job(job)
                     continue
-                stage = ev.get("stage")
-                job["stage"] = stage or job["stage"]
-                if stage and stage != "verdict":
-                    job["stages"].append({"stage": stage, "status": ev.get("status"),
-                                          "summary": (ev.get("summary") or "")[:200]})
-                job["log"].append({"t": round(time.time(), 3),
-                                   "msg": "[%s] %s" % (stage, ev.get("summary"))})
-                if stage == "verdict":
-                    job["verdict"] = "reject" if ev.get("status") == "rejected" else "pass"
-                if stage == "score":
-                    job["result"] = ev
-                    job["verdict"] = (ev.get("detail") or {}).get("verdict", job.get("verdict"))
-                now = time.time()
-                if stage and stage != "verdict":
-                    st = job.setdefault("stage_seconds", {})
-                    st[stage] = round(st.get(stage, 0) + (now - last_t), 2)
-                last_t = now
-                save_job(job)
+                with _jobs_lock:
+                    last_t = _apply_job_event(job, ev, last_t)
+                    save_job(job)
             try:
                 proc.wait(timeout=15)
             except subprocess.TimeoutExpired:
                 proc.kill()
                 proc.wait(timeout=5)
-                job["error"] = "timeout"
-                job["log"].append({"t": round(time.time(), 3), "msg": "进程超时，已终止"})
-            if proc.returncode != 0:
-                job["state"] = "failed"
-                job.setdefault("error", "process_exit_%d" % proc.returncode)
-            else:
-                job["state"] = "done"
-            save_job(job)
+                with _jobs_lock:
+                    job["error"] = "timeout"
+                    job["log"].append({"t": round(time.time(), 3), "msg": "进程超时，已终止"})
+            with _jobs_lock:
+                if proc.returncode != 0:
+                    job["state"] = "failed"
+                    job.setdefault("error", "process_exit_%d" % proc.returncode)
+                else:
+                    job["state"] = "done"
+                save_job(job)
         except Exception as e:
-            job["state"] = "failed"
-            job["error"] = str(e)[:200]
-            job["log"].append({"t": round(time.time(), 3), "msg": "执行异常：%s" % e})
-            save_job(job)
+            with _jobs_lock:
+                job["state"] = "failed"
+                job["error"] = str(e)[:200]
+                job["log"].append({"t": round(time.time(), 3), "msg": "执行异常：%s" % e})
+                save_job(job)
         finally:
-            job["finished"] = time.time()
-            job["verdict"] = _job_verdict(job)
-            rec = {"job_id": jid, "case": job.get("case"), "state": job.get("state"),
-                   "verdict": job.get("verdict"),
-                   "started": job.get("started"), "finished": job.get("finished"),
-                   "seconds": round(job["finished"] - job["started"], 2)
-                   if job.get("started") else None,
-                   "mode": job.get("mode"), "provider": job.get("provider"),
-                   "model": job.get("model"), "conversation_id": job.get("conversation_id"),
-                   "stages": job.get("stage_seconds") or {}}
-            if job.get("error"):
-                rec["error"] = job["error"]
+            with _jobs_lock:
+                job["finished"] = time.time()
+                job["verdict"] = _job_verdict(job)
+                rec = {"job_id": jid, "case": job.get("case"), "state": job.get("state"),
+                       "verdict": job.get("verdict"),
+                       "started": job.get("started"), "finished": job.get("finished"),
+                       "seconds": round(job["finished"] - job["started"], 2)
+                       if job.get("started") else None,
+                       "mode": job.get("mode"), "provider": job.get("provider"),
+                       "model": job.get("model"), "conversation_id": job.get("conversation_id"),
+                       "stages": job.get("stage_seconds") or {}}
+                if job.get("error"):
+                    rec["error"] = job["error"]
+                save_job(job)
             append_run(rec)
             if conversation_id:
                 try:
                     _attach_job_result(conversation_id, jid, job)
                 except Exception as e:
-                    job["log"].append({"t": round(time.time(), 3),
-                                       "msg": "会话写入失败：%s" % e})
-            save_job(job)
+                    with _jobs_lock:
+                        job["log"].append({"t": round(time.time(), 3),
+                                           "msg": "会话写入失败：%s" % e})
+                        save_job(job)
 
 
     threading.Thread(target=worker, daemon=True).start()
@@ -624,7 +656,9 @@ def start_job(cid, dry_run=False, conversation_id=None):
 
 
 def _job_verdict(job):
-    """pass / reject / abstained / None。"""
+    """pass / reject / abstained / canceled / None。"""
+    if (job.get("approval") or {}).get("status") in ("rejected", "timeout"):
+        return "canceled"
     detail = ((job.get("result") or {}).get("detail") or {})
     v = detail.get("verdict") or job.get("verdict")
     if not v and job.get("state") == "done":
@@ -636,6 +670,17 @@ def _job_verdict(job):
 
 def _attach_job_result(conversation_id, jid, job):
     """任务结束后把一条 assistant 摘要写入会话（不含任何凭据）。"""
+    approval = (job.get("approval") or {}).get("status")
+    if approval in ("rejected", "timeout") or job.get("verdict") == "canceled":
+        content = (("用例 %s · 审批超时（未调用模型）" if approval == "timeout"
+                    else "用例 %s · 已取消（未批准候选消息，未调用模型）")
+                   % job.get("case"))
+        append_message(conversation_id, "assistant", content,
+                       job_id=jid, case=job.get("case"), stages=[],
+                       verdict="canceled", L1=None, L3=None, status="canceled")
+        update_conv_state(conversation_id, active_case=job.get("case"),
+                          last_job_id=jid, last_verdict="canceled")
+        return
     detail = ((job.get("result") or {}).get("detail") or {})
     parts = ["用例 %s" % job.get("case")]
     if detail.get("verdict"):
@@ -778,7 +823,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         last_sig = None
         last_ping = time.time()
-        deadline = time.time() + 900
+        deadline = time.time() + 1800
         try:
             while time.time() < deadline:
                 job = get_job(jid)
@@ -1055,6 +1100,35 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             if msg is None:
                 return self._json({"error": "conversation_not_found"}, 404)
             return self._json({"ok": True, "at": msg["at"]})
+        m = re.match(r"^/api/job/([0-9a-f]+)/approve$", path)
+        if m:
+            jid = m.group(1)
+            with _approval_lock:
+                job = get_job(jid)
+                if not job:
+                    return self._json({"error": "job_not_found"}, 404)
+                approval = job.get("approval") or {}
+                if job.get("state") != "awaiting_approval" or approval.get("status") != "pending":
+                    return self._json({"error": "not_awaiting_approval"}, 409)
+                decision = (self._body().get("decision") or "").strip()
+                if decision not in ("approve", "reject"):
+                    return self._json({"error": "bad_decision"}, 400)
+                try:
+                    os.makedirs(JOBS_DIR, exist_ok=True)
+                    dest = os.path.join(JOBS_DIR, jid + ".approval")
+                    tmp = dest + "." + uuid.uuid4().hex + ".tmp"
+                    with open(tmp, "w", encoding="utf-8") as f:
+                        json.dump({"decision": decision, "at": time.time()}, f)
+                    os.replace(tmp, dest)
+                except Exception as e:
+                    return self._json({"error": "write_failed", "message": str(e)[:120]}, 500)
+                with _jobs_lock:
+                    live = _jobs.get(jid)
+                    if live is not None:
+                        live.setdefault("approval", {})["status"] = (
+                            "approved" if decision == "approve" else "rejected")
+                        save_job(live)
+            return self._json({"ok": True})
         if path == "/api/run":
             body = self._body()
             cid = (body.get("case") or "").strip()
@@ -1070,7 +1144,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 return self._json({"error": "conversation_not_found"}, 404)
             with _jobs_lock:
                 active = [j for j in _jobs.values()
-                          if j.get("state") in ("queued", "running")]
+                          if j.get("state") in ("queued", "running", "awaiting_approval")]
                 if conv_id and any(j.get("conversation_id") == conv_id for j in active):
                     return self._json({"error": "run_in_progress"}, 409)
                 if len(active) >= MAX_CONCURRENT_RUNS:
@@ -1078,7 +1152,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             instruction = (body.get("instruction") or "").strip()
             if conv_id and instruction:
                 append_message(conv_id, "user", instruction)
-            return self._json({"job_id": start_job(cid, bool(body.get("dry_run")), conv_id)})
+            return self._json({"job_id": start_job(cid, bool(body.get("dry_run")), conv_id,
+                                                   hitl=bool(body.get("hitl")))})
         return self._json({"error": "not_found"}, 404)
 
     def do_PATCH(self):

@@ -9,7 +9,7 @@
 | GET | `/api/models` | query: `provider`,`base_url`,`api_key?` | `{models:[str], source:"live"\|"catalog"\|"error", note?}` |
 | GET | `/api/conversations` | — | `[{id,title,updated,turns,last_case}]`，按 `updated` 倒序 |
 | POST | `/api/conversations` | `{title?}` | `{id,title,created}` |
-| GET | `/api/conversations/<id>` | — | `{id,title,created,updated,messages:[{role,content,at,job_id?,case?,stages?}]}` |
+| GET | `/api/conversations/<id>` | — | `{id,title,created,updated,messages:[{role,content,at,job_id?,case?,stages?,verdict?,L1?,L3?,status?}]}`；`verdict ∈ pass\|reject\|abstained\|canceled` |
 | PATCH | `/api/conversations/<id>` | `{title}` | `{ok}` |
 | DELETE | `/api/conversations/<id>` | — | `{ok}` |
 | POST | `/api/conversations/<id>/messages` | `{role,content}` | `{ok,at}` |
@@ -22,7 +22,7 @@
 
 **会话存储**：`data/conversations/<id>.json`（已在 `.gitignore` 的 `data/` 内）；`id` 为 8 位十六进制。**API Key 绝不写入会话文件**。
 
-**`/api/run` 扩展**：`{case, instruction?, conversation_id?}`；若带 `conversation_id`，任务完成后把一条 `role=assistant` 的摘要消息追加到该会话（含 `job_id`、`case`、`verdict`、`stages`）。
+**`/api/run` 扩展**：`{case, instruction?, conversation_id?, hitl?, dry_run?}`；若带 `conversation_id`，任务完成后把一条 `role=assistant` 的摘要消息追加到该会话（含 `job_id`、`case`、`verdict`、`stages`）。`hitl=true` 时在 `candidates` 之后暂停等待审批（见下）；`dry_run=true` 走确定性桩，不调用模型。
 
 ## 页面与路由
 | 路由 | 文件 | 内容 |
@@ -53,9 +53,16 @@
 | POST | `/api/test` | `{provider?, base_url?, model?, api_key?}` | `{ok, latency_ms, model_seen, error?}`（发一次最小请求） |
 | GET | `/api/cases` | — | `[{case, title, status, gold_ies}]` |
 | GET | `/api/case/<id>` | — | `{stages:[{stage, status, summary, detail}]}`，stage 顺序固定见上表 |
-| POST | `/api/run` | `{case, instruction?}` | `{job_id}` |
-| GET | `/api/job/<id>` | — | `{state:"queued\|running\|done\|failed", stage, log:[{t,msg}], result?}` |
-| GET | `/api/events/<id>` | — | SSE，事件 `{stage,msg}`；不支持时前端降级为 0.5s 轮询 `/api/job/<id>` |
+| POST | `/api/run` | `{case, instruction?, conversation_id?, hitl?, dry_run?}` | `{job_id}`；`hitl=true` 时候选阶段后暂停等审批。错误码：`400`（缺/未知 case、无凭据）、`404`（会话不存在）、`409`（同会话已有任务）、`429`（全局并发已满） |
+| GET | `/api/job/<id>` | — | `{state:"queued\|running\|awaiting_approval\|done\|failed", stage, log:[{t,msg}], approval?, verdict?:"pass\|reject\|abstained\|canceled", result?}` |
+| GET | `/api/job/<id>/stream` | — | SSE，`data: <整份 Job JSON>`；任务进入 `done\|failed` 后关闭；断开时前端回退轮询 |
+| POST | `/api/job/<id>/approve` | `{decision:"approve"\|"reject"}` | `{ok}`；仅 `awaiting_approval` 可审批，否则 `409`；`approve` → `running`，`reject`/超时 → `state=done`、`verdict=canceled`，**不调用模型** |
+| POST | `/api/chat` | `{message, conversation_id?}` | `{action:"run"\|"reply", case?, say, model?, source:"llm"\|"fallback"\|"timeout"\|"error"}`；意图识别失败不抛 5xx |
+| GET | `/api/metrics` | — | `{runs_total, by_state, by_verdict, seconds_p50, seconds_p95, runs_last_24h, recent_failures}` |
+
+**HITL 审批契约**：`POST /api/job/<id>/approve` 的 `decision` 只接受 `approve`/`reject`（否则 `400`）。`approve` 后任务回到 `running`；`reject` 或等待超时（默认 600s）都进入 `state=done`、`verdict=canceled`，后三阶段标记 `skipped`，**不发起任何模型调用**，也不写成 `failed`。前端凭 `awaiting_approval` 渲染审批卡，不自动批准。
+
+**轮询语义**：无 SSE 或 SSE 断开时，前端轮询 `GET /api/job/<id>`——首次间隔 1s，按 1.5× 逐步退避，上限 3s；终态 `done\|failed` 停止。
 
 **状态语义**：`stage ∈ ingest|context|candidates|generate|validate|score`；弃权时后三阶段为 `skipped`，`state=done`（**不是 failed**）。
 
@@ -91,7 +98,7 @@
 - **禁止**把 `undefined`、`null`、`NaN` 直接渲染到页面；一律显示 `—`，并 `console.warn` 一次。
 
 ## 可选：实时运行（live）
-- 按钮「运行本用例」，调 `POST /api/run`，body `{"case":"6.7.1.3"}` → `{job_id}`；轮询 `GET /api/job/<id>` → `{state, stage, log[], started, finished}`；`state ∈ queued|running|done|failed`。
+- 按钮「运行本用例」，调 `POST /api/run`，body `{"case":"6.7.1.3"}` → `{job_id}`；优先 `GET /api/job/<id>/stream`（SSE）接收整份 Job；SSE 不可用/断开时轮询 `GET /api/job/<id>`（1s 起、退避至 3s）→ `{state, stage, log[], started, finished}`；`state ∈ queued|running|awaiting_approval|done|failed`，`verdict ∈ pass|reject|abstained|canceled`。
 - 不可用时（未检测到模型通道）按钮置灰，`title` 说明原因，**不得静默失败**。
 - 运行结果写入 `data/out/<case>.json` 并刷新页面阶段视图。
 

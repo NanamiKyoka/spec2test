@@ -33,7 +33,7 @@ benchmark(规范PDF) → ctx(裁剪后上下文) → generate/baseline → out(I
       工作记忆：最近 8 轮 + 会话状态（active_case / last_job_id / last_verdict）
       LLM 只做两件事：选用例（run）或自然引导（reply）
   → 用例解析
-      本地精确命中 → 直接跑；LLM 语义命中 → HITL 确认卡；无法确定 → 引导
+      本地精确命中 → 直接跑；LLM 语义命中 → 候选阶段后暂停待批准（HITL 审批卡）；无法确定 → 引导
   → 运行层 /api/run
       同会话单任务（409）、全局并发 4（429）、job 落盘 data/jobs/<id>.json
   → 六阶段 worker（子进程）
@@ -46,7 +46,10 @@ benchmark(规范PDF) → ctx(裁剪后上下文) → generate/baseline → out(I
       conversation messages + state、runs.jsonl、/api/metrics
 ```
 
-**状态机**：`queued → running → done | failed`。进程重启时 `running/queued` 一律标记
+**状态机**：`queued → running → awaiting_approval → running → done | failed`，另有边
+`awaiting_approval → done(verdict=canceled)`。审批只暂停在 `candidates` 之后、`generate` 之前；
+`approve` 回到 `running`，`reject` 或等待超时（默认 600s）都进入 **`done` + `verdict=canceled`**
+（**不是 `failed`**），且不调用模型。进程重启时 `queued/running/awaiting_approval` 一律标记
 `failed(error=restarted)`；前端凭 `sessionStorage` 的 job 锚点重连 SSE 或回退轮询。
 
 **工作记忆**（有界、可审计）：
@@ -62,7 +65,7 @@ benchmark(规范PDF) → ctx(裁剪后上下文) → generate/baseline → out(I
 2. 每一句解释必须能指回 artifact（条款/字段路径/gold/违规）。
 3. 信息不足允许弃权；弃权不是失败，不计 0 分。
 4. 工作记忆有界（8 轮 / 单条 300 字），不写入密钥与规范原文。
-5. 任务状态落盘，重启可查、可恢复、可标记中断。
+5. 任务状态落盘，重启后可查询，**不保证续跑**（restart 会把 `queued/running/awaiting_approval` 标记 `failed(restarted)`）。
 6. API Key 不写明文：DPAPI/keyring → 环境变量 → 旧配置兜底。
 
 ## 文件所有权（并行作业边界）

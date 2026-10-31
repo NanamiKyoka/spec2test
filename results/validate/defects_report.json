@@ -1,0 +1,344 @@
+[
+  {
+    "file": "6.7.1.10_D1.json",
+    "case_id": "6.7.1.10",
+    "violations": [
+      {
+        "rule": "R2",
+        "path": "messages[2].ies[0].name",
+        "detail": "unknown field 'tn-ReferenceLocation-r18-zz9' for SIB25"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.10_D2.json",
+    "case_id": "6.7.1.10",
+    "violations": [
+      {
+        "rule": "R3",
+        "path": "tp[1]",
+        "detail": "该 TP 无任何步骤引用（tp 列未出现）"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.10_D3.json",
+    "case_id": "6.7.1.10",
+    "violations": [
+      {
+        "rule": "R3",
+        "path": "tp[1]",
+        "detail": "该 TP 无任何步骤引用（tp 列未出现）"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.10_D4.json",
+    "case_id": "6.7.1.10",
+    "violations": [
+      {
+        "rule": "R1",
+        "path": "steps[99].message",
+        "detail": "unknown message: RRCDefinitelyNotReal"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.12_D1.json",
+    "case_id": "6.7.1.12",
+    "violations": [
+      {
+        "rule": "R2",
+        "path": "messages[None].ies[0].name",
+        "detail": "unknown field 'threshServingLowP-zz9' for SIB2"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.12_D2.json",
+    "case_id": "6.7.1.12",
+    "violations": [
+      {
+        "rule": "R3",
+        "path": "tp[1]",
+        "detail": "该 TP 无任何步骤引用（tp 列未出现）"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.12_D3.json",
+    "case_id": "6.7.1.12",
+    "violations": [
+      {
+        "rule": "R3",
+        "path": "tp[1]",
+        "detail": "该 TP 无任何步骤引用（tp 列未出现）"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.12_D4.json",
+    "case_id": "6.7.1.12",
+    "violations": [
+      {
+        "rule": "R1",
+        "path": "steps[99].message",
+        "detail": "unknown message: RRCDefinitelyNotReal"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.1_D2.json",
+    "case_id": "6.7.1.1",
+    "violations": [
+      {
+        "rule": "R3",
+        "path": "tp[1]",
+        "detail": "该 TP 无任何步骤引用（tp 列未出现）"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.1_D3.json",
+    "case_id": "6.7.1.1",
+    "violations": [
+      {
+        "rule": "R3",
+        "path": "tp[1]",
+        "detail": "该 TP 无任何步骤引用（tp 列未出现）"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.1_D4.json",
+    "case_id": "6.7.1.1",
+    "violations": [
+      {
+        "rule": "R1",
+        "path": "steps[99].message",
+        "detail": "unknown message: RRCDefinitelyNotReal"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.2_D1.json",
+    "case_id": "6.7.1.2",
+    "violations": [
+      {
+        "rule": "R2",
+        "path": "messages[None].ies[0].name",
+        "detail": "unknown field 'cellAccessRelatedInfo-zz9' for SIB1"
+      },
+      {
+        "rule": "R2",
+        "path": "messages[None].ies[0].name",
+        "detail": "unknown field 'cellAccessRelatedInfo-zz9' for SIB1"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.2_D2.json",
+    "case_id": "6.7.1.2",
+    "violations": []
+  },
+  {
+    "file": "6.7.1.2_D3.json",
+    "case_id": "6.7.1.2",
+    "violations": []
+  },
+  {
+    "file": "6.7.1.2_D4.json",
+    "case_id": "6.7.1.2",
+    "violations": [
+      {
+        "rule": "R1",
+        "path": "steps[99].message",
+        "detail": "unknown message: RRCDefinitelyNotReal"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.3_D1.json",
+    "case_id": "6.7.1.3",
+    "violations": [
+      {
+        "rule": "R2",
+        "path": "messages[None].ies[0].name",
+        "detail": "unknown field 'cellBarredNTN-r17-zz9' for SIB1"
+      },
+      {
+        "rule": "R2",
+        "path": "messages[4].ies[0].name",
+        "detail": "unknown field 'cellBarredNTN-r17-zz9' for SIB1"
+      },
+      {
+        "rule": "R2",
+        "path": "messages[22].ies[0].name",
+        "detail": "unknown field 'cellBarredNTN-r17-zz9' for SIB1"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.3_D2.json",
+    "case_id": "6.7.1.3",
+    "violations": [
+      {
+        "rule": "R3",
+        "path": "tp[1]",
+        "detail": "该 TP 无任何步骤引用（tp 列未出现）"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.3_D3.json",
+    "case_id": "6.7.1.3",
+    "violations": [
+      {
+        "rule": "R3",
+        "path": "tp[1]",
+        "detail": "该 TP 无任何步骤引用（tp 列未出现）"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.3_D4.json",
+    "case_id": "6.7.1.3",
+    "violations": [
+      {
+        "rule": "R1",
+        "path": "steps[99].message",
+        "detail": "unknown message: RRCDefinitelyNotReal"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.4_D1.json",
+    "case_id": "6.7.1.4",
+    "violations": [
+      {
+        "rule": "R2",
+        "path": "messages[None].ies[0].name",
+        "detail": "unknown field 'ephemerisInfo-r17-zz9' for SIB19"
+      },
+      {
+        "rule": "R2",
+        "path": "messages[None].ies[0].name",
+        "detail": "unknown field 'ephemerisInfo-r17-zz9' for SIB19"
+      },
+      {
+        "rule": "R2",
+        "path": "messages[None].ies[0].name",
+        "detail": "unknown field 'ephemerisInfo-r17-zz9' for SIB19"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.4_D2.json",
+    "case_id": "6.7.1.4",
+    "violations": []
+  },
+  {
+    "file": "6.7.1.4_D3.json",
+    "case_id": "6.7.1.4",
+    "violations": []
+  },
+  {
+    "file": "6.7.1.4_D4.json",
+    "case_id": "6.7.1.4",
+    "violations": [
+      {
+        "rule": "R1",
+        "path": "steps[99].message",
+        "detail": "unknown message: RRCDefinitelyNotReal"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.5_D1.json",
+    "case_id": "6.7.1.5",
+    "violations": [
+      {
+        "rule": "R2",
+        "path": "messages[None].ies[0].name",
+        "detail": "unknown field 's-NonIntraSearch-zz9' for SIB2"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.5_D2.json",
+    "case_id": "6.7.1.5",
+    "violations": [
+      {
+        "rule": "R3",
+        "path": "tp[1]",
+        "detail": "该 TP 无任何步骤引用（tp 列未出现）"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.5_D3.json",
+    "case_id": "6.7.1.5",
+    "violations": [
+      {
+        "rule": "R3",
+        "path": "tp[1]",
+        "detail": "该 TP 无任何步骤引用（tp 列未出现）"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.5_D4.json",
+    "case_id": "6.7.1.5",
+    "violations": [
+      {
+        "rule": "R1",
+        "path": "steps[99].message",
+        "detail": "unknown message: RRCDefinitelyNotReal"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.6_D1.json",
+    "case_id": "6.7.1.6",
+    "violations": [
+      {
+        "rule": "R2",
+        "path": "messages[None].ies[0].name",
+        "detail": "unknown field 's-NonIntraSearch-zz9' for SIB2"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.6_D2.json",
+    "case_id": "6.7.1.6",
+    "violations": [
+      {
+        "rule": "R3",
+        "path": "tp[1]",
+        "detail": "该 TP 无任何步骤引用（tp 列未出现）"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.6_D3.json",
+    "case_id": "6.7.1.6",
+    "violations": [
+      {
+        "rule": "R3",
+        "path": "tp[1]",
+        "detail": "该 TP 无任何步骤引用（tp 列未出现）"
+      }
+    ]
+  },
+  {
+    "file": "6.7.1.6_D4.json",
+    "case_id": "6.7.1.6",
+    "violations": [
+      {
+        "rule": "R1",
+        "path": "steps[99].message",
+        "detail": "unknown message: RRCDefinitelyNotReal"
+      }
+    ]
+  }
+]

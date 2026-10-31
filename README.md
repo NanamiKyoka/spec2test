@@ -129,7 +129,7 @@ py -3.12 -m pytest -q
 cd app && npm ci && npm run build && npm run smoke
 ```
 
-CI（`.github/workflows/ci.yml`）在每次 push 跑三组：pytest、前端构建、Playwright UI 冒烟。
+CI（`.github/workflows/ci.yml`）在 **push `main` 与 pull request** 时触发，跑三组：后端 `py_compile` + pytest、前端构建、Playwright UI 冒烟（6 条路由 + 外部请求/console 断言；Windows 用 Edge，Linux 用 chromium）。
 
 ## 模型通道（三选一，禁止写死）
 

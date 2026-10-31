@@ -41,6 +41,41 @@ def load(path):
         return json.load(f)
 
 
+def await_approval(job_id, candidates, timeout):
+    """HITL：候选消息生成后暂停，等用户批准再调用模型；超时按拒绝处理。"""
+    emit("approval", "pending", "等待人工确认候选消息",
+         {"candidates": candidates, "timeout": timeout})
+    path = os.path.join(ROOT, "data", "jobs", job_id + ".approval")
+    deadline = time.time() + max(1, timeout)
+    while time.time() < deadline:
+        if os.path.exists(path):
+            decision = ""
+            try:
+                with open(path, encoding="utf-8") as f:
+                    decision = (json.load(f).get("decision") or "").strip()
+            except Exception:
+                decision = ""
+            if decision in ("approve", "reject"):
+                try:
+                    os.remove(path)
+                except Exception:
+                    pass
+                status = "approved" if decision == "approve" else "rejected"
+                emit("approval", status,
+                     "已批准，开始生成" if decision == "approve" else "已取消，未调用模型",
+                     {"candidates": candidates, "decision": decision})
+                return decision
+            if os.path.exists(path):
+                # 非法内容（空/损坏）：删掉继续等，避免坏文件卡满 600 秒
+                try:
+                    os.remove(path)
+                except Exception:
+                    pass
+        time.sleep(0.5)
+    emit("approval", "timeout", "审批超时，未调用模型", {"candidates": candidates})
+    return "reject"
+
+
 def finish(case, ir, a, sym_path):
     """校验 → 判定 → 写盘 → 评分。拒收时写 out_rejected，绝不覆盖 data/out。"""
     viol = []
@@ -101,6 +136,11 @@ def main():
     ap.add_argument("--revalidate", action="store_true",
                     help="不调用模型：读现有 IR 重新校验并判定 verdict")
     ap.add_argument("--ir-file", default="", help="配合 --revalidate，指定 IR 文件路径")
+    ap.add_argument("--hitl", action="store_true",
+                    help="候选消息生成后暂停，等待人工批准再调用模型")
+    ap.add_argument("--job-id", default="", help="配合 --hitl，审批文件的 job 标识")
+    ap.add_argument("--approval-timeout", type=int, default=600,
+                    help="等待审批的秒数，超时按拒绝处理")
     a = ap.parse_args()
     case = a.case
     if a.dry_run and not a.force_write:
@@ -164,6 +204,14 @@ def main():
         else:
             emit("candidates", "skipped",
                  "输入中没有消息/SIB 名 → 弃权（不发起模型调用）", {"candidates": []})
+
+    # 3.5) HITL：确定性阶段已完成，调用模型前等人工批准
+    if a.hitl and a.job_id and cand:
+        if await_approval(a.job_id, cand, a.approval_timeout) != "approve":
+            emit("generate", "skipped", "未获批准：未调用模型", {"calls": 0})
+            emit("validate", "skipped", "未获批准：未调用模型")
+            emit("score", "skipped", "未获批准：不计分")
+            return 0
 
     # 4) generate
     ir = None

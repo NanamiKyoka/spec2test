@@ -172,7 +172,13 @@ function MetricCard({
    首屏引导（三步，关闭后不再弹）
    ============================================================ */
 
-function StartCard({ onGoChat }: { onGoChat: () => void }) {
+function StartCard({
+  onGoChat,
+  verdicts,
+}: {
+  onGoChat: () => void;
+  verdicts: Record<string, "pass" | "reject" | "abstained" | "unknown">;
+}) {
   const [open, setOpen] = useState(() => {
     try {
       return localStorage.getItem("s2t-start-seen") !== "1";
@@ -199,6 +205,11 @@ function StartCard({ onGoChat }: { onGoChat: () => void }) {
   const goCase = (id: string) => {
     window.location.hash = `#/case?case=${id}`;
   };
+  const firstOf = (v: "pass" | "reject" | "abstained") =>
+    Object.keys(verdicts).find((c) => verdicts[c] === v);
+  const passCase = firstOf("pass");
+  const rejectCase = firstOf("reject");
+  const abstainCase = firstOf("abstained");
   if (!open) {
     return (
       <button
@@ -236,9 +247,9 @@ function StartCard({ onGoChat }: { onGoChat: () => void }) {
             <b className="text-[13px]">2. 能问什么</b>
             <div className="mt-1 flex flex-col gap-1">
               {[
-                ["通过", "6.7.1.3 生成测试步骤"],
-                ["拒收", "6.7.1.10 生成测试步骤"],
-                ["弃权", "6.7.1.12 需要哪些信令内容"],
+                ["通过", `${passCase || "6.7.1.3"} 生成测试步骤`],
+                [rejectCase ? "拒收" : "复杂例", `${rejectCase || "6.7.1.10"} 生成测试步骤`],
+                ["弃权", `${abstainCase || "6.7.1.4"} 需要哪些信令内容`],
               ].map(([label, text]) => (
                 <button
                   key={text}
@@ -253,15 +264,27 @@ function StartCard({ onGoChat }: { onGoChat: () => void }) {
           <div>
             <b className="text-[13px]">3. 结果怎么读</b>
             <div className="mt-1 flex flex-wrap gap-1.5">
-              <button onClick={() => goCase("6.7.1.3")} title="看一条通过的用例">
-                <Chip tone="ok">通过</Chip>
-              </button>
-              <button onClick={() => goCase("6.7.1.10")} title="看一条被拒收的用例">
-                <Chip tone="bad">已拒收</Chip>
-              </button>
-              <button onClick={() => goCase("6.7.1.12")} title="看一条弃权的用例">
-                <Chip tone="muted">弃权</Chip>
-              </button>
+              {passCase ? (
+                <button onClick={() => goCase(passCase)} title={`看一条通过的用例：${passCase}`}>
+                  <Chip tone="ok">通过</Chip>
+                </button>
+              ) : (
+                <Chip tone="muted">暂无通过例</Chip>
+              )}
+              {rejectCase ? (
+                <button onClick={() => goCase(rejectCase)} title={`看一条被拒收的用例：${rejectCase}`}>
+                  <Chip tone="bad">已拒收</Chip>
+                </button>
+              ) : (
+                <Chip tone="muted">当前快照无拒收例</Chip>
+              )}
+              {abstainCase ? (
+                <button onClick={() => goCase(abstainCase)} title={`看一条弃权的用例：${abstainCase}`}>
+                  <Chip tone="muted">弃权</Chip>
+                </button>
+              ) : (
+                <Chip tone="muted">暂无弃权例</Chip>
+              )}
             </div>
             <div className="mt-1 text-xs text-muted">点颜色看对应单例；结论以校验器为准。</div>
           </div>
@@ -300,21 +323,25 @@ export function DataView() {
       // 逐例判定：正式产物优先，缺判定时回退 out_rejected（与单例页口径一致）
       const entries = await Promise.all(
         (score.data || []).map(async (r) => {
-          const [out, rej] = await Promise.all([
-            fetchJson<{ status?: string; verdict?: string | null }>(
+          const out = (
+            await fetchJson<{ status?: string; verdict?: string | null; violations?: unknown[] }>(
               `/data/out/${r.case}.json`, `/results/out/${r.case}.json`
-            ),
-            fetchJson<{ verdict?: string | null }>(
-              `/data/out_rejected/${r.case}.json`, `/results/out_rejected/${r.case}.json`
-            ),
-          ]);
-          const o = out.data;
+            )
+          ).data;
           let v: "pass" | "reject" | "abstained" | "unknown" = "unknown";
-          if (o?.status === "abstained") v = "abstained";
-          else if (o?.verdict === "reject") v = "reject";
-          else if (o?.verdict === "pass") v = "pass";
-          else if (rej.data?.verdict === "reject") v = "reject";
-          else if (r.status === "abstained") v = "abstained";
+          if (out?.status === "abstained") v = "abstained";
+          else if (out?.verdict === "reject") v = "reject";
+          else if ((out?.violations?.length ?? 0) > 0) v = "reject";
+          else if (out?.verdict === "pass") v = "pass";
+          else {
+            const rej = (
+              await fetchJson<{ verdict?: string | null }>(
+                `/data/out_rejected/${r.case}.json`, `/results/out_rejected/${r.case}.json`
+              )
+            ).data;
+            if (rej?.verdict === "reject") v = "reject";
+            else if (r.status === "abstained") v = "abstained";
+          }
           return [r.case, v] as const;
         })
       );
@@ -433,7 +460,7 @@ export function DataView() {
           </p>
         )}
 
-        <StartCard onGoChat={() => (window.location.hash = "#/chat")} />
+        <StartCard onGoChat={() => (window.location.hash = "#/chat")} verdicts={verdicts} />
 
         {/* 指标 */}
         <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">

@@ -74,6 +74,8 @@ export function verdictOf(job?: Job): "pass" | "reject" | undefined {
 export function conclusionOf(job?: Job): string {
   if (!job) return "";
   if (job.state === "failed") return "执行失败，未产出结果。";
+  if (job.verdict === "canceled") return "已取消，未调用模型。";
+  if (job.state !== "done") return "运行中，尚未得出结论。";
   const stages = buildStages(job);
   const skipped = stages.filter((s) => s.status === "skipped").length;
   if (skipped >= 3) return "输入信息不足，已弃权：未调用模型、未产出信令内容。";

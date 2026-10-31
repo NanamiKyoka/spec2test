@@ -207,12 +207,11 @@ export function CaseView({ caseId }: { caseId: string }) {
     let alive = true;
     setLoading(true);
     (async () => {
-      const [score, abs, ieFile, outFile, rejFile, ctxFile, explainFile] = await Promise.all([
+      const [score, abs, ieFile, outFile, ctxFile, explainFile] = await Promise.all([
         loadScore(),
         loadAbstain(),
         fetchJson<IeFile>(`/data/ir/ie/${caseId}.json`, `/results/ir/ie/${caseId}.json`),
         fetchJson<OutFile>(`/data/out/${caseId}.json`, `/results/out/${caseId}.json`),
-        fetchJson<OutFile>(`/data/out_rejected/${caseId}.json`, `/results/out_rejected/${caseId}.json`),
         fetchJson<CtxFile>(`/data/ctx/${caseId}.json`, `/results/ctx/${caseId}.json`),
         fetchJson<ExplainFile>(`/data/explain/${caseId}.json`, `/results/explain/${caseId}.json`),
       ]);
@@ -224,7 +223,14 @@ export function CaseView({ caseId }: { caseId: string }) {
       setExplain(explainFile.data);
       // 正式产物无判定时，优先用被拒收运行的结论，避免把拒收显示成通过/已生成
       const primary = outFile.data;
-      const rejected = rejFile.data;
+      const rejected =
+        !primary || (!primary.verdict && primary.status !== "abstained")
+          ? (await fetchJson<OutFile>(
+              `/data/out_rejected/${caseId}.json`,
+              `/results/out_rejected/${caseId}.json`
+            )).data
+          : null;
+      if (!alive) return;
       const chosen =
         primary && (primary.verdict || primary.status === "abstained") ? primary : rejected || primary;
       setOut(chosen);
@@ -254,10 +260,11 @@ export function CaseView({ caseId }: { caseId: string }) {
   const stages = useMemo(() => buildStages(report, abstain, ie, out), [report, abstain, ie, out]);
 
   const verdict = useMemo(() => {
+    if (out?.status === "abstained") return "abstained";
     if (out?.verdict === "reject") return "reject";
-    if (out?.status === "abstained" || report?.status === "abstained") return "abstained";
-    if (out?.verdict === "pass") return "pass";
     if ((out?.violations?.length ?? 0) > 0) return "reject";
+    if (out?.verdict === "pass") return "pass";
+    if (report?.status === "abstained") return "abstained";
     // 没有判定就是没有判定：不得由 report.status 推断为通过
     return "unknown";
   }, [out, report]);
@@ -470,7 +477,7 @@ export function CaseView({ caseId }: { caseId: string }) {
               </>
             ) : (
               <p className="max-w-[68ch] text-[12.5px] leading-relaxed text-muted">
-                尚未生成智能解读。运行 <code className="font-mono">py -3.12 tools/explain.py {caseId}</code> 生成后再刷新。
+                该用例暂未生成智能解读；判定以校验器与下方证据为准。
               </p>
             )}
           </CardBody>

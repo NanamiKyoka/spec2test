@@ -8,7 +8,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import score
 
-BASE = "E:/workspace/ai_competition/data"
+BASE = os.path.join(os.path.dirname(HERE), "data")
 OUT = os.path.join(BASE, "out")
 BASE_OUT = os.path.join(BASE, "out_baseline")
 

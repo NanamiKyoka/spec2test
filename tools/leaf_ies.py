@@ -9,7 +9,7 @@ import json
 import os
 import re
 
-BASE = "E:/workspace/ai_competition/data/ir/ie"
+BASE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "ir", "ie")
 TYPE_LINE = re.compile(r"^(SEQUENCE|CHOICE|ENUMERATED)\b")
 TARGET = {"6.7.1.10": 2, "6.7.1.12": 14, "6.7.1.2": 4,
           "6.7.1.3": 3, "6.7.1.4": 3, "6.7.1.5": 7, "6.7.1.6": 9}

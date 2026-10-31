@@ -58,11 +58,18 @@ export type JobLog = { t: number; msg: string };
 
 export type Violation = { rule: string; path: string; detail: string };
 
+export type JobCandidate = string | { message?: string; name?: string };
+
 export type Job = {
-  state: "queued" | "running" | "done" | "failed";
+  id?: string;
+  state: "queued" | "running" | "awaiting_approval" | "done" | "failed";
   stage?: string;
   log: JobLog[];
-  verdict?: "pass" | "reject" | null;
+  verdict?: "pass" | "reject" | "canceled" | null;
+  approval?: {
+    status: "pending" | "approved" | "rejected" | "timeout" | string;
+    candidates?: JobCandidate[];
+  };
   result?: {
     stage?: string;
     status?: string;
@@ -151,10 +158,20 @@ export const api = {
       { method: "POST", body: JSON.stringify({ message, conversation_id: conversationId }) }
     ),
 
-  run: (caseId: string, instruction: string, conversationId?: string) =>
+  run: (caseId: string, instruction: string, conversationId?: string, hitl?: boolean) =>
     call<{ job_id: string }>("/api/run", {
       method: "POST",
-      body: JSON.stringify({ case: caseId, instruction, conversation_id: conversationId }),
+      body: JSON.stringify({
+        case: caseId,
+        instruction,
+        conversation_id: conversationId,
+        hitl: Boolean(hitl),
+      }),
+    }),
+  approveJob: (jobId: string, decision: "approve" | "reject") =>
+    call<{ ok: true }>(`/api/job/${jobId}/approve`, {
+      method: "POST",
+      body: JSON.stringify({ decision }),
     }),
   job: (id: string) => call<Job>(`/api/job/${id}`),
 };
@@ -164,13 +181,13 @@ export async function pollJob(
   jobId: string,
   onUpdate: (job: Job) => void,
   signal: AbortSignal,
-  maxMs = 300000
+  maxMs = 1200000
 ): Promise<Job> {
   const t0 = Date.now();
   let last: Job = { state: "queued", log: [] };
   let delay = 1000;
   while (!signal.aborted) {
-    if (Date.now() - t0 > maxMs) throw new ApiError(0, "任务超时（超过 5 分钟未完成）");
+    if (Date.now() - t0 > maxMs) throw new ApiError(0, "任务超时（超过 20 分钟未完成）");
     await new Promise((r) => setTimeout(r, delay));
     if (signal.aborted) break;
     last = await api.job(jobId);
@@ -235,9 +252,10 @@ export async function runJob(
   onUpdate: (job: Job) => void,
   signal: AbortSignal,
   conversationId?: string,
-  onJobId?: (jobId: string) => void
+  onJobId?: (jobId: string) => void,
+  hitl?: boolean
 ): Promise<Job> {
-  const { job_id } = await api.run(caseId, instruction, conversationId);
+  const { job_id } = await api.run(caseId, instruction, conversationId, hitl);
   onJobId?.(job_id);
   const r = await streamJob(job_id, onUpdate, signal);
   if (signal.aborted) return r.job ?? { state: "done", log: [] };

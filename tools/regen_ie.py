@@ -7,7 +7,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import gen_ie
 
-BASE = "E:/workspace/ai_competition/data"
+BASE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
 SYMBOLS = os.path.join(BASE, "symbols", "rrc_symbols.json")
 
 

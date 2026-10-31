@@ -284,9 +284,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 export const useToast = () => React.useContext(ToastCtx);
 
 /* ---------------- TopBar ---------------- */
-export type ViewKey = "data" | "chat" | "api" | "about";
+export type ViewKey = "data" | "eval" | "chat" | "api" | "about";
 const NAV: { key: ViewKey; label: string }[] = [
   { key: "data", label: "数据" },
+  { key: "eval", label: "评测" },
   { key: "chat", label: "对话" },
   { key: "api", label: "API" },
   { key: "about", label: "关于" },

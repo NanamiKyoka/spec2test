@@ -70,8 +70,8 @@ function syncConvLocation(id: string | null) {
 
 const SAMPLES = [
   { tone: "ok" as const, label: "通过", text: "6.7.1.3 生成测试步骤", note: "完整生成并通过校验" },
-  { tone: "bad" as const, label: "已拒收", text: "6.7.1.10 生成测试步骤", note: "字段非法，被校验器拒收" },
-  { tone: "muted" as const, label: "弃权", text: "6.7.1.12 需要哪些信令内容", note: "输入信息不足，不调用模型" },
+  { tone: "accent" as const, label: "复杂例", text: "6.7.1.10 生成测试步骤", note: "多字段 / 增强特性" },
+  { tone: "muted" as const, label: "弃权", text: "6.7.1.4 需要哪些信令内容", note: "输入信息不足，不调用模型" },
 ];
 
 const CASE_RE = /\b6\.7\.1\.\d{1,2}\b/;
@@ -334,7 +334,8 @@ export function ChatView() {
   const [stopped, setStopped] = React.useState(false);
   const [elapsed, setElapsed] = React.useState(0);
   const [liveJob, setLiveJob] = React.useState<Job | null>(null);
-  const [pendingRun, setPendingRun] = React.useState<{ caseId: string; say: string; cid: string } | null>(null);
+  const [approvalBusy, setApprovalBusy] = React.useState<"approve" | "reject" | null>(null);
+  const [approvalError, setApprovalError] = React.useState<string | null>(null);
   const [liveExplain, setLiveExplain] = React.useState<string | null>(null);
   const [atBottom, setAtBottom] = React.useState(true);
   const [guideOpen, setGuideOpen] = React.useState(() => localStorage.getItem(GUIDE_KEY) !== "1");
@@ -362,8 +363,15 @@ export function ChatView() {
   }, [loadConvs]);
 
   const openSeq = React.useRef(0);
+  const resumeLiveRef = React.useRef<((ref: LiveRef) => void) | null>(null);
   const openConv = React.useCallback(
     (id: string) => {
+      const live = readLiveJob();
+      if (live && live.cid === id) {
+        // 该会话还有正在运行/等待审批的任务：直接恢复，别把审批卡丢掉
+        resumeLiveRef.current?.(live);
+        return;
+      }
       abortRef.current?.abort();
       const seq = ++openSeq.current;
       setBusy(false);
@@ -410,7 +418,8 @@ export function ChatView() {
       setLiveExplain(null);
       try {
         const first = await api.job(ref.jobId);
-        if (first.state === "running" || first.state === "queued") {
+        if (first.state === "running" || first.state === "queued" ||
+            first.state === "awaiting_approval") {
           setLiveJob(first);
           const r = await streamJob(ref.jobId, (j) => setLiveJob(j), ac.signal);
           if (ac.signal.aborted) return;
@@ -449,6 +458,7 @@ export function ChatView() {
     },
     [loadConvs]
   );
+  resumeLiveRef.current = resumeLive;
 
   // 挂载时恢复上次会话：URL 优先，localStorage 兜底。否则切视图后 current 归零。
   const currentRef = React.useRef<string | null>(null);
@@ -600,10 +610,12 @@ export function ChatView() {
     return resolveCase(text, cs);
   };
 
-  const runForCase = async (caseId: string, cid: string | null) => {
+  const runForCase = async (caseId: string, cid: string | null, opts?: { hitl?: boolean }) => {
     const ac = new AbortController();
     abortRef.current = ac;
     setLiveJob({ state: "queued", log: [] });
+    setApprovalBusy(null);
+    setApprovalError(null);
     try {
       // instruction 传空：用户消息由前端写一次，后端不再重复追加
       const job = await runJob(
@@ -619,7 +631,8 @@ export function ChatView() {
           } catch {
             /* ignore */
           }
-        }
+        },
+        opts?.hitl
       );
       if (ac.signal.aborted) return;
       setLiveJob(job);
@@ -689,7 +702,6 @@ export function ChatView() {
     setBusy(true);
     setElapsed(0);
     setLiveExplain(null);
-    setPendingRun(null);
     try {
       const cid = await ensureConv();
       if (!cid) return;
@@ -708,8 +720,9 @@ export function ChatView() {
           guide = null;
         }
         if (guide?.action === "run" && guide.case) {
-          // 语义匹配到的用例先走确认卡，避免自动烧一次模型调用
-          setPendingRun({ caseId: guide.case, say: guide.say || "", cid });
+          // 语义命中的用例：先跑确定性阶段，候选消息就绪后由后端暂停等审批
+          lastCaseRef.current = guide.case;
+          await runForCase(guide.case, cid, { hitl: true });
           return;
         } else {
           const content =
@@ -751,29 +764,27 @@ export function ChatView() {
     });
   };
 
-  const confirmPending = () => {
-    const p = pendingRun;
-    setPendingRun(null);
-    if (!p || sendingRef.current) return;
-    sendingRef.current = true;
-    lastCaseRef.current = p.caseId;
-    setError(null);
-    setStopped(false);
-    setBusy(true);
-    runForCase(p.caseId, p.cid).finally(() => {
-      sendingRef.current = false;
-      setBusy(false);
-    });
-  };
-
-  const cancelPending = () => {
-    const p = pendingRun;
-    setPendingRun(null);
-    if (!p) return;
-    const content = "已取消，未发起运行。";
-    pushLocal({ role: "assistant", content, at: Date.now() });
-    api.appendMessage(p.cid, "assistant", content).catch(() => undefined);
-    requestAnimationFrame(() => scrollBottom(true));
+  const decideApproval = async (decision: "approve" | "reject") => {
+    const jid = liveJob?.id;
+    if (!jid || approvalBusy) return;
+    if (liveJob?.state !== "awaiting_approval" || liveJob.approval?.status !== "pending") return;
+    setApprovalBusy(decision);
+    setApprovalError(null);
+    try {
+      await api.approveJob(jid, decision);
+      // 乐观更新：SSE 下一帧到达前就禁用按钮，避免重复提交
+      setLiveJob((prev) =>
+        prev && prev.id === jid
+          ? { ...prev, approval: { ...(prev.approval || {}), status: decision === "approve" ? "approved" : "rejected" } }
+          : prev
+      );
+    } catch (e) {
+      setApprovalError(
+        e instanceof ApiError ? `提交审批失败：${e.message}` : "提交审批失败，请重试。"
+      );
+    } finally {
+      setApprovalBusy(null);
+    }
   };
 
   /* ---------- 键盘 ---------- */
@@ -812,6 +823,19 @@ export function ChatView() {
 
   const emptyState = messages.length === 0 && !liveJob;
   const currentTitle = convs.find((c) => c.id === current)?.title || "新对话";
+  const awaitingApproval = liveJob?.state === "awaiting_approval";
+  const approvalStatus = liveJob?.approval?.status;
+  const approvalCanceled = approvalStatus === "rejected" || approvalStatus === "timeout";
+  const approvalNames = (liveJob?.approval?.candidates || [])
+    .map((c) => (typeof c === "string" ? c : c.message || c.name || ""))
+    .filter(Boolean);
+  const approvalShown = approvalNames.slice(0, 8);
+  const approvalRest = approvalNames.length - approvalShown.length;
+  const liveConclusion = approvalCanceled
+    ? approvalStatus === "timeout"
+      ? "审批超时，未调用模型。"
+      : "已取消：未批准候选消息，未调用模型。"
+    : conclusionOf(liveJob ?? undefined);
 
   return (
     <div className="relative flex h-full min-h-0 overflow-hidden">
@@ -973,35 +997,9 @@ export function ChatView() {
               )
             )}
 
-            {pendingRun && (
-              <Card className="border-accent/40">
-                <CardBody className="flex flex-col gap-3">
-                  <div className="flex flex-col gap-1">
-                    <div className="text-[11.5px] font-medium text-muted">语义匹配结果 · 确认后才调用模型</div>
-                    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                      <span className="num font-mono text-[14px] font-semibold text-ink">{pendingRun.caseId}</span>
-                      <Chip tone="muted">预计 1 次模型调用</Chip>
-                    </div>
-                  </div>
-                  {pendingRun.say && (
-                    <p className="text-[12.5px] leading-relaxed text-ink/80">{pendingRun.say}</p>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <Button variant="primary" onClick={confirmPending}>
-                      <Check className="h-4 w-4" />
-                      确认运行
-                    </Button>
-                    <Button variant="subtle" onClick={cancelPending}>
-                      取消
-                    </Button>
-                  </div>
-                </CardBody>
-              </Card>
-            )}
-
             {liveJob && (
               <div className="flex min-w-0 flex-col gap-2 break-words">
-                {busy && (
+                {busy && !awaitingApproval && (
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px]" role="status" aria-live="polite">
                     <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-accent" />
                     <span className="font-medium text-ink">运行中</span>
@@ -1011,12 +1009,74 @@ export function ChatView() {
                     <span className="num text-[11.5px] text-muted">· 已等待 {elapsed} 秒</span>
                   </div>
                 )}
+                {awaitingApproval && (
+                  <Card className="border-accent/40">
+                    <CardBody className="flex flex-col gap-3">
+                      <div className="flex flex-col gap-1">
+                        <div className="text-[12px] font-medium text-ink">
+                          候选消息已就绪 · 调用模型前需确认
+                        </div>
+                        <div className="text-[11.5px] leading-relaxed text-muted">
+                          确认后才会发起 1 次模型调用；取消则不会生成任何信令内容。
+                        </div>
+                      </div>
+                      {approvalShown.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {approvalShown.map((name) => (
+                            <Chip key={name} tone="muted" className="font-mono text-[11.5px]">
+                              {name}
+                            </Chip>
+                          ))}
+                          {approvalRest > 0 && (
+                            <span className="text-[11.5px] text-muted">另 {approvalRest} 条</span>
+                          )}
+                        </div>
+                      )}
+                      {approvalStatus === "pending" ? (
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Button
+                            variant="primary"
+                            onClick={() => decideApproval("approve")}
+                            disabled={approvalBusy !== null}
+                          >
+                            {approvalBusy === "approve" ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Check className="h-4 w-4" />
+                            )}
+                            批准并生成
+                          </Button>
+                          <Button
+                            variant="subtle"
+                            onClick={() => decideApproval("reject")}
+                            disabled={approvalBusy !== null}
+                          >
+                            取消
+                          </Button>
+                          <span className="text-[11.5px] text-muted">
+                            候选仅来自确定性抽取，不含模型输出
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-wrap items-center gap-2 text-[12px] text-muted" role="status">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          已提交，等待任务继续…
+                        </div>
+                      )}
+                      {approvalError && (
+                        <p role="alert" className="text-[12px] leading-relaxed text-bad">
+                          {approvalError}
+                        </p>
+                      )}
+                    </CardBody>
+                  </Card>
+                )}
                 <AssistantBlock
-                  content={busy ? undefined : conclusionOf(liveJob)}
-                  explain={busy ? null : liveExplain}
-                  verdict={busy ? undefined : verdictOf(liveJob)}
-                  stageRows={rowsOf(liveJob)}
-                  violations={violationsOf(liveJob)}
+                  content={busy ? undefined : liveConclusion}
+                  explain={busy || approvalCanceled ? null : liveExplain}
+                  verdict={busy || approvalCanceled ? undefined : verdictOf(liveJob)}
+                  stageRows={approvalCanceled ? [] : rowsOf(liveJob)}
+                  violations={approvalCanceled ? [] : violationsOf(liveJob)}
                   raw={liveJob}
                   stopped={stopped}
                   running={busy}

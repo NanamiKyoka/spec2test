@@ -1,14 +1,20 @@
 """一致性自检：report.json 与 abstain.json 的 gold 合计、逐例 gold、calls 必须一致。"""
+import argparse
 import json
 import os
 import sys
 
-BASE = "E:/workspace/ai_competition/data/score"
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DEFAULT_BASE = os.path.join(ROOT, "data", "score")
 
 
 def main():
-    rep = {r["case"]: r for r in json.load(open(os.path.join(BASE, "report.json"), encoding="utf-8"))}
-    abst = {r["case"]: r for r in json.load(open(os.path.join(BASE, "abstain.json"), encoding="utf-8"))}
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--base", default=DEFAULT_BASE,
+                    help="score 目录；交付快照用 results/score")
+    base = ap.parse_args().base
+    rep = {r["case"]: r for r in json.load(open(os.path.join(base, "report.json"), encoding="utf-8"))}
+    abst = {r["case"]: r for r in json.load(open(os.path.join(base, "abstain.json"), encoding="utf-8"))}
 
     problems = []
     if set(rep) != set(abst):
