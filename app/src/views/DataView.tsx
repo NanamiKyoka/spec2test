@@ -53,6 +53,7 @@ export type ReportRow = {
   L3_recall: number | null | "abstained";
   L1_base: number;
   L3_base: number | null;
+  L3_base_relaxed?: number | null;
   gold_ie_n: number;
 };
 

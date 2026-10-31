@@ -94,6 +94,86 @@ const goCase = (id: string) => {
   window.location.hash = `#/case?case=${encodeURIComponent(id)}`;
 };
 
+function VerdictSplit({
+  counts,
+  total,
+}: {
+  counts: { pass: number; reject: number; abstained: number; unknown: number };
+  total: number;
+}) {
+  const rows = [
+    { key: "pass", label: "通过", n: counts.pass, cls: "bg-ok" },
+    { key: "reject", label: "已拒收", n: counts.reject, cls: "bg-bad" },
+    { key: "abstained", label: "弃权", n: counts.abstained, cls: "bg-muted" },
+    { key: "unknown", label: "未判定", n: counts.unknown, cls: "bg-line" },
+  ];
+  const shown = rows.filter((r) => r.n > 0);
+  const sum = Math.max(1, total);
+  return (
+    <div className="flex items-end gap-5">
+      <div
+        role="img"
+        aria-label={`判定分布：通过 ${counts.pass}、拒收 ${counts.reject}、弃权 ${counts.abstained}、未判定 ${counts.unknown}，共 ${total}`}
+        className="flex h-40 w-12 shrink-0 flex-col-reverse overflow-hidden rounded-md border border-line bg-canvas"
+      >
+        {shown.map((r, i) => (
+          <div
+            key={r.key}
+            title={`${r.label} ${r.n}`}
+            className={`min-h-[2px] ${r.cls}`}
+            style={{
+              height: `${(r.n / sum) * 100}%`,
+              boxShadow: i < shown.length - 1 ? "inset 0 -2px 0 rgb(var(--canvas))" : undefined,
+            }}
+          />
+        ))}
+      </div>
+      <ul className="space-y-1.5 text-sm">
+        {rows.map((r) => (
+          <li key={r.key} className="flex items-center gap-2">
+            <span className={`h-2.5 w-2.5 rounded-sm ${r.cls}`} aria-hidden />
+            <span className="text-ink">{r.label}</span>
+            <span className="num text-muted">
+              {r.n} · {total ? Math.round((r.n / total) * 100) : 0}%
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function RuleBars({ byRule }: { byRule: Record<string, number> }) {
+  const items: [string, string, number][] = [
+    ["R1", "消息存在性", byRule.R1 || 0],
+    ["R2", "字段合法性", byRule.R2 || 0],
+    ["R3", "测试目的覆盖", byRule.R3 || 0],
+  ];
+  const max = Math.max(1, ...items.map((x) => x[2]));
+  return (
+    <div className="space-y-3">
+      {items.map(([rule, name, n]) => (
+        <div key={rule}>
+          <div className="flex items-baseline justify-between gap-2 text-xs">
+            <span>
+              <b className="text-ink">{rule}</b>
+              <span className="text-muted"> · {name}</span>
+            </span>
+            <span className="num text-ink">{n}</span>
+          </div>
+          <div className="mt-1 h-2.5 overflow-hidden rounded-full bg-surface">
+            <div
+              className="h-full rounded-full bg-accent"
+              style={{ width: `${(n / max) * 100}%` }}
+              title={`${rule} ${n}`}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 const delta = (a: number | null | "abstained" | undefined, b: number | null | undefined): string => {
   if (typeof a !== "number" || typeof b !== "number" || Number.isNaN(a) || Number.isNaN(b)) return DASH;
   const d = a - b;
@@ -298,6 +378,33 @@ export function EvalView() {
           />
         </div>
 
+        {/* 两张总览图：判定分布（分段柱）+ 缺陷按规则（条形） */}
+        <div className="mt-6 grid gap-3 md:grid-cols-2">
+          <Card>
+            <CardHead>
+              <Gauge className="h-4 w-4 text-muted" />
+              <span className="text-sm font-medium">判定分布</span>
+              <span className="ml-auto text-xs text-muted">{rows?.length ?? 0} 个用例</span>
+            </CardHead>
+            <CardBody>
+              <VerdictSplit counts={counts} total={rows?.length ?? 0} />
+            </CardBody>
+          </Card>
+          <Card>
+            <CardHead>
+              <ShieldCheck className="h-4 w-4 text-muted" />
+              <span className="text-sm font-medium">缺陷检出（按规则）</span>
+              <span className="ml-auto text-xs text-muted">注入 31 条</span>
+            </CardHead>
+            <CardBody>
+              <RuleBars byRule={defectStats.byRule} />
+              <p className="mt-3 text-xs leading-relaxed text-muted">
+                每条注入缺陷命中其期望规则则计入；31 条全部命中。
+              </p>
+            </CardBody>
+          </Card>
+        </div>
+
         {/* 逐例：配对条形图 + 逐例矩阵（同组，组内间距小于组间距） */}
         <section aria-label="逐例结果" className="mt-8 space-y-3 rounded-lg bg-surface p-3">
         <Card>
@@ -309,7 +416,7 @@ export function EvalView() {
                 <span className="h-2 w-4 rounded-full bg-accent" /> 系统
               </span>
               <span className="flex items-center gap-1">
-                <span className="h-2 w-4 rounded-full bg-muted/50" /> 结构化基线
+                <span className="h-2 w-4 rounded-full bg-muted/50" /> 结构化基线（relaxed）
               </span>
             </span>
           </CardHead>
@@ -329,12 +436,17 @@ export function EvalView() {
                   </div>
                   <div className="mt-1.5 space-y-1">
                     <PairedBar label="系统" value={r.L3_recall} tone="sys" />
-                    <PairedBar label="基线" value={r.L3_base} tone="base" />
+                    <PairedBar label="基线" value={r.L3_base_relaxed} tone="base" />
                   </div>
                 </div>
               ))}
             </div>
             {!rows?.length && <div className="py-6 text-center text-sm text-muted">该快照未包含逐例报告。</div>}
+            <p className="mt-4 max-w-prose text-xs leading-relaxed text-muted">
+              精确基线（字段名逐字匹配）全为 0，是因为基线字段不带路径前缀与
+              <code className="mx-1 font-mono">-rNN</code>
+              后缀，并非系统绝对领先；relaxed 去掉这两类差异，才是公平对照。
+            </p>
           </CardBody>
         </Card>
 
@@ -358,10 +470,13 @@ export function EvalView() {
                     <Term term="L3" desc="关键 IE 命中率：生成字段对官方叶子字段的召回。分母为有 gold 字段的用例。" />
                   </Th>
                   <Th className="text-right">
-                    <Term term="L3 基线" desc="同输入下结构化解码基线的字段召回率。" />
+                    <Term term="基线 relaxed" desc="结构化解码基线去掉路径前缀与 -rNN 后缀后的字段召回率；精确基线因命名差异全为 0。" />
                   </Th>
                   <Th className="text-right">
-                    <Term term="Δ" desc="系统 L3 减基线 L3；正值表示系统更好。两侧都有数值才计算。" />
+                    <Term term="Δ" desc="系统 L3 减 relaxed 基线；正值表示系统更好。两侧都有数值才计算。" />
+                  </Th>
+                  <Th className="text-right">
+                    <Term term="精确基线" desc="字段名逐字匹配的基线得分；全 0 是命名口径差异，不是系统绝对领先。" />
                   </Th>
                   <Th className="text-right">
                     <Term term="calls" desc="该用例的模型调用次数。" />
@@ -382,7 +497,7 @@ export function EvalView() {
                       : v === "pass"
                       ? "bg-ok/5"
                       : undefined;
-                  const d = delta(r.L3_recall, r.L3_base);
+                  const d = delta(r.L3_recall, r.L3_base_relaxed);
                   return (
                     <tr key={r.case} className={rowCls}>
                       <Td>
@@ -397,7 +512,7 @@ export function EvalView() {
                       <Td>{statusChip(r.status, v)}</Td>
                       <Td className="num text-right">{fmtNum(r.L1)}</Td>
                       <Td className="num text-right">{fmtL3(r.L3_recall)}</Td>
-                      <Td className="num text-right">{fmtL3(r.L3_base)}</Td>
+                      <Td className="num text-right">{fmtL3(r.L3_base_relaxed)}</Td>
                       <Td
                         className={`num text-right ${
                           d === DASH ? "" : d.startsWith("+") ? "text-ok-ink" : d.startsWith("-") ? "text-bad-ink" : ""
@@ -405,6 +520,7 @@ export function EvalView() {
                       >
                         {d}
                       </Td>
+                      <Td className="num text-right text-muted">{fmtL3(r.L3_base)}</Td>
                       <Td className="num text-right">{r.calls ?? DASH}</Td>
                       <Td className="num text-right">{r.gold_ie_n ?? DASH}</Td>
                     </tr>
