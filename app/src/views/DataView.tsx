@@ -537,6 +537,11 @@ export function DataView() {
             <span className="ml-auto text-xs text-muted">点击行查看单例全链条</span>
           </CardHead>
           <CardBody className="p-0">
+            <p className="border-b border-line px-3 py-2 text-xs leading-relaxed text-muted">
+              怎么读：每行一个用例；绿=通过、灰=弃权、红=拒收；L1/L3 点指标卡右上角
+              <HelpCircle className="mx-0.5 inline h-3 w-3" />
+              看口径；点用例号看字段级证据。
+            </p>
             <div className="flex flex-wrap items-center gap-1.5 border-b border-line px-3 py-2">
               {(
                 [
@@ -655,6 +660,7 @@ export function DataView() {
                     <Th>用例</Th>
                     <Th>状态</Th>
                     <Th>verdict</Th>
+                    <Th>说明</Th>
                     <Th className="text-right">耗时</Th>
                   </tr>
                 </thead>
@@ -667,6 +673,9 @@ export function DataView() {
                         <Chip tone={x.state === "done" ? "ok" : x.state === "failed" ? "bad" : "muted"}>{runState(x.state)}</Chip>
                       </Td>
                       <Td>{statusChip(undefined, x.verdict ?? null)}</Td>
+                      <Td className="max-w-[360px] text-xs leading-relaxed text-muted">
+                        {x.summary || DASH}
+                      </Td>
                       <Td className="num text-right">{x.seconds != null ? `${Number(x.seconds).toFixed(2)}s` : DASH}</Td>
                     </tr>
                   ))}
