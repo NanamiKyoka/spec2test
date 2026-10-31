@@ -48,6 +48,10 @@ def test_health(base):
     assert _code(base + "/api/health") == 200
 
 
+def test_explain_index(base):
+    assert _code(base + "/api/explain") == 200
+
+
 def test_snapshot_is_served(base):
     assert _code(base + "/results/score/report.json") == 200
 

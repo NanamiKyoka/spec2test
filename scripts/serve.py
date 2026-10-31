@@ -944,6 +944,21 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                                "recent_failures": failures})
         if path == "/api/cases":
             return self._json(list_cases())
+        if path == "/api/explain":
+            cases, source = set(), "none"
+            for sub, tag in (("data", "live"), ("results", "snapshot")):
+                base = os.path.join(ROOT, sub, "explain")
+                if not os.path.isdir(base):
+                    continue
+                for n in os.listdir(base):
+                    m2 = re.match(r"^(6\.7\.1\.\d{1,2})\.json$", n)
+                    if m2:
+                        cases.add(m2.group(1))
+                        if tag == "live":
+                            source = "live"
+            if source != "live" and cases:
+                source = "snapshot"
+            return self._json({"cases": sorted(cases), "source": source})
         m = re.match(r"^/api/case/([0-9.]+)$", path)
         if m:
             return self._json({"case": m.group(1), "stages": case_stages(m.group(1))})

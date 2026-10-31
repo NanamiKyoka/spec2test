@@ -110,6 +110,7 @@ export function EvalView() {
   const [gold, setGold] = useState<ValidateRow[] | null>(null);
   const [defects, setDefects] = useState<ValidateRow[] | null>(null);
   const [verdicts, setVerdicts] = useState<Record<string, Verdict>>({});
+  const [explainCount, setExplainCount] = useState<number | null>(null);
   const [source, setSource] = useState<"live" | "snapshot" | "none">("none");
   const [loading, setLoading] = useState(true);
 
@@ -151,6 +152,16 @@ export function EvalView() {
         })
       );
       if (!alive) return;
+      let explainCases: string[] = [];
+      try {
+        const r = await fetch("/api/explain", { cache: "no-store" });
+        if (r.ok) explainCases = (await r.json()).cases || [];
+      } catch {
+        /* 后端不可用时按 0 计，不阻塞页面 */
+      }
+      if (!alive) return;
+      const caseSet = new Set((score.data || []).map((r) => r.case));
+      setExplainCount(explainCases.filter((c) => caseSet.has(c)).length);
       setVerdicts(Object.fromEntries(entries));
       setRows(score.data);
       setAbstainCount(abs.data ? abs.data.length : null);
@@ -171,6 +182,8 @@ export function EvalView() {
   }, [rows, verdicts]);
 
   const calls = useMemo(() => (rows || []).reduce((s, r) => s + (r.calls || 0), 0), [rows]);
+
+  const goldDenom = useMemo(() => (rows || []).filter((r) => (r.gold_ie_n ?? 0) > 0).length, [rows]);
 
   const defectStats = useMemo(() => {
     const detected = (defects || []).filter((d) => (d.violations?.length || 0) > 0).length;
@@ -452,11 +465,29 @@ export function EvalView() {
             <span className="text-sm font-medium">已知限制</span>
           </CardHead>
           <CardBody>
-            <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-muted">
-              <li>L2 不计分：样本仅 16 条，不足以支撑统计结论。</li>
-              <li>6G 尚未标准化：相关结论基于 Rel-19 验证，不代表最终标准。</li>
-              <li>L3 只衡量字段召回，不衡量取值是否正确。</li>
-            </ul>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {[
+                ["切片范围", `${rows?.length ?? 0} 个 NTN 用例`],
+                ["弃权", `${counts.abstained} 例 · 未调用模型，不计 0 分`],
+                ["拒收（当前快照）", `${counts.reject} 例 · 拒收不写入正式结果`],
+                ["L3 分母", `${goldDenom} 例（gold 字段为 0 的用例不计）`],
+                [
+                  "智能解读覆盖",
+                  explainCount === null ? DASH : `${explainCount} / ${rows?.length ?? 0}`,
+                ],
+                ["L2", "16 条交换 · 样本不足，不计分"],
+                ["6G", "未标准化 · 结论基于 Rel-19"],
+                ["用户研究", "未做 · 适用人群为设计假设"],
+              ].map(([k, v]) => (
+                <div key={k} className="flex items-baseline justify-between gap-3 rounded-md bg-canvas px-3 py-2">
+                  <span className="shrink-0 text-xs font-medium text-muted">{k}</span>
+                  <span className="text-right text-xs text-ink">{v}</span>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-xs leading-relaxed text-muted">
+              L3 只衡量字段召回，不衡量取值是否正确；当前快照无拒收样本，拒收能力以上方注入缺陷验证。
+            </p>
           </CardBody>
         </Card>
         </section>

@@ -46,6 +46,7 @@
 | POST | `/api/settings` | `{provider, base_url, model, temperature, api_key?}` | `{ok}`；`api_key` 缺省则不覆盖旧值 |
 | POST | `/api/test` | `{provider?, base_url?, model?, api_key?}` | `{ok, latency_ms, model_seen, error?}`（发一次最小请求） |
 | GET | `/api/cases` | — | `[{case, title, status, gold_ies}]` |
+| GET | `/api/explain` | — | `{cases:[caseId], source:"live"\|"snapshot"\|"none"}`，已有智能解读的用例索引 |
 | GET | `/api/case/<id>` | — | `{stages:[{stage, status, summary, detail}]}`，stage 顺序固定见上表 |
 | POST | `/api/run` | `{case, instruction?, conversation_id?, hitl?, dry_run?}` | `{job_id}`；`hitl=true` 时候选阶段后暂停等审批。错误码：`400`（缺/未知 case、无凭据）、`404`（会话不存在）、`409`（同会话已有任务）、`429`（全局并发已满） |
 | GET | `/api/job/<id>` | — | `{state:"queued\|running\|awaiting_approval\|done\|failed", stage, log:[{t,msg}], approval?, verdict?:"pass\|reject\|abstained\|canceled", result?}` |
