@@ -129,9 +129,12 @@ py -3.12 -m pytest -q
 
 # 前端：类型检查 + 构建 + 浏览器冒烟（需先启动 scripts/serve.py）
 cd app && npm ci && npm run build && npm run smoke
+
+# 干净克隆自检：clone → serve → 健康检查 → smoke → 清理
+bash scripts/verify_clean.sh
 ```
 
-CI（`.github/workflows/ci.yml`）在 **push `main` 与 pull request** 时触发，跑三组：后端 `py_compile` + pytest、前端构建、Playwright UI 冒烟（6 条路由 + 外部请求/console 断言；Windows 用 Edge，Linux 用 chromium）。
+CI（`.github/workflows/ci.yml`）在 **push `main` 与 pull request** 时触发，跑三组：后端 `py_compile` + pytest、前端构建、Playwright UI 冒烟（7 条路由 + 外部请求/console 断言；Windows 用 Edge，Linux 用 chromium）。
 
 ## 模型通道（三选一，禁止写死）
 

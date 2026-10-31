@@ -373,7 +373,7 @@ export function CaseView({ caseId }: { caseId: string }) {
               variant="subtle"
               size="sm"
               disabled={!out}
-              title={out ? "导出为 Markdown 文件" : "该用例没有可导出的产物"}
+              title={out ? "导出为 Markdown 文件（归档/评审）" : "该用例没有可导出的产物"}
               onClick={() => downloadIntentMarkdown(caseId, out, report, ctx)}
             >
               <Download className="h-3.5 w-3.5" aria-hidden /> 导出 Markdown
@@ -382,7 +382,7 @@ export function CaseView({ caseId }: { caseId: string }) {
               variant="subtle"
               size="sm"
               disabled={!out}
-              title={out ? "导出为 JSON 文件" : "该用例没有可导出的产物"}
+              title={out ? "导出为 JSON 文件（接入用例库/CI）" : "该用例没有可导出的产物"}
               onClick={() => downloadIntentJson(caseId, out, report, ctx)}
             >
               <Download className="h-3.5 w-3.5" aria-hidden /> 导出 JSON
