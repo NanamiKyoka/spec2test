@@ -54,3 +54,9 @@
 3. 任意指标都能点开看到口径；
 4. 任意空态都给出下一步动作；
 5. 页面上**不出现**裸的 `undefined`、`NaN`、`[object Object]`。
+
+## 9. 干净机器验收（已实测）
+- **只看结果**：Python 3.9+，双击 `start.bat`；不需要 `pip install`。页面读仓库自带 `results/` 快照。
+- **想重跑数据**：`pip install -r requirements.txt`，按 `scripts/repro.sh` 提示下载 3GPP PDF（仓库不附带），再运行 `bash scripts/repro.sh --live --force`。
+- **实测基线**（Windows 11 / Python 3.12）：干净 `git clone` 约 1s，服务 171ms 就绪，数据页 HTTP 200，Playwright 冒烟 7/7、外部请求 0、console error 0。
+- **常见坑**：不要用 MSYS2 自带 Python（3.11 且缺 wheel 支持）；未装 `pdfplumber` 只会影响重跑数据，不影响浏览结果。

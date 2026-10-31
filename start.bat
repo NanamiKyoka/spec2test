@@ -12,7 +12,7 @@ rem ---- 1. 端口已占用则直接提示（不报错） ----
 netstat -ano 2>nul | findstr /C:":8000" | findstr /C:"LISTENING" >nul
 if not errorlevel 1 goto running
 
-rem ---- 2. 依次探测解释器（要求能 import pdfplumber） ----
+rem ---- 2) 依次探测解释器（只需能跑标准库服务；重跑数据才需要 pdfplumber） ----
 set "PYCMD="
 call :try "py -3.12"
 if not defined PYCMD call :try "%LOCALAPPDATA%\Programs\Python\Python312\python.exe"
@@ -20,6 +20,12 @@ if not defined PYCMD call :try "python"
 if not defined PYCMD goto nopython
 
 echo [ok] 使用解释器：%PYCMD%
+%PYCMD% -c "import pdfplumber" >nul 2>&1
+if errorlevel 1 (
+  echo [warn] 未安装 pdfplumber：仅浏览结果不受影响；
+  echo        需要重跑数据时再执行 py -3.12 -m pip install -r requirements.txt
+  echo.
+)
 echo [ok] 启动后自动打开 http://127.0.0.1:8000/web/
 echo      关闭本窗口即停止服务（Ctrl+C 亦可）
 echo.
@@ -36,17 +42,18 @@ pause
 exit /b 0
 
 :nopython
-echo [1/3] 未检测到可用的 Python 3.12（要求能 import pdfplumber）。
-echo [2/3] 安装 Python 3.12：https://www.python.org/downloads/  安装时勾选 Add to PATH。
-echo [3/3] 装好依赖后重试：py -3.12 -m pip install -r requirements.txt
+echo [1/3] 未检测到可用的 Python（建议 3.12，最低 3.9）。
+echo [2/3] 安装 Python：https://www.python.org/downloads/  安装时勾选 Add to PATH。
+echo [3/3] 浏览结果无需额外依赖；重跑数据再执行 py -3.12 -m pip install -r requirements.txt
 echo.
 pause
 exit /b 1
 
 :try
-set "CAND=%~1"
-%CAND% -c "import pdfplumber" >nul 2>&1
+set "RAW=%~1"
+echo %RAW% | findstr /I /E ".exe" >nul
+if errorlevel 1 (set "CAND=%RAW%") else (set "CAND="%RAW%"")
+%CAND% -c "import sys; raise SystemExit(0 if sys.version_info >= (3,9) else 1)" >nul 2>&1
 if errorlevel 1 goto :eof
-echo %CAND% | findstr /I /E ".exe" >nul
-if errorlevel 1 (set "PYCMD=%CAND%") else (set "PYCMD="%CAND%"")
+set "PYCMD=%CAND%"
 goto :eof

@@ -13,6 +13,7 @@
 ```
 
 仓库自带 `results/` 结果快照，**没有 `data/` 也能直接看到页面**；页面会提示"当前显示的是快照"。
+浏览结果只需 Python 3.9+，**不需要安装任何第三方依赖**；重跑数据才需要 `pip install -r requirements.txt` 和 3GPP 规范 PDF（`repro.sh` 会打印下载命令，仓库不附带 PDF）。
 `data/` 由 `scripts/repro.sh` 生成，存在时自动优先使用。
 
 ## 目录
