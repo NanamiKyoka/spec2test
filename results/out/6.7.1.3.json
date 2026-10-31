@@ -1,186 +1,5 @@
 {
   "case_id": "6.7.1.3",
-  "steps": [
-    {
-      "st": 1,
-      "actor": "SS",
-      "direction": "S->U",
-      "message": "",
-      "tp_ref": [
-        1
-      ]
-    },
-    {
-      "st": 2,
-      "actor": "UE",
-      "direction": "U->S",
-      "message": "",
-      "tp_ref": [
-        1
-      ]
-    },
-    {
-      "st": 3,
-      "actor": "SS",
-      "direction": "S->U",
-      "message": "MIB",
-      "tp_ref": [
-        1
-      ]
-    },
-    {
-      "st": 4,
-      "actor": "SS",
-      "direction": "S->U",
-      "message": "SIB1",
-      "tp_ref": [
-        1
-      ]
-    },
-    {
-      "st": 5,
-      "actor": "UE",
-      "direction": "U->S",
-      "message": "",
-      "tp_ref": [
-        1
-      ]
-    },
-    {
-      "st": 6,
-      "actor": "SS",
-      "direction": "S->U",
-      "message": "",
-      "tp_ref": [
-        2
-      ]
-    },
-    {
-      "st": 7,
-      "actor": "SS",
-      "direction": "S->U",
-      "message": "MIB",
-      "tp_ref": [
-        2
-      ]
-    },
-    {
-      "st": 8,
-      "actor": "SS",
-      "direction": "S->U",
-      "message": "SIB1",
-      "tp_ref": [
-        2
-      ]
-    },
-    {
-      "st": 9,
-      "actor": "UE",
-      "direction": "U->S",
-      "message": "",
-      "tp_ref": [
-        2
-      ]
-    },
-    {
-      "st": 10,
-      "actor": "SS",
-      "direction": "S->U",
-      "message": "",
-      "tp_ref": [
-        3
-      ]
-    },
-    {
-      "st": 11,
-      "actor": "SS",
-      "direction": "S->U",
-      "message": "MIB",
-      "tp_ref": [
-        3
-      ]
-    },
-    {
-      "st": 12,
-      "actor": "SS",
-      "direction": "S->U",
-      "message": "SIB1",
-      "tp_ref": [
-        3
-      ]
-    },
-    {
-      "st": 13,
-      "actor": "UE",
-      "direction": "U->S",
-      "message": "",
-      "tp_ref": [
-        3
-      ]
-    },
-    {
-      "st": 14,
-      "actor": "SS",
-      "direction": "S->U",
-      "message": "SIB1",
-      "tp_ref": [
-        3
-      ]
-    },
-    {
-      "st": 15,
-      "actor": "UE",
-      "direction": "U->S",
-      "message": "",
-      "tp_ref": [
-        3
-      ]
-    }
-  ],
-  "messages": [
-    {
-      "message": "SIB1",
-      "derivation_path": "3GPP TS 38.331 SIB1 ASN.1 / default_template_fields",
-      "ies": [
-        {
-          "name": "cellAccessRelatedInfo",
-          "value": "present",
-          "condition": "All cases: SIB1 carries cellAccessRelatedInfo for the NR NTN cell",
-          "_known": true
-        },
-        {
-          "name": "cellBarredNTN-r17",
-          "value": "Not present",
-          "condition": "Case (1): NR NTN suitable cell; cellBarredNTN-r17 absent in SIB1, UE considers cell barred and does not camp",
-          "_known": true
-        },
-        {
-          "name": "cellBarredNTN-r17",
-          "value": "notBarred",
-          "condition": "Case (2): NR NTN suitable cell; cellBarredNTN-r17 set to notBarred, UE considers cell suitable and camps",
-          "_known": true
-        },
-        {
-          "name": "cellBarredNTN-r17",
-          "value": "barred",
-          "condition": "Case (3): NR NTN cell; cellBarredNTN-r17 changes to barred, UE considers cell barred and does not camp",
-          "_known": true
-        }
-      ],
-      "_stop": "end_turn"
-    }
-  ],
-  "status": "generated",
-  "reason": "",
-  "_stage2": {
-    "candidates": [
-      "SIB1"
-    ],
-    "calls": 1
-  },
-  "verdict": "pass",
-  "violations": [],
-  "calls": 1,
   "tp": [
     {
       "index": 1,
@@ -203,5 +22,152 @@
       "then": "the UE considers the cell as barred and no camping on this cell can take place",
       "ok": true
     }
-  ]
+  ],
+  "steps": [
+    {
+      "st": 1,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 2,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 3,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 4,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 5,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "RRCSetupRequest",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 6,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "RRCSetup",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 7,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "RRCSetupComplete",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 8,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "RRCRelease",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 9,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1",
+      "tp_ref": [
+        3
+      ]
+    },
+    {
+      "st": 10,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        3
+      ]
+    },
+    {
+      "st": 11,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "Paging",
+      "tp_ref": [
+        3
+      ]
+    },
+    {
+      "st": 12,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        3
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "message": "SIB1",
+      "derivation_path": "default_template_fields",
+      "ies": [
+        {
+          "name": "cellBarredNTN-r17",
+          "value": "Not present",
+          "condition": "case (1): SIB1 at step 1; field absent => UE considers cell barred",
+          "_known": true
+        },
+        {
+          "name": "cellBarredNTN-r17",
+          "value": "notBarred",
+          "condition": "case (2): SIB1 at step 4; field present => UE considers cell suitable and camps",
+          "_known": true
+        },
+        {
+          "name": "cellBarredNTN-r17",
+          "value": "barred",
+          "condition": "case (3): SIB1 at step 9; field changed to barred => UE considers cell barred",
+          "_known": true
+        }
+      ],
+      "_stop": "end_turn"
+    }
+  ],
+  "status": "generated",
+  "reason": "",
+  "_stage2": {
+    "candidates": [
+      "SIB1"
+    ],
+    "calls": 1
+  },
+  "verdict": "pass",
+  "violations": []
 }

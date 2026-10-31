@@ -350,13 +350,13 @@ export function EvalView() {
         <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           <StatCard
             label="用例"
-            term="本切片 8 个用例的判定分布。通过/拒收由校验器给出，弃权指信息不足时明确不生成且零调用。"
+            term="本切片 8 个用例的判定分布。通过/拒收由校验器给出，弃权指信息不足时未生成 IE 字段内容（阶段二零调用）。"
             value={String(rows?.length ?? 0)}
             sub={`通过 ${counts.pass} / 拒收 ${counts.reject} / 弃权 ${counts.abstained}`}
           />
           <StatCard
-            label="总模型调用"
-            term="全部用例的模型调用次数合计。弃权用例不发起调用，因此为 0。"
+            label="IE 生成调用"
+            term="字段级（IE）生成的模型调用合计；不含步骤解析阶段。弃权用例为 0。契约以 report.json 的 calls 为准。"
             value={String(calls)}
             sub="report.json 中 calls 求和"
           />
@@ -584,7 +584,8 @@ export function EvalView() {
             <div className="grid gap-2 sm:grid-cols-2">
               {[
                 ["切片范围", `${rows?.length ?? 0} 个 NTN 用例`],
-                ["弃权", `${counts.abstained} 例 · 未调用模型，不计 0 分`],
+                ["弃权", `${counts.abstained} 例 · 未生成 IE 字段内容，不计 0 分`],
+                ["弃权口径", "未生成 IE 字段内容；步骤可含消息名"],
                 ["拒收（当前快照）", `${counts.reject} 例 · 拒收不写入正式结果`],
                 ["L3 分母", `${goldDenom} 例（gold 字段为 0 的用例不计）`],
                 [

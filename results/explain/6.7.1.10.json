@@ -2,33 +2,33 @@
   "case_id": "6.7.1.10",
   "provider": "proxy",
   "model": "deepseek-v4.1-flash",
-  "generated_at": "2026-10-30T15:49:50.729061+00:00",
-  "headline": "该用例判定通过，未发现违规项",
+  "generated_at": "2026-10-31T10:00:41.186559+00:00",
+  "headline": "该用例生成通过，未发现违规",
   "sections": [
     {
       "key": "tests",
       "title": "这条用例在验什么",
-      "body": "验证支持跳过TN测量的UE在NR NTN增强小区空闲态，收到SIB25与SIB4配置后，当tn-AreaIdList内TN NR小区排名更高且UE处于该频率覆盖范围时，重选到该TN NR小区。"
+      "body": "验证支持跳过TN测量的NTN UE在收到SIB25与SIB4配置后，当TN NR小区排名更高且处于tn-AreaIdList覆盖内时，重选到该TN NR小区。"
     },
     {
       "key": "generated",
       "title": "系统生成了什么",
-      "body": "系统生成5步流程：SS先后下发SIB25、SIB4，随后UE与SS交互，覆盖验证点1；生成消息包含SIB25的coverageAreaInfoList和SIB4的interFreqCarrierFreqList等字段。"
+      "body": "steps_count=5，calls=2；messages字段实际列出SIB25与SIB4，其余步骤消息名为空。"
     },
     {
       "key": "verdict",
       "title": "为什么是这个判定",
-      "body": "numbers.verdict为pass，violations为空即实际违规0条，因此判定通过；不是unknown或abstained。"
+      "body": "numbers.verdict为pass，实际违规0条；证据中violations为空，未发现与通过判定冲突的内容。"
     },
     {
       "key": "data",
       "title": "数据怎么读",
-      "body": "L1=1.0，L3_recall=1.0，gold_ie_n=2，calls=2；steps_count=5，score状态为generated。"
+      "body": "L1=1.0，L3_recall=1.0，gold_ie_n=2，calls=2；L3非空，不写弃权不计分；gold叶子IE共2个。"
     },
     {
       "key": "caveats",
       "title": "哪里还不确定",
-      "body": "证据未给出空消息的具体内容，也未列出除SIB25/SIB4外的步骤细节；仅凭现有JSON不能补充更多规范事实。"
+      "body": "证据未提供messages_count，且第3–5步消息名为空，不能据此推断更多未列出的信令内容。"
     }
   ],
   "numbers": {

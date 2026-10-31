@@ -76,7 +76,7 @@ export function AboutView() {
           <ol className="mt-3 max-w-prose list-decimal space-y-1.5 pl-5 text-sm leading-relaxed text-muted">
             <li>先看数据：8 例、L1 8/8、缺陷检出 31/31、官方误报 0/8；点指标卡 `?` 看口径。</li>
             <li>看通过证据：6.7.1.3 → 结论 → 字段抽屉 → 导出 Markdown/JSON。</li>
-            <li>看弃权：6.7.1.4 → 未调用模型、不计 0 分。</li>
+            <li>看弃权：6.7.1.4 → 未生成 IE 字段内容、不计 0 分。</li>
             <li>试对话：精确命中直接跑；语义输入触发 HITL 审批卡，批准后才调用模型。</li>
             <li>看局限：评测页底部「已知限制」，含切片、L3 分母、解读覆盖与未验证项。</li>
           </ol>

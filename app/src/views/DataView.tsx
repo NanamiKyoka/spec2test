@@ -362,14 +362,14 @@ export function DataView() {
             label={
               <Term
                 term="弃权"
-                desc="输入信息不足时，系统明确声明不生成，且不发起模型调用——既不是失败，也不是 0 分。"
+                desc="输入信息不足时，系统明确声明不生成，且不进入字段级生成——既不是失败，也不是 0 分。"
               />
             }
             value={String(metrics.abstained)}
-            sub="未调用模型、未产出信令"
+            sub="未生成 IE 字段内容"
             explain={{
               title: "弃权",
-              formula: "统计 status=abstained 的用例数：候选消息集为空即弃权，调用次数为 0。",
+              formula: "统计 status=abstained 的用例数：候选消息集为空即弃权，字段级调用为 0。",
               denominator: `分母 = ${metrics.n} 个用例。`,
               limit: "弃权是正确行为（拒绝编造），因此标记为灰色，不使用错误色。",
             }}
@@ -437,7 +437,7 @@ export function DataView() {
                   <Th>用例</Th>
                   <Th>标题</Th>
                   <Th>状态</Th>
-                  <Th className="text-right">调用数</Th>
+                  <Th className="text-right">IE 调用</Th>
                   <Th className="text-right">
                     <Term term="L1" desc="结构合法率：生成物能否解析成 IR，且每个步骤都有主体/方向/消息。" />
                   </Th>

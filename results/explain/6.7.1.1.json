@@ -2,33 +2,33 @@
   "case_id": "6.7.1.1",
   "provider": "proxy",
   "model": "deepseek-v4.1-flash",
-  "generated_at": "2026-10-31T08:04:10.865695+00:00",
-  "headline": "结构解析通过，信令流程覆盖两项测试目的，无违规",
+  "generated_at": "2026-10-31T09:59:25.750333+00:00",
+  "headline": "6.7.1.1 生成通过，违规 0 条。",
   "sections": [
     {
       "key": "tests",
       "title": "这条用例在验什么",
-      "body": "验证 NR NTN 小区选择与 GNSS 位置的关系：UE 在无有效 GNSS 位置时不应建立 RRC 连接去发起注册；有有效位置且小区广播 SIB19 时，应建立 RRC 连接并完成注册。"
+      "body": "验证 NR NTN 小区选择中 GNSS 位置的影响：无有效 GNSS 位置时 UE 不应建立 RRC 连接做注册；有有效位置并收到 SIB19 时应建立 RRC 并完成注册。"
     },
     {
       "key": "generated",
       "title": "系统生成了什么",
-      "body": "共 14 步：先下发 MIB、SIB1、SIB19，随后对应无位置场景的 UE 侧步骤，再进入 RRCSetupRequest、RRCSetup、RRCSetupComplete、注册请求、注册接受、注册完成。另生成 SIB4、SIB5、SIB11 至 SIB14 等字段。"
+      "body": "系统生成 14 步流程，调用模型 9 次；证据未给 messages_count，messages 字段实际列出 SIB19、SIB1、SIB4、SIB5、SIB11、SIB12、SIB13、SIB14。"
     },
     {
       "key": "verdict",
       "title": "为什么是这个判定",
-      "body": "判定为 pass，实际违规 0 条，violations 为空。生成流程按测试目的分成两段，结构上可对上 SIB19 下发与注册流程两项要求。"
+      "body": "numbers.verdict 为 pass，实际违规 0 条；状态为 generated，L1=1.0，L3=null 因 gold=0 不适用，不能写成弃权不计分。"
     },
     {
       "key": "data",
       "title": "数据怎么读",
-      "body": "L1=1.0，表示结构层得分；L3=null，因 gold=0，该用例没有可计分的 gold 字段，L3 不适用；calls=9，gold=0，说明没有黄金样本参与比对。"
+      "body": "L1=1.0；L3_recall=null；gold_ie_n=0；calls=9。gold=0 时 L3 无计分字段，按不适用读，不是弃权不计分。"
     },
     {
       "key": "caveats",
       "title": "哪里还不确定",
-      "body": "SIB14 模板为空，无字段；若干步骤 message 为空，仅能靠方向与序号判断。L1 满分只反映结构，不代表信令内容已逐字段验证。"
+      "body": "SIB14 无可用模板字段，messages 未给 messages_count；gold_leaf_ies 为空，解读仅限已给证据，不补规范细节。"
     }
   ],
   "numbers": {

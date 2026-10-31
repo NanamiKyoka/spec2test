@@ -149,7 +149,7 @@ function VerdictChip({
         <span className="h-1.5 w-1.5 rounded-full bg-muted" />
         <Term
           term="已取消"
-          desc="候选消息未获批准或审批超时，未调用模型、未产出信令内容。不是失败，也不是弃权。"
+          desc="候选消息未获批准或审批超时，未调用模型、未生成 IE 字段内容。不是失败，也不是弃权。"
         />
       </Chip>
     );
@@ -157,7 +157,7 @@ function VerdictChip({
     return (
       <Chip tone="muted" className={className}>
         <span className="h-1.5 w-1.5 rounded-full bg-muted" />
-        <Term term="已弃权" desc="输入信息不足，系统不发起模型调用、不产出信令内容。弃权不是失败，也不计 0 分。" />
+        <Term term="已弃权" desc="输入信息不足，系统不进入字段级生成、不产出信令内容。弃权不是失败，也不计 0 分。" />
       </Chip>
     );
   if (verdict === "reject")

@@ -201,7 +201,7 @@ export function renderIntentMarkdown(model: ExportModel): string {
   if (model.status === "abstained") {
     lines.push("");
     lines.push(
-      `弃权：未生成信令内容（未调用模型）；以上步骤为结构解析产物${model.reason ? `。原因：${model.reason}` : ""}`
+      `弃权：未生成 IE 字段内容（阶段二未调用模型）；以上步骤为前序解析产物，含消息名、不含字段取值${model.reason ? `。原因：${model.reason}` : ""}`
     );
   }
 

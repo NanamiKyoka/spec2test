@@ -78,7 +78,7 @@ export function conclusionOf(job?: Job): string {
   if (job.state !== "done") return "运行中，尚未得出结论。";
   const stages = buildStages(job);
   const skipped = stages.filter((s) => s.status === "skipped").length;
-  if (skipped >= 3) return "输入信息不足，已弃权：未调用模型、未产出信令内容。";
+  if (skipped >= 3) return "输入信息不足，已弃权：未生成 IE 字段内容。";
   const v = verdictOf(job);
   const vs = violationsOf(job);
   if (v === "reject") return `校验未通过（${vs.length} 条违规）—— 已拒收，未写入结果。`;

@@ -2,33 +2,33 @@
   "case_id": "6.7.1.4",
   "provider": "proxy",
   "model": "deepseek-v4.1-flash",
-  "generated_at": "2026-10-31T08:04:25.223626+00:00",
-  "headline": "判定为弃权：未生成信令内容",
+  "generated_at": "2026-10-31T10:00:08.520277+00:00",
+  "headline": "该用例弃权：未生成IE字段内容",
   "sections": [
     {
       "key": "tests",
       "title": "这条用例在验什么",
-      "body": "验证配置 MinimumPeriodicSearchTimer 后，UE 驻留 NR-NTN VPLMN 且存在更高优先级 PLMN 时，不得使用小于该定时器的 T，并在定时器到期后选择最高优先级 PLMN 尝试位置注册。"
+      "body": "验证 NR NTN 下周期重选：UE 配置 MinimumPeriodicSearchTimer 且驻留 VPLMN、存在更高优先级 PLMN 时，T 不得低于该定时器，并在其超时后选最高优先级 PLMN 并发起位置注册。"
     },
     {
       "key": "generated",
       "title": "系统生成了什么",
-      "body": "证据记录 steps_count=26；但判定为弃权，未调用模型、未生成信令内容。steps 只是结构解析产物，不是生成的信令流程。"
+      "body": "证据显示 steps_count=26，messages 为空，calls=0。steps 只是前序解析产物，仅含部分消息名，不是生成的信令内容，也未生成 IE 字段内容（阶段二未调用模型）。"
     },
     {
       "key": "verdict",
       "title": "为什么是这个判定",
-      "body": "numbers.verdict=abstained，实际违规 0 条；原因是 inputs contain no message/SIB names，不能写成通过或未判定。"
+      "body": "numbers.verdict=abstained，实际违规条数 0。原因是输入没有消息/SIB 名称，因此弃权；弃权不等于通过，也不等于未判定。"
     },
     {
       "key": "data",
       "title": "数据怎么读",
-      "body": "L1=1.0；L3=abstained（弃权）；gold=3；calls=0。"
+      "body": "L1=1.0，L3_recall=abstained（弃权），gold_ie_n=3，calls=0；gold_leaf_ies 为 3 个 ephemerisInfo-r17。l3 未计分，不能读成通过。"
     },
     {
       "key": "caveats",
       "title": "哪里还不确定",
-      "body": "证据仅给结构步骤与 gold 叶节点，缺少消息/SIB 名称，无法确认真实空口流程或 MinimumPeriodicSearchTimer 行为。"
+      "body": "证据未给 messages_count，messages 为空；steps 中消息名不完整且有空白项，无法据此判断覆盖或通过，也不能核对 ephemerisInfo-r17 的生成情况。"
     }
   ],
   "numbers": {

@@ -2,33 +2,33 @@
   "case_id": "6.7.1.6",
   "provider": "proxy",
   "model": "deepseek-v4.1-flash",
-  "generated_at": "2026-10-30T14:07:21.788415+00:00",
-  "headline": "11步流程覆盖两种测量触发场景，判定通过且无违规",
+  "generated_at": "2026-10-31T10:00:27.369970+00:00",
+  "headline": "用例6.7.1.6生成通过，11步、4条SIB，L3召回0.625",
   "sections": [
     {
       "key": "tests",
       "title": "这条用例在验什么",
-      "body": "验证支持NR NTN空闲态基于时间测量的终端：当服务小区SIB19含t-Service、且Sintrasearch非零时，终端做频内测量并按Srxlev门限重选；当Snonintrasearch非零时，做频间测量并重选到低优先级频点小区。"
+      "body": "验证支持NR RRC_IDLE时基测量的UE，在NR NTN小区且SIB19带t-Service时，即使Srxlev高于Sintrasearch/Snonintrasearch门限，也要在t-Service前启动同频与异频测量并完成重选。分两个测试目的，分别对应同频与低优先级异频。"
     },
     {
       "key": "generated",
       "title": "系统生成了什么",
-      "body": "共生成11步信令流程，分属两个测试目的：前段5步、后段6步，含系统消息与寻呼的下发以及终端上行响应。配套生成SIB19、SIB2、SIB4、SIB5四类系统消息及其具体参数取值。"
+      "body": "steps_count为11步：其中含SystemInformation、Paging等消息，另有若干步骤消息名为空。messages字段生成4条SIB：SIB19（含t-Service-r17、referenceLocation-r17）、SIB2（s-IntraSearchP=10、s-NonIntraSearchP=10）、SIB4（低优先级异频630000）、SIB5（EUTRA 6300），调用模型4次。"
     },
     {
       "key": "verdict",
       "title": "为什么是这个判定",
-      "body": "numbers.verdict为pass，实际违规条数为0，violations为空，因此判定通过。这是对现有生成结果的判定，不是未判定，也不是弃权。"
+      "body": "判定为pass，实际违规0条，violations为空，理由字段为空；11步均标注到两个测试目的（tp_ref 1或2），未发现与参考条款冲突之处。"
     },
     {
       "key": "data",
       "title": "数据怎么读",
-      "body": "L1为1.0，L3召回为0.625，参考叶子信息元素共9个，调用次数为4次。L3不是null，按0.625计入评分，说明参考要点中约六成被覆盖。"
+      "body": "L1=1.0，L3_recall=0.625，gold_ie_n=9，calls=4。即字段层面完全命中，但9个gold叶子IE中只召回约六成，仍有遗漏；本次为pass而非弃权，L3有具体分数。"
     },
     {
       "key": "caveats",
       "title": "哪里还不确定",
-      "body": "参考要点含distanceThresh-r17与Equivalent，而生成消息中未见对应取值；L3仅0.625，覆盖不完整。具体测量启动时刻由终端实现决定，判定细节仍需人工核对。"
+      "body": "gold列表中的distanceThresh-r17、Equivalent等字段在生成消息里未见对应内容，召回缺口集中于此。另外多条步骤消息名为空，其具体信令动作仅凭证据无法确认说明。"
     }
   ],
   "numbers": {

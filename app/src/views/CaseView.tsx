@@ -113,7 +113,7 @@ function buildStages(report?: ReportRow, abstain?: AbstainRow, ie?: IeFile | nul
       label: "生成 IR",
       status: abstained ? "skipped" : out?.messages ? "ok" : "pending",
       summary: abstained
-        ? "弃权：未调用模型（calls=0）"
+        ? "弃权：未生成 IE 字段内容（字段级 calls=0）"
         : out?.messages
         ? `生成 ${out.steps?.length ?? 0} 步 / ${out.messages.length} 条消息`
         : "等待生成",
@@ -285,7 +285,7 @@ export function CaseView({ caseId }: { caseId: string }) {
 
   const conclusion = useMemo(() => {
     if (verdict === "abstained")
-      return { text: "已弃权：输入信息不足，未发起模型调用，也不计分。", tone: "muted" as const };
+      return { text: "已弃权：输入信息不足，未进入字段级生成，也不计分。", tone: "muted" as const };
     if (verdict === "reject")
       return {
         text: `已拒收：校验发现 ${out?.violations?.length ?? 0} 条违规，未写入正式结果。`,
@@ -611,7 +611,7 @@ export function CaseView({ caseId }: { caseId: string }) {
                 <p className="text-sm leading-relaxed text-muted">快照中不含该用例的系统产出。</p>
               ) : out.status === "abstained" ? (
                 <p className="text-sm leading-relaxed text-muted">
-                  已弃权：{out.reason || "输入中没有消息/SIB 名"}。未调用模型，未产出信令内容。
+                  已弃权：{out.reason || "输入中没有消息/SIB 名"}。未生成 IE 字段内容；步骤仅含消息名。
                 </p>
               ) : !sysMsgs.length ? (
                 <p className="text-sm leading-relaxed text-muted">没有产出消息。</p>
@@ -684,6 +684,11 @@ export function CaseView({ caseId }: { caseId: string }) {
             className="mt-3"
             bodyClassName="p-0"
           >
+            {out.status === "abstained" && (
+              <p className="border-b border-line px-4 py-2 text-xs leading-relaxed text-muted">
+                弃权：以下步骤仅含消息名，不含 IE 字段取值；阶段二未调用模型。
+              </p>
+            )}
             <Table>
               <thead>
                 <tr>

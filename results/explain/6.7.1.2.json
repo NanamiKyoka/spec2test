@@ -2,33 +2,33 @@
   "case_id": "6.7.1.2",
   "provider": "proxy",
   "model": "deepseek-v4.1-flash",
-  "generated_at": "2026-10-31T08:01:48.836154+00:00",
-  "headline": "判定通过：多TAC信令流程已生成",
+  "generated_at": "2026-10-31T09:59:39.507926+00:00",
+  "headline": "用例6.7.1.2生成5步，判定通过，违规0条。",
   "sections": [
     {
       "key": "tests",
       "title": "这条用例在验什么",
-      "body": "验证NR NTN空闲态UE在SIB1按PLMN广播多个TAC时，是否将trackingAreaList交给上层用于移动性管理，并完成小区重选。"
+      "body": "验证NR NTN空闲态UE在SIB1为同一PLMN广播多个TAC时，将trackingAreaList送上层并完成小区重选；证据列出MIB与SIB1相关IE。"
     },
     {
       "key": "generated",
       "title": "系统生成了什么",
-      "body": "生成5步流程：SS先下发MIB与SIB1，随后UE侧响应/上行；SIB1含cellAccessRelatedInfo、1条PLMN条目、TAC1与TAC2、cellBarredNTN-r17=notBarred。"
+      "body": "steps_count=5，calls=1；messages字段仅列出SIB1，含cellAccessRelatedInfo、plmn-IdentityList、trackingAreaList（TAC1、TAC2）、cellBarredNTN-r17=notBarred。第2步MIB、第3步SIB1，第1/4/5步消息为空。"
     },
     {
       "key": "verdict",
       "title": "为什么是这个判定",
-      "body": "numbers.verdict=pass，违规列表为空，实际违规0条，因此判定通过。"
+      "body": "numbers.verdict=pass；violations为空，实际违规0条，因此判定通过。未出现弃权或未判定。"
     },
     {
       "key": "data",
       "title": "数据怎么读",
-      "body": "L1=1.0，L3_recall=0.333，gold=4，calls=1；表明生成调用1次，叶级覆盖4项，但L3召回仅0.333。"
+      "body": "L1=1.0，L3_recall=0.333，gold_ie_n=4（gold叶子IE共4项），calls=1；L3非null，不写弃权。分数显示只召回部分gold字段。"
     },
     {
       "key": "caveats",
       "title": "哪里还不确定",
-      "body": "部分步骤消息为空，UE动作与上行内容未明；L3召回0.333显示叶级覆盖不完整，且证据未列违规项，具体遗漏点需看原始步骤。"
+      "body": "证据未给出messages_count，也未说明第1/4/5步空消息的具体含义；reason为空、无违规明细。L3=0.333提示部分gold字段未被messages覆盖。"
     }
   ],
   "numbers": {

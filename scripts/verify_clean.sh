@@ -16,20 +16,28 @@ done
 
 PYTHON="${PYTHON:-}"
 if [ -z "$PYTHON" ]; then
-  for cand in python3 python; do
-    if command -v "$cand" >/dev/null 2>&1; then PYTHON="$cand"; break; fi
+  for cand in python python3; do
+    if command -v "$cand" >/dev/null 2>&1 \
+      && "$cand" -c "import sys; raise SystemExit(0 if sys.version_info >= (3,9) else 1)" >/dev/null 2>&1; then
+      PYTHON="$cand"
+      break
+    fi
   done
 fi
 if [ -z "$PYTHON" ]; then
-  echo "[fatal] 未找到 python，请用 PYTHON=/path/to/python 指定"
+  echo "[fatal] 未找到可用的 Python 3.9+，请用 PYTHON=/path/to/python 指定"
   exit 1
 fi
+echo "[env] python = $PYTHON ($("$PYTHON" -c 'import sys;print(sys.version.split()[0])'))"
 
 TMP="$(mktemp -d 2>/dev/null || mktemp -d -t spec2test)"
 PID=""
 cleanup() {
   if [ -n "$PID" ]; then
     kill "$PID" 2>/dev/null
+    if command -v taskkill >/dev/null 2>&1; then
+      taskkill //PID "$PID" //T //F >/dev/null 2>&1 || true
+    fi
     wait "$PID" 2>/dev/null
   fi
   for _ in 1 2 3 4 5 6 7 8 9 10; do
@@ -75,11 +83,15 @@ for p in /web/ /web/index.html /results/score/report.json; do
   [ "$code" = "200" ] || { echo "[fail] $p -> $code"; exit 1; }
 done
 
+echo "[4b/5] 校验快照：gold 误报 / 缺陷检出"
+( cd "$CLONE" && "$PYTHON" -c "import json;g=json.load(open('results/validate/gold.json',encoding='utf-8'));d=json.load(open('results/validate/defects_report.json',encoding='utf-8'));gv=sum(len(x.get('violations') or []) for x in g);dv=sum(1 for x in d if x.get('violations'));assert gv==0;assert dv==len(d)==31;print('[ok] gold violations=%d; defects %d/%d'%(gv,dv,len(d)))" ) \
+  || { echo "[fail] 校验快照不一致"; exit 1; }
+
 if [ "$SMOKE" = "1" ] && [ -d "$ROOT/app/node_modules" ] && command -v npm >/dev/null 2>&1; then
   echo "[5/5] Playwright 冒烟"
   ( cd "$ROOT/app" && SMOKE_BASE="http://127.0.0.1:$PORT" npm run smoke ) || { echo "[fail] smoke"; exit 1; }
 else
-  echo "[5/5] 跳过 UI 冒烟（缺少 app/node_modules 或 npm）"
+  echo "[5/5] 跳过 UI 冒烟（缺少 app/node_modules 或 npm）；页面与快照检查已完成"
 fi
 
 echo "[ok] clean-clone PASS"

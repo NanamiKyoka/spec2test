@@ -61,7 +61,7 @@ export function skippedNote(job?: Job) {
   if (skipped < 3) return null;
   return (
     <div className="mt-2 rounded border border-line bg-canvas px-3 py-2 text-xs text-muted">
-      未调用模型，calls=0；弃权不计分（不是 0 分）。
+      未生成 IE 字段内容，字段级 calls=0；弃权不计分（不是 0 分）。
     </div>
   );
 }
