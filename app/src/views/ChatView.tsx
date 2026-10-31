@@ -24,6 +24,7 @@ import {
   type CaseItem,
   type Conversation,
   type ConversationDetail,
+  type ExplainData,
   type Job,
   type Message,
   type Violation,
@@ -177,6 +178,28 @@ function VerdictChip({
 }
 
 /** 助手消息：结论（主）→ 智能解读（辅）→ 六阶段 / 违规（证）→ 原始数据（备）。 */
+function ExplainBlock({ data }: { data: ExplainData }) {
+  const sections = (data.sections || []).filter((s) => s.title && s.body);
+  return (
+    <div className="border-l-2 border-accent/40 pl-3">
+      <div className="text-xs font-medium text-accent-ink">智能解读</div>
+      {data.headline && (
+        <p className="mt-0.5 text-sm font-medium leading-relaxed text-ink">{data.headline}</p>
+      )}
+      {sections.length > 0 && (
+        <div className="mt-1.5 space-y-1">
+          {sections.map((s, i) => (
+            <div key={s.key || s.title || i} className="text-sm leading-relaxed">
+              <span className="font-medium text-ink">{s.title}：</span>
+              <span className="text-ink/80">{s.body}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AssistantBlock({
   content,
   explain,
@@ -189,7 +212,7 @@ function AssistantBlock({
   onCopy,
 }: {
   content?: string;
-  explain?: string | null;
+  explain?: ExplainData | null;
   verdict?: string;
   stageRows: Row[];
   violations: Violation[];
@@ -244,12 +267,7 @@ function AssistantBlock({
         </div>
       )}
 
-      {explain && (
-        <div className="border-l-2 border-accent/40 pl-3">
-          <div className="text-xs font-medium text-accent-ink">智能解读</div>
-          <p className="mt-0.5 text-sm leading-relaxed text-ink/80">{explain}</p>
-        </div>
-      )}
+      {explain && <ExplainBlock data={explain} />}
 
       {stageRows.length > 0 && (
         <div className="overflow-hidden rounded-md border border-line">
@@ -324,6 +342,7 @@ function StoredAssistant({ m, onCopy }: { m: Message; onCopy: (t: string) => voi
   return (
     <AssistantBlock
       content={m.content}
+      explain={m.explain}
       verdict={m.verdict}
       stageRows={rows}
       violations={(m.violations as Violation[]) || []}
@@ -346,7 +365,7 @@ export function ChatView() {
   const [liveJob, setLiveJob] = React.useState<Job | null>(null);
   const [approvalBusy, setApprovalBusy] = React.useState<"approve" | "reject" | null>(null);
   const [approvalError, setApprovalError] = React.useState<string | null>(null);
-  const [liveExplain, setLiveExplain] = React.useState<string | null>(null);
+  const [liveExplain, setLiveExplain] = React.useState<ExplainData | null>(null);
   const [atBottom, setAtBottom] = React.useState(true);
   const [guideOpen, setGuideOpen] = React.useState(() => localStorage.getItem(GUIDE_KEY) !== "1");
   const [renaming, setRenaming] = React.useState<string | null>(null);
@@ -671,7 +690,7 @@ export function ChatView() {
             const d = await r.json();
             const ev = d?.numbers?.verdict;
             if (d?.headline && (!jv || !ev || ev === jv)) {
-              if (!ac.signal.aborted) setLiveExplain(d.headline);
+              if (!ac.signal.aborted) setLiveExplain(d as ExplainData);
               return;
             }
           } catch {

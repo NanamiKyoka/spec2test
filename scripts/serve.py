@@ -431,6 +431,27 @@ def _score_of(cid):
     return next((r for r in report if r.get("case") == cid), None)
 
 
+def _case_title(cid):
+    ctx = read_json("data/ctx/%s.json" % cid, "results/ctx/%s.json" % cid) or {}
+    return (ctx.get("title") or "").strip()
+
+
+def _explain_of(cid):
+    """LLM 智能解读（若已生成）；页面与历史消息共用同一份。"""
+    return read_json("data/explain/%s.json" % cid, "results/explain/%s.json" % cid)
+
+
+def _plain_summary(job, verdict):
+    """一句白话摘要：优先用智能解读的 headline，缺省时给判定 + 用例标题。"""
+    explain = _explain_of(job.get("case"))
+    if explain and (explain.get("headline") or "").strip():
+        return explain["headline"].strip()
+    label = {"pass": "通过", "reject": "已拒收", "abstained": "已弃权",
+             "canceled": "已取消", "failed": "运行失败"}.get(verdict, "运行完成")
+    title = _case_title(job.get("case"))
+    return "%s：%s" % (label, title or job.get("case"))
+
+
 def list_cases():
     report = read_json("data/score/report.json", "results/score/report.json") or []
     by = {r.get("case"): r for r in report}
@@ -640,6 +661,9 @@ def start_job(cid, dry_run=False, conversation_id=None, hitl=False):
                 if job.get("error"):
                     rec["error"] = job["error"]
                 save_job(job)
+            summary = _plain_summary(job, job.get("verdict"))
+            job["summary"] = summary
+            rec["summary"] = summary
             append_run(rec)
             if conversation_id:
                 try:
@@ -677,22 +701,12 @@ def _attach_job_result(conversation_id, jid, job):
                    % job.get("case"))
         append_message(conversation_id, "assistant", content,
                        job_id=jid, case=job.get("case"), stages=[],
-                       verdict="canceled", L1=None, L3=None, status="canceled")
+                       verdict="canceled", L1=None, L3=None, status="canceled",
+                       summary=content, explain=_explain_of(job.get("case")))
         update_conv_state(conversation_id, active_case=job.get("case"),
                           last_job_id=jid, last_verdict="canceled")
         return
     detail = ((job.get("result") or {}).get("detail") or {})
-    parts = ["用例 %s" % job.get("case")]
-    if detail.get("verdict"):
-        parts.append("verdict=%s" % detail["verdict"])
-    if detail.get("L1") is not None:
-        parts.append("L1=%.3f" % detail["L1"])
-    if detail.get("L3") is not None:
-        parts.append("L3=%s" % detail["L3"])
-    elif job.get("state") == "done":
-        parts.append("已弃权")
-    if job.get("state") == "failed":
-        parts.append("运行失败")
     verdict = _job_verdict(job)
     status = None
     if job.get("state") == "done":
@@ -711,11 +725,12 @@ def _attach_job_result(conversation_id, jid, job):
                 L3 = rep.get("L3_recall")
             if isinstance(L3, str):
                 L3 = None
-    content = " · ".join(parts)
+    content = _plain_summary(job, verdict)
     append_message(conversation_id, "assistant", content,
                    job_id=jid, case=job.get("case"),
                    stages=job.get("stages") or [],
-                   verdict=verdict, L1=L1, L3=L3, status=status)
+                   verdict=verdict, L1=L1, L3=L3, status=status,
+                   summary=content, explain=_explain_of(job.get("case")))
     update_conv_state(conversation_id, active_case=job.get("case"),
                       last_job_id=jid, last_verdict=verdict)
 
@@ -900,6 +915,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                                "mode": j.get("mode"), "provider": j.get("provider"),
                                "model": j.get("model"),
                                "conversation_id": j.get("conversation_id"),
+                               "summary": j.get("summary"),
                                "stages": j.get("stage_seconds") or {}}
                 if j.get("error"):
                     merged[jid]["error"] = j["error"]

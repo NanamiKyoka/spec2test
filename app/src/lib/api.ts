@@ -40,6 +40,20 @@ export type Message = {
   verdict?: "pass" | "reject" | "abstained" | string;
   stages?: StageRec[];
   violations?: Violation[];
+  L1?: number | null;
+  L3?: number | null;
+  status?: string;
+  summary?: string;
+  explain?: ExplainData | null;
+};
+
+export type ExplainSection = { key?: string; title?: string; body?: string };
+
+export type ExplainData = {
+  headline?: string;
+  sections?: ExplainSection[];
+  model?: string;
+  generated_at?: string;
 };
 
 export type ConversationDetail = Conversation & { created?: number; messages: Message[] };
@@ -49,6 +63,7 @@ export type RunRec = {
   case: string;
   state: string;
   verdict?: string | null;
+  summary?: string;
   started?: number;
   finished?: number;
   seconds?: number;
