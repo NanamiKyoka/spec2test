@@ -21,51 +21,28 @@ export function AboutView() {
       <div className="mx-auto max-w-[860px] px-6 py-8">
         <div className="flex items-center gap-2">
           <ShieldCheck className="h-5 w-5 text-accent" />
-          <h1 className="text-[20px] font-semibold tracking-tight">五分钟了解</h1>
+          <h1 className="text-xl font-semibold tracking-tight">五分钟了解</h1>
         </div>
-        <p className="mt-1 text-[13px] text-muted">没看过这个项目的人，从这里开始。</p>
+        <p className="mt-1 max-w-prose text-[13px] text-muted">没看过这个项目的人，从这里开始。</p>
 
-        <Card className="mt-5">
-          <CardHead>
-            <span className="text-[13px] font-medium">问题 → 方案 → 效果 → 局限</span>
-          </CardHead>
-          <CardBody className="space-y-3">
-            {ROWS.map(([k, v]) => (
-              <div key={k} className="flex gap-3">
-                <div className="w-12 shrink-0 pt-0.5 text-[12px] font-medium text-muted">{k}</div>
-                <div className="text-[13px] leading-relaxed">{v}</div>
-              </div>
-            ))}
-          </CardBody>
-        </Card>
-
-        <Card className="mt-4">
-          <CardHead>
-            <span className="text-[13px] font-medium">诚实声明</span>
-            <Chip tone="warn" className="ml-auto">必读</Chip>
-          </CardHead>
-          <CardBody>
-            <ul className="list-disc space-y-1.5 pl-5 text-[13px] leading-relaxed">
-              <li>6G 尚未标准化（首个 6G 规范冻结计划 2028-12），本系统在 NR Rel-19 上验证。</li>
-              <li>暂无专利或软件著作权，真实性由可复现性担保：脚本与基准可重跑。</li>
-              <li>消息序列（L2）不计分：全库仅 16 个交换，样本量不支持统计结论。</li>
-            </ul>
-          </CardBody>
-        </Card>
-
-        <Card className="mt-4">
+        <Card className="mt-6">
           <CardHead>
             <span className="text-[13px] font-medium">5 分钟评审路线</span>
-            <Chip tone="ok" className="ml-auto">推荐</Chip>
+            <Chip tone="accent" className="ml-auto">
+              推荐
+            </Chip>
           </CardHead>
-          <CardBody className="space-y-1.5">
+          <CardBody className="space-y-2">
+            <p className="max-w-prose text-[13px] leading-relaxed text-muted">
+              按顺序看：先看通过的证据，再看拒收与弃权，最后回数据页看逐例矩阵。
+            </p>
             {ROUTE.map(([n, label, caseId]) => (
               <button
                 key={n}
                 onClick={() => {
                   window.location.hash = caseId ? `#/case?case=${caseId}` : "#/data";
                 }}
-                className="flex w-full items-center gap-3 rounded-md border border-line px-3 py-2 text-left text-[13px] hover:border-accent/40 hover:bg-accent/5"
+                className="flex w-full items-center gap-3 rounded-md border border-line px-3 py-2 text-left text-[13px] hover:border-accent/40 hover:bg-accent/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
               >
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/10 text-[11px] font-medium text-accent">
                   {n}
@@ -77,7 +54,33 @@ export function AboutView() {
           </CardBody>
         </Card>
 
-        <div className="mt-5 flex flex-wrap gap-2">
+        <Card className="mt-6">
+          <CardHead>
+            <span className="text-[13px] font-medium">问题 → 方案 → 效果 → 局限</span>
+          </CardHead>
+          <CardBody className="space-y-3">
+            {ROWS.map(([k, v]) => (
+              <div key={k} className="flex gap-3">
+                <div className="w-12 shrink-0 pt-0.5 text-xs font-medium text-muted">{k}</div>
+                <div className="max-w-prose text-[13px] leading-relaxed">{v}</div>
+              </div>
+            ))}
+          </CardBody>
+        </Card>
+
+        <section className="mt-6 rounded-lg bg-surface px-4 py-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-muted">诚实声明</span>
+            <span className="rounded-full border border-line px-2 py-[1px] text-[11px] text-muted">必读</span>
+          </div>
+          <ul className="mt-2 max-w-prose list-disc space-y-1.5 pl-5 text-[13px] leading-relaxed">
+            <li>6G 尚未标准化（首个 6G 规范冻结计划 2028-12），本系统在 NR Rel-19 上验证。</li>
+            <li>暂无专利或软件著作权，真实性由可复现性担保：脚本与基准可重跑。</li>
+            <li>消息序列（L2）不计分：全库仅 16 个交换，样本量不支持统计结论。</li>
+          </ul>
+        </section>
+
+        <div className="mt-8 flex flex-wrap gap-2">
           <Button variant="primary" onClick={() => (window.location.hash = "#/data")}>
             看数据 <ArrowRight className="h-4 w-4" />
           </Button>

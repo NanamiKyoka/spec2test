@@ -1,16 +1,19 @@
 import * as React from "react";
 import {
+  AlertCircle,
   ArrowDown,
   Check,
   ChevronDown,
   Copy,
-  MessageSquarePlus,
+  Loader2,
+  Menu,
   Plus,
   RefreshCw,
   Send,
   Sparkles,
   Square,
   Trash2,
+  X,
 } from "lucide-react";
 import {
   api,
@@ -130,24 +133,32 @@ const toneOf = (status: string) =>
 const statusText = (status: string) =>
   status === "skipped" ? "弃权" : status === "failed" ? "失败" : status === "pending" ? "等待" : "完成";
 
-function VerdictChip({ verdict, skipped }: { verdict?: string; skipped?: boolean }) {
+function VerdictChip({
+  verdict,
+  skipped,
+  className,
+}: {
+  verdict?: string;
+  skipped?: boolean;
+  className?: string;
+}) {
   if (skipped || verdict === "abstained")
     return (
-      <Chip tone="muted">
+      <Chip tone="muted" className={className}>
         <span className="h-1.5 w-1.5 rounded-full bg-muted" />
         <Term term="已弃权" desc="输入信息不足，系统不发起模型调用、不产出信令内容。弃权不是失败，也不计 0 分。" />
       </Chip>
     );
   if (verdict === "reject")
     return (
-      <Chip tone="bad">
+      <Chip tone="bad" className={className}>
         <span className="h-1.5 w-1.5 rounded-full bg-bad" />
         已拒收
       </Chip>
     );
   if (verdict === "pass")
     return (
-      <Chip tone="ok">
+      <Chip tone="ok" className={className}>
         <span className="h-1.5 w-1.5 rounded-full bg-ok" />
         通过
       </Chip>
@@ -155,7 +166,7 @@ function VerdictChip({ verdict, skipped }: { verdict?: string; skipped?: boolean
   return null;
 }
 
-/** 助手消息：结论 → 说明 → 六阶段 → 违规 → 原始数据。 */
+/** 助手消息：结论（主）→ 智能解读（辅）→ 六阶段 / 违规（证）→ 原始数据（备）。 */
 function AssistantBlock({
   content,
   explain,
@@ -164,6 +175,7 @@ function AssistantBlock({
   violations,
   raw,
   stopped,
+  running,
   onCopy,
 }: {
   content?: string;
@@ -173,6 +185,7 @@ function AssistantBlock({
   violations: Violation[];
   raw: unknown;
   stopped?: boolean;
+  running?: boolean;
   onCopy: () => void;
 }) {
   const skipped = verdict === "abstained" || stageRows.filter((r) => r.status === "skipped").length >= 3;
@@ -183,40 +196,64 @@ function AssistantBlock({
   const l3 = typeof d.L3 === "number" ? (d.L3 as number) : undefined;
   const [openStages, setOpenStages] = React.useState(false);
   const [openRaw, setOpenRaw] = React.useState(false);
+  const hasMeta = l1 !== undefined || l3 !== undefined;
+  const hasBadges = !running && (verdict !== undefined || skipped || stopped === true || hasMeta);
+  const hasHead = !running && (hasBadges || Boolean(content));
+  const done = stageRows.filter((r) => r.status !== "pending").length;
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap items-center gap-2">
-        <VerdictChip verdict={verdict} skipped={skipped} />
-        {l1 !== undefined && (
-          <span className="text-[12px] text-muted">
-            <Term term={`L1 ${l1.toFixed(3)}`} desc="结构合法率：输出能否解析成 IR，且每步具备主体/方向/消息。" />
-          </span>
-        )}
-        {l3 !== undefined && (
-          <span className="text-[12px] text-muted">
-            <Term term={`L3 ${l3.toFixed(3)}`} desc="关键 IE 命中率：生成字段对官方叶子字段的召回。" />
-          </span>
-        )}
-        {content && <span className="text-[13px] text-ink">{content}</span>}
-        {stopped && <Chip tone="warn">已停止（后端任务可能仍在运行）</Chip>}
-      </div>
+    <div className="flex flex-col gap-4">
+      {hasHead && (
+        <div className="flex flex-col gap-1.5">
+          {hasBadges && (
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+              <VerdictChip
+                verdict={verdict}
+                skipped={skipped}
+                className="px-2.5 py-0.5 text-[12.5px] font-medium"
+              />
+              {stopped && <Chip tone="warn">已停止（后端任务可能仍在运行）</Chip>}
+              {hasMeta && (
+                <span className="flex flex-wrap items-baseline gap-x-2 text-[11.5px] text-muted">
+                  {l1 !== undefined && (
+                    <Term
+                      term={`L1 ${l1.toFixed(3)}`}
+                      desc="结构合法率：输出能否解析成 IR，且每步具备主体/方向/消息。"
+                    />
+                  )}
+                  {l3 !== undefined && (
+                    <Term
+                      term={`L3 ${l3.toFixed(3)}`}
+                      desc="关键 IE 命中率：生成字段对官方叶子字段的召回。"
+                    />
+                  )}
+                </span>
+              )}
+            </div>
+          )}
+          {content && <p className="whitespace-pre-wrap text-[13px] leading-relaxed text-ink">{content}</p>}
+        </div>
+      )}
 
       {explain && (
-        <p className="rounded-md border border-accent/25 bg-accent/5 px-3 py-2 text-[12.5px] leading-relaxed text-ink">
-          <span className="mr-1 font-medium text-accent">智能解读</span>
-          {explain}
-        </p>
+        <div className="border-l-2 border-accent/40 pl-3">
+          <div className="text-[11px] font-medium text-accent">智能解读</div>
+          <p className="mt-0.5 text-[12.5px] leading-relaxed text-ink/80">{explain}</p>
+        </div>
       )}
 
       {stageRows.length > 0 && (
-        <div className="rounded-md border border-line">
+        <div className="overflow-hidden rounded-md border border-line">
           <button
-            className="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-muted hover:bg-surface"
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-muted transition-colors hover:bg-surface hover:text-ink"
             onClick={() => setOpenStages((v) => !v)}
             aria-expanded={openStages}
           >
-            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${openStages ? "" : "-rotate-90"}`} />
-            六阶段（{stageRows.filter((r) => r.status !== "pending").length}/{stageRows.length}）
+            <ChevronDown className={`h-3.5 w-3.5 shrink-0 transition-transform ${openStages ? "" : "-rotate-90"}`} />
+            <span className="font-medium">六阶段</span>
+            <span className="num text-[11.5px]">
+              {done}/{stageRows.length}
+            </span>
+            <span className="ml-auto text-[11px]">{openStages ? "收起" : "展开"}</span>
           </button>
           {openStages && (
             <ol className="border-t border-line px-3 py-2">
@@ -241,10 +278,10 @@ function AssistantBlock({
 
       {violations.length > 0 && (
         <div className="rounded-md border border-bad/30 bg-bad/5 px-3 py-2">
-          <div className="mb-1 text-[12px] font-medium text-bad">校验违规 {violations.length} 条</div>
+          <div className="mb-1 text-[11.5px] font-medium text-bad">校验违规 {violations.length} 条</div>
           <ul className="space-y-1">
             {violations.map((v, i) => (
-              <li key={i} className="font-mono text-[11px] leading-relaxed text-ink/80">
+              <li key={i} className="break-words font-mono text-[11px] leading-relaxed text-ink/80">
                 [{v.rule}] {v.path} — {v.detail}
               </li>
             ))}
@@ -252,16 +289,18 @@ function AssistantBlock({
         </div>
       )}
 
-      <div className="flex items-center gap-2">
-        <Button variant="subtle" size="sm" onClick={onCopy} title="复制这条结果">
-          <Copy className="h-3.5 w-3.5" />
-          复制
-        </Button>
-        <Button variant="subtle" size="sm" onClick={() => setOpenRaw((v) => !v)} aria-expanded={openRaw}>
-          {openRaw ? "收起原始数据" : "原始数据"}
-        </Button>
-      </div>
-      {openRaw && (
+      {!running && (
+        <div className="flex flex-wrap items-center gap-1">
+          <Button variant="subtle" size="sm" onClick={onCopy} title="复制这条结果">
+            <Copy className="h-3.5 w-3.5" />
+            复制
+          </Button>
+          <Button variant="subtle" size="sm" onClick={() => setOpenRaw((v) => !v)} aria-expanded={openRaw}>
+            {openRaw ? "收起原始数据" : "原始数据"}
+          </Button>
+        </div>
+      )}
+      {openRaw && !running && (
         <pre className="max-h-56 overflow-auto rounded-md border border-line bg-surface p-2 font-mono text-[11px] leading-relaxed">
           {JSON.stringify(raw, null, 2)}
         </pre>
@@ -772,19 +811,30 @@ export function ChatView() {
   };
 
   const emptyState = messages.length === 0 && !liveJob;
+  const currentTitle = convs.find((c) => c.id === current)?.title || "新对话";
 
   return (
-    <div className="flex h-full min-h-0">
+    <div className="relative flex h-full min-h-0 overflow-hidden">
       {/* 会话栏 */}
       <aside
         className={`${
-          drawer ? "absolute inset-y-0 left-0 z-30 flex" : "hidden"
-        } w-64 shrink-0 flex-col border-r border-line bg-surface md:relative md:flex`}
+          drawer ? "absolute inset-y-0 left-0 z-30 flex shadow-card" : "hidden"
+        } w-64 shrink-0 flex-col border-r border-line bg-surface md:relative md:flex md:shadow-none`}
       >
         <div className="flex items-center gap-2 px-3 py-3">
           <Button variant="primary" size="sm" className="flex-1" onClick={newConv} title="新建对话">
             <Plus className="h-4 w-4" />
             新建对话
+          </Button>
+          <Button
+            variant="subtle"
+            size="sm"
+            className="md:hidden"
+            onClick={() => setDrawer(false)}
+            aria-label="关闭会话列表"
+            title="关闭"
+          >
+            <X className="h-4 w-4" />
           </Button>
         </div>
         <div className="scroll-thin min-h-0 flex-1 overflow-y-auto px-2 pb-2">
@@ -826,7 +876,7 @@ export function ChatView() {
                 </button>
               )}
               <button
-                className="rounded p-1 text-muted opacity-0 transition-opacity hover:bg-canvas hover:text-bad group-hover:opacity-100"
+                className="shrink-0 rounded p-1 text-muted transition-opacity hover:bg-canvas hover:text-bad focus-visible:opacity-100 md:opacity-0 md:group-hover:opacity-100"
                 title="删除对话"
                 aria-label={`删除 ${c.title || "新对话"}`}
                 onClick={() => removeConv(c.id)}
@@ -842,35 +892,36 @@ export function ChatView() {
 
       {/* 主区 */}
       <section className="flex min-w-0 flex-1 flex-col">
-        <div className="flex items-center gap-2 border-b border-line px-3 py-2 md:hidden">
-          <Button variant="subtle" size="sm" onClick={() => setDrawer(true)} title="会话列表">
-            <MessageSquarePlus className="h-4 w-4" />
+        <div className="flex min-w-0 items-center gap-2 border-b border-line px-3 py-2 md:hidden">
+          <Button variant="subtle" size="sm" onClick={() => setDrawer(true)} title="打开会话列表">
+            <Menu className="h-4 w-4" />
             会话
           </Button>
+          <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-ink">{currentTitle}</span>
         </div>
 
         <div ref={streamRef} onScroll={onScroll} className="scroll-thin min-h-0 flex-1 overflow-y-auto">
           <div className="mx-auto flex w-full max-w-[820px] flex-col gap-5 px-4 py-5">
             {guideOpen && (
-              <Card className="border-accent/30 bg-accent/5">
+              <Card className="border-line bg-surface">
                 <div className="flex items-start justify-between gap-3 px-4 py-3">
-                  <div className="space-y-1.5">
-                    <div className="text-[13px] font-semibold">三步看懂这里</div>
-                    <ol className="list-decimal space-y-1 pl-5 text-[12px] leading-relaxed text-ink/80">
+                  <div className="min-w-0 space-y-1.5">
+                    <div className="text-[12.5px] font-semibold text-ink">三步看懂这里</div>
+                    <ol className="list-decimal space-y-1 pl-4 text-[12px] leading-relaxed text-muted">
                       <li>
-                        这是<b>测试意图编译器</b>：把 3GPP 条款编译成步骤与信令，并用确定性校验器判对错。
+                        这是<b className="text-ink">测试意图编译器</b>：把 3GPP 条款编译成步骤与信令，并用确定性校验器判对错。
                       </li>
                       <li>
-                        每条回答先看<b>结论</b>（通过 / 已拒收 /
+                        每条回答先看<b className="text-ink">结论</b>（通过 / 已拒收 /
                         <Term term="弃权" desc="输入信息不足时不发起模型调用，不产出信令内容；不是失败，也不计 0 分。" />
                         ），再看六阶段与违规。
                       </li>
                       <li>
-                        下面点一个<b>示例问题</b>就能看到完整链路；也可以直接输入用例号，如 <code className="font-mono">6.7.1.3</code>。
+                        下面点一个<b className="text-ink">示例问题</b>就能看到完整链路；也可以直接输入用例号，如 <code className="font-mono">6.7.1.3</code>。
                       </li>
                     </ol>
                   </div>
-                  <Button variant="subtle" size="sm" onClick={closeGuide} title="不再显示">
+                  <Button variant="subtle" size="sm" className="shrink-0" onClick={closeGuide} title="不再显示">
                     知道了
                   </Button>
                 </div>
@@ -878,27 +929,32 @@ export function ChatView() {
             )}
 
             {emptyState && (
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-4">
                 <Empty
                   title="今天想测哪一段？输入用例编号或描述一个场景，系统会给出结论、六阶段与校验结果。"
                   icon={<Sparkles className="h-5 w-5" />}
                 />
-                <div className="grid gap-2 md:grid-cols-3">
-                  {SAMPLES.map((s) => (
-                    <button
-                      key={s.text}
-                      disabled={busy}
-                      onClick={() => send(s.text)}
-                      className="flex flex-col items-start gap-1 rounded-lg border border-line bg-canvas px-3 py-2 text-left transition-colors hover:border-accent/40 hover:bg-accent/5 disabled:opacity-50"
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <Chip tone={s.tone}>{s.label}</Chip>
-                        <span className="num font-mono text-[11.5px] text-muted">{s.text.split(" ")[0]}</span>
-                      </div>
-                      <span className="text-[12.5px] text-ink">{s.text}</span>
-                      <span className="text-[11.5px] text-muted">{s.note}</span>
-                    </button>
-                  ))}
+                <div className="flex flex-col gap-2">
+                  <div className="text-[11.5px] font-medium text-muted">示例问题 · 三种典型结果</div>
+                  <div className="grid gap-2 md:grid-cols-3">
+                    {SAMPLES.map((s) => (
+                      <button
+                        key={s.text}
+                        disabled={busy}
+                        onClick={() => send(s.text)}
+                        aria-label={`示例：${s.text}（${s.note}）`}
+                        className="flex flex-col items-start gap-1.5 rounded-lg border border-line bg-canvas px-3 py-2.5 text-left transition-colors hover:border-accent/40 hover:bg-accent/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-50"
+                      >
+                        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                          <Chip tone={s.tone} className="px-2 text-[11.5px] font-medium">
+                            {s.label}
+                          </Chip>
+                          <span className="text-[11px] text-muted">{s.note}</span>
+                        </div>
+                        <span className="text-[12.5px] leading-snug text-ink">{s.text}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
@@ -918,21 +974,24 @@ export function ChatView() {
             )}
 
             {pendingRun && (
-              <Card className="border-accent/30 bg-accent/5">
-                <CardBody className="space-y-2">
-                  <div className="text-[12px] text-muted">即将运行（语义匹配结果，确认后才调用模型）</div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-[13px]">{pendingRun.caseId}</span>
-                    <Chip tone="muted">预计 1 次模型调用</Chip>
+              <Card className="border-accent/40">
+                <CardBody className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-1">
+                    <div className="text-[11.5px] font-medium text-muted">语义匹配结果 · 确认后才调用模型</div>
+                    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                      <span className="num font-mono text-[14px] font-semibold text-ink">{pendingRun.caseId}</span>
+                      <Chip tone="muted">预计 1 次模型调用</Chip>
+                    </div>
                   </div>
                   {pendingRun.say && (
-                    <p className="text-[12.5px] leading-relaxed text-ink">{pendingRun.say}</p>
+                    <p className="text-[12.5px] leading-relaxed text-ink/80">{pendingRun.say}</p>
                   )}
-                  <div className="flex gap-2">
-                    <Button variant="primary" size="sm" onClick={confirmPending}>
-                      <Check className="h-3.5 w-3.5" /> 确认运行
+                  <div className="flex items-center gap-2">
+                    <Button variant="primary" onClick={confirmPending}>
+                      <Check className="h-4 w-4" />
+                      确认运行
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={cancelPending}>
+                    <Button variant="subtle" onClick={cancelPending}>
                       取消
                     </Button>
                   </div>
@@ -941,7 +1000,17 @@ export function ChatView() {
             )}
 
             {liveJob && (
-              <div className="break-words">
+              <div className="flex min-w-0 flex-col gap-2 break-words">
+                {busy && (
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px]" role="status" aria-live="polite">
+                    <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-accent" />
+                    <span className="font-medium text-ink">运行中</span>
+                    <span className="text-muted">
+                      {STAGE_LABEL[(liveJob.stage || "ingest") as keyof typeof STAGE_LABEL] || "准备中"}
+                    </span>
+                    <span className="num text-[11.5px] text-muted">· 已等待 {elapsed} 秒</span>
+                  </div>
+                )}
                 <AssistantBlock
                   content={busy ? undefined : conclusionOf(liveJob)}
                   explain={busy ? null : liveExplain}
@@ -950,19 +1019,19 @@ export function ChatView() {
                   violations={violationsOf(liveJob)}
                   raw={liveJob}
                   stopped={stopped}
+                  running={busy}
                   onCopy={() => copy(JSON.stringify(liveJob, null, 2))}
                 />
-                {busy && (
-                  <p className="mt-2 text-[12px] text-muted">
-                    已等待 {elapsed} 秒 · 当前阶段 {STAGE_LABEL[(liveJob.stage || "ingest") as keyof typeof STAGE_LABEL] || "准备中"}
-                  </p>
-                )}
               </div>
             )}
 
             {error && (
-              <div className="flex flex-wrap items-center gap-2 rounded-md border border-bad/30 bg-bad/5 px-3 py-2 text-[12px] text-bad">
-                {error}
+              <div
+                role="alert"
+                className="flex flex-wrap items-center gap-2 rounded-md border border-bad/30 bg-bad/5 px-3 py-2"
+              >
+                <AlertCircle className="h-3.5 w-3.5 shrink-0 text-bad" />
+                <span className="min-w-0 flex-1 text-[12px] leading-relaxed text-bad">{error}</span>
                 <Button variant="ghost" size="sm" onClick={retry} title="重试">
                   <RefreshCw className="h-3.5 w-3.5" />
                   重试
@@ -987,8 +1056,8 @@ export function ChatView() {
           </div>
         )}
 
-        <div className="border-t border-line bg-canvas px-4 py-3">
-          <div className="mx-auto w-full max-w-[820px]">
+        <div className="border-t border-line bg-surface px-4 py-3">
+          <div className="mx-auto flex w-full max-w-[820px] flex-col gap-2">
             <CasePicker
               disabled={busy}
               onPick={(id) => {
@@ -996,36 +1065,36 @@ export function ChatView() {
                 requestAnimationFrame(() => inputRef.current?.focus());
               }}
             />
+            <div className="flex min-w-0 items-end gap-2">
+              <textarea
+                ref={inputRef}
+                value={input}
+                readOnly={busy}
+                rows={1}
+                placeholder="输入用例编号或描述场景，Enter 发送，Shift+Enter 换行"
+                onChange={(e) => { setInput(e.target.value); autoGrow(e.target); }}
+                onKeyDown={onKeyDown}
+                aria-label="消息输入框"
+                className={`max-h-[200px] min-h-[38px] w-full min-w-0 flex-1 resize-none rounded-md border border-line bg-canvas px-3 py-2 text-[13px] leading-relaxed outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 ${
+                  busy ? "cursor-default text-muted caret-transparent" : ""
+                }`}
+              />
+              {!busy ? (
+                <Button variant="primary" className="shrink-0" onClick={() => send(input)} disabled={!input.trim()} title="发送">
+                  <Send className="h-4 w-4" />
+                  发送
+                </Button>
+              ) : (
+                <Button variant="ghost" className="shrink-0" onClick={stop} title="停止（仅中断前端轮询）">
+                  <Square className="h-4 w-4" />
+                  停止
+                </Button>
+              )}
+            </div>
+            <p className="text-[11px] leading-relaxed text-muted">
+              判断依据：每条结论可指回条款；不合格产物会被拒收；输入信息不足时弃权而非编造。
+            </p>
           </div>
-          <div className="mx-auto flex w-full max-w-[820px] items-end gap-2">
-            <textarea
-              ref={inputRef}
-              value={input}
-              readOnly={busy}
-              rows={1}
-              placeholder="输入用例编号或描述场景，Enter 发送，Shift+Enter 换行"
-              onChange={(e) => { setInput(e.target.value); autoGrow(e.target); }}
-              onKeyDown={onKeyDown}
-              aria-label="消息输入框"
-              className={`max-h-[200px] min-h-[38px] w-full resize-none rounded-lg border border-line bg-canvas px-3 py-2 text-[13px] leading-relaxed outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 ${
-                busy ? "cursor-default bg-surface text-muted caret-transparent" : ""
-              }`}
-            />
-            {!busy ? (
-              <Button variant="primary" onClick={() => send(input)} disabled={!input.trim()} title="发送">
-                <Send className="h-4 w-4" />
-                发送
-              </Button>
-            ) : (
-              <Button variant="ghost" onClick={stop} title="停止（仅中断前端轮询）">
-                <Square className="h-4 w-4" />
-                停止
-              </Button>
-            )}
-          </div>
-          <p className="mx-auto mt-1.5 w-full max-w-[820px] text-[11px] text-muted">
-            判断依据：每条结论可指回条款；不合格产物会被拒收；输入信息不足时弃权而非编造。
-          </p>
         </div>
       </section>
     </div>

@@ -21,3 +21,7 @@ __pycache__/
 app/node_modules/
 app/smoke-about.png
 web_m2/
+
+# 本地会话/临时
+.claude/scheduled_tasks.lock
+app/_*

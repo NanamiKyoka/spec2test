@@ -1,5 +1,14 @@
 import * as React from "react";
-import { KeyRound, RefreshCw, Save, PlugZap, Info, ArrowRight } from "lucide-react";
+import {
+  KeyRound,
+  RefreshCw,
+  Save,
+  PlugZap,
+  Info,
+  ArrowRight,
+  CheckCircle2,
+  TriangleAlert,
+} from "lucide-react";
 import {
   Button,
   Card,
@@ -7,6 +16,7 @@ import {
   CardHead,
   Chip,
   Field,
+  Section,
   Term,
   inputCls,
   useToast,
@@ -30,6 +40,11 @@ const PROVIDER_LABEL: Record<Provider, string> = {
 };
 
 const NO_KEY_PROVIDERS: Provider[] = ["openai", "anthropic"];
+
+/* 表单分组标题：比字段标签弱一档，比正文强一档 */
+function GroupHead({ children }: { children: React.ReactNode }) {
+  return <h2 className="text-[11.5px] font-semibold uppercase tracking-wide text-muted">{children}</h2>;
+}
 
 export function ApiView() {
   const toast = useToast();
@@ -55,6 +70,7 @@ export function ApiView() {
     latency?: number;
     seen?: string;
   } | null>(null);
+  const [saveError, setSaveError] = React.useState<string | null>(null);
   const [loadError, setLoadError] = React.useState<string | null>(null);
 
   const applySettings = React.useCallback((s: Settings) => {
@@ -109,6 +125,7 @@ export function ApiView() {
 
   function onSave() {
     setSaving(true);
+    setSaveError(null);
     const payload: Record<string, unknown> = {
       provider,
       base_url: baseUrl.trim(),
@@ -124,7 +141,7 @@ export function ApiView() {
         setApiKey(""); // 保存后立刻清空，明文不留在 DOM
         toast("已保存");
       })
-      .catch((e) => toast("保存失败：" + msgOf(e)))
+      .catch((e) => setSaveError(msgOf(e)))
       .finally(() => setSaving(false));
   }
 
@@ -176,7 +193,7 @@ export function ApiView() {
   const header = (
     <>
       <h1 className="text-[20px] font-semibold tracking-tight">API 管理</h1>
-      <p className="mt-1 text-[13px] leading-relaxed text-muted">
+      <p className="mt-1 max-w-[68ch] text-[13px] leading-relaxed text-muted">
         选择模型通道并配置凭据。凭据只保存在本机{" "}
         <code className="rounded bg-surface px-1 py-0.5 font-mono text-[12px]">data/settings.json</code>
         （已被 gitignore），页面只显示掩码，不会回传明文。
@@ -210,13 +227,234 @@ export function ApiView() {
     <div className="mx-auto w-full max-w-3xl px-4 py-6">
       {header}
 
-      {/* 三种通道怎么选 */}
-      <Card className="mt-4">
-        <CardHead className="flex items-center gap-2">
-          <Info className="h-4 w-4 text-accent" />
-          三种通道怎么选
+      {/* 主区：表单。可操作的内容在前，说明性内容折叠到后面 */}
+      <Card className="mt-5">
+        <CardHead>
+          <span className="flex items-center gap-2 text-[13px] font-medium">
+            <KeyRound className="h-4 w-4 text-accent" aria-hidden />
+            模型通道与密钥
+          </span>
+          <Chip tone={keySet ? "ok" : "warn"} className="ml-auto">
+            {keySet ? "已配置密钥" : "未配置密钥"}
+          </Chip>
         </CardHead>
-        <CardBody className="space-y-2 text-[12.5px] leading-relaxed text-muted">
+
+        <CardBody className="space-y-6">
+          {/* 组一：连接参数 */}
+          <section>
+            <GroupHead>连接</GroupHead>
+            <div className="mt-3 space-y-4">
+              <Field label="通道" htmlFor="provider">
+                <select
+                  id="provider"
+                  className={cn(inputCls, "cursor-pointer")}
+                  value={provider}
+                  onChange={(e) => onProviderChange(e.target.value as Provider)}
+                >
+                  {(Object.keys(DEFAULTS) as Provider[]).map((p) => (
+                    <option key={p} value={p}>
+                      {PROVIDER_LABEL[p]}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+
+              <Field
+                label="Base URL"
+                htmlFor="base_url"
+                hint={provider === "proxy" ? "本地代理根地址，不要带 /v1/messages" : "OpenAI 兼容端点通常以 /v1 结尾"}
+              >
+                <input
+                  id="base_url"
+                  className={inputCls}
+                  value={baseUrl}
+                  spellCheck={false}
+                  onChange={(e) => {
+                    touchedBase.current = true;
+                    setBaseUrl(e.target.value);
+                  }}
+                />
+              </Field>
+
+              <Field
+                label="模型"
+                htmlFor="model"
+                hint={
+                  models?.source === "catalog"
+                    ? "本地代理不支持枚举，显示内置目录"
+                    : models?.source === "error"
+                    ? undefined
+                    : "点右侧「获取模型列表」从端点拉取"
+                }
+              >
+                <div className="flex items-center gap-2">
+                  <select
+                    id="model"
+                    className={cn(inputCls, "min-w-0 flex-1 cursor-pointer")}
+                    value={model}
+                    onChange={(e) => {
+                      touchedModel.current = true;
+                      setModel(e.target.value);
+                    }}
+                  >
+                    {options.length === 0 && <option value={model}>{model}</option>}
+                    {options.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                  <Button
+                    variant="ghost"
+                    onClick={() => fetchModels(provider, baseUrl.trim())}
+                    disabled={fetching}
+                    title="从当前通道获取可用模型"
+                  >
+                    <RefreshCw className={cn("h-4 w-4", fetching && "animate-spin")} aria-hidden />
+                    {fetching ? "获取中" : "获取模型列表"}
+                  </Button>
+                </div>
+                {models?.source === "catalog" && (
+                  <p className="mt-1 text-[11.5px] text-muted">{models.note || "已回退到内置目录"}</p>
+                )}
+                {models?.source === "error" && (
+                  <p className="mt-1 text-[11.5px] text-bad">获取失败：{models.note || "未知原因"}</p>
+                )}
+              </Field>
+
+              <Field label="温度" htmlFor="temperature" hint="0 最稳定，评测建议 0；本项目的对比实验固定为 0">
+                <div className="flex items-center gap-3">
+                  <input
+                    id="temperature"
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.1}
+                    value={temperature}
+                    onChange={(e) => setTemperature(Number(e.target.value))}
+                    className="h-1.5 flex-1 cursor-pointer accent-[rgb(var(--accent))]"
+                  />
+                  <span className="num w-8 shrink-0 text-right text-[12px] text-muted">
+                    {temperature.toFixed(1)}
+                  </span>
+                </div>
+              </Field>
+            </div>
+          </section>
+
+          {/* 组二：凭据 */}
+          <section className="border-t border-line pt-5">
+            <GroupHead>凭据</GroupHead>
+            <div className="mt-3 space-y-3">
+              <Field
+                label={needsKey ? "API Key（必填）" : "API Key（可选）"}
+                htmlFor="api_key"
+                hint={
+                  keySet
+                    ? "已保存过密钥；留空表示不修改"
+                    : needsKey
+                    ? "该通道需要 Key 才能调用"
+                    : "本地代理无需 Key，留空即可"
+                }
+              >
+                <input
+                  id="api_key"
+                  type="password"
+                  autoComplete="off"
+                  className={inputCls}
+                  value={apiKey}
+                  placeholder={settings?.key_masked ? `已保存：${settings.key_masked}` : "尚未配置"}
+                  onChange={(e) => setApiKey(e.target.value)}
+                />
+              </Field>
+
+              {needsKey && !keySet && (
+                <p className="max-w-[68ch] text-[11.5px] leading-relaxed text-muted">
+                  提示：未配置 Key 时，对话页会收到{" "}
+                  <Term term="no_credential" desc="后端返回的错误码，表示当前通道缺少可用凭据" />
+                  ，这是预期行为，不是故障。
+                </p>
+              )}
+            </div>
+          </section>
+
+          {/* 操作区：一个主操作（保存），一个次操作（测试），一个文字链接 */}
+          <div className="flex flex-wrap items-center gap-2 border-t border-line pt-5">
+            <Button variant="primary" onClick={onSave} disabled={saving}>
+              <Save className="h-4 w-4" aria-hidden />
+              {saving ? "保存中" : "保存"}
+            </Button>
+            <Button variant="ghost" onClick={onTest} disabled={testing}>
+              <PlugZap className="h-4 w-4" aria-hidden />
+              {testing ? "测试中" : "测试连接"}
+            </Button>
+            <a
+              href="#/chat"
+              className="ml-auto inline-flex items-center gap-1 rounded text-[12px] text-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+            >
+              去对话页试运行 <ArrowRight className="h-3 w-3" aria-hidden />
+            </a>
+          </div>
+
+          {saveError && (
+            <div role="alert" className="flex items-start gap-2 rounded-md border border-bad/40 bg-bad/5 px-3 py-2">
+              <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-bad" aria-hidden />
+              <div className="min-w-0 text-[12px] leading-relaxed">
+                <span className="font-medium text-bad">保存失败</span>
+                <span className="ml-1 text-ink">{saveError}</span>
+              </div>
+            </div>
+          )}
+
+          {testResult && (
+            <div
+              role="status"
+              aria-live="polite"
+              className={cn(
+                "flex items-start gap-2 rounded-md border px-3 py-2",
+                testResult.ok ? "border-ok/40 bg-ok/5" : "border-bad/40 bg-bad/5"
+              )}
+            >
+              {testResult.ok ? (
+                <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ok" aria-hidden />
+              ) : (
+                <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-bad" aria-hidden />
+              )}
+              <div className="min-w-0 text-[12px] leading-relaxed">
+                <span className={cn("font-medium", testResult.ok ? "text-ok" : "text-bad")}>
+                  {testResult.ok ? "连接成功" : "连接失败"}
+                </span>
+                <span className="ml-1 text-ink">
+                  {testResult.ok ? (
+                    <>
+                      {testResult.seen && <>模型 {testResult.seen}</>}
+                      {typeof testResult.latency === "number" && (
+                        <>{testResult.seen ? " · " : ""}{testResult.latency} ms</>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {testResult.text}
+                      {testResult.text.includes("未配置密钥") && (
+                        <> —— 也可以先用本地代理通道跑通（无需 Key）</>
+                      )}
+                    </>
+                  )}
+                </span>
+              </div>
+            </div>
+          )}
+        </CardBody>
+      </Card>
+
+      {/* 说明性内容：不占首屏，需要时展开 */}
+      <Section
+        title="三种通道怎么选"
+        icon={<Info className="h-4 w-4 shrink-0 text-accent" aria-hidden />}
+        className="mt-8"
+        bodyClassName="px-4 py-3"
+      >
+        <div className="max-w-[68ch] space-y-2 text-[12.5px] leading-relaxed text-muted">
           <p>
             <b className="text-ink">本地代理</b>：适合"手上没有厂商 Key"的情况——只要本机 OpenCode
             代理在跑，<b className="text-ink">不需要填 Key</b>。它的模型列表无法枚举，页面会显示内置目录。
@@ -228,190 +466,8 @@ export function ApiView() {
           <p>
             <b className="text-ink">Anthropic 官方</b>：直连官方 API，需要 API Key。
           </p>
-        </CardBody>
-      </Card>
-
-      {/* 表单 */}
-      <Card className="mt-4">
-        <CardHead className="flex items-center justify-between">
-          <span className="flex items-center gap-2">
-            <KeyRound className="h-4 w-4 text-accent" />
-            模型通道与密钥
-          </span>
-          <Chip tone={keySet ? "ok" : "warn"}>{keySet ? "已配置密钥" : "未配置密钥"}</Chip>
-        </CardHead>
-
-        <CardBody className="space-y-4">
-          <Field label="通道" htmlFor="provider">
-            <select
-              id="provider"
-              className={cn(inputCls, "cursor-pointer")}
-              value={provider}
-              onChange={(e) => onProviderChange(e.target.value as Provider)}
-            >
-              {(Object.keys(DEFAULTS) as Provider[]).map((p) => (
-                <option key={p} value={p}>
-                  {PROVIDER_LABEL[p]}
-                </option>
-              ))}
-            </select>
-          </Field>
-
-          <Field
-            label="Base URL"
-            htmlFor="base_url"
-            hint={provider === "proxy" ? "本地代理根地址，不要带 /v1/messages" : "OpenAI 兼容端点通常以 /v1 结尾"}
-          >
-            <input
-              id="base_url"
-              className={inputCls}
-              value={baseUrl}
-              spellCheck={false}
-              onChange={(e) => {
-                touchedBase.current = true;
-                setBaseUrl(e.target.value);
-              }}
-            />
-          </Field>
-
-          <Field
-            label="模型"
-            htmlFor="model"
-            hint={
-              models?.source === "catalog"
-                ? "本地代理不支持枚举，显示内置目录"
-                : models?.source === "error"
-                ? undefined
-                : "点右侧「获取模型列表」从端点拉取"
-            }
-          >
-            <div className="flex items-center gap-2">
-              <select
-                id="model"
-                className={cn(inputCls, "cursor-pointer")}
-                value={model}
-                onChange={(e) => {
-                  touchedModel.current = true;
-                  setModel(e.target.value);
-                }}
-              >
-                {options.length === 0 && <option value={model}>{model}</option>}
-                {options.map((m) => (
-                  <option key={m} value={m}>
-                    {m}
-                  </option>
-                ))}
-              </select>
-              <Button
-                variant="ghost"
-                onClick={() => fetchModels(provider, baseUrl.trim())}
-                disabled={fetching}
-                title="从当前通道获取可用模型"
-              >
-                <RefreshCw className={cn("h-4 w-4", fetching && "animate-spin")} />
-                {fetching ? "获取中" : "获取模型列表"}
-              </Button>
-            </div>
-            {models?.source === "catalog" && (
-              <p className="mt-1 text-[11px] text-muted">{models.note || "已回退到内置目录"}</p>
-            )}
-            {models?.source === "error" && (
-              <p className="mt-1 text-[11px] text-bad">获取失败：{models.note || "未知原因"}</p>
-            )}
-          </Field>
-
-          <Field
-            label="温度"
-            htmlFor="temperature"
-            hint="0 最稳定，评测建议 0；本项目的对比实验固定为 0"
-          >
-            <input
-              id="temperature"
-              type="range"
-              min={0}
-              max={1}
-              step={0.1}
-              value={temperature}
-              onChange={(e) => setTemperature(Number(e.target.value))}
-              className="w-full accent-[rgb(var(--accent))]"
-            />
-            <div className="mt-1 font-mono text-[12px] text-muted">{temperature.toFixed(1)}</div>
-          </Field>
-
-          <Field
-            label={needsKey ? "API Key（必填）" : "API Key（可选）"}
-            htmlFor="api_key"
-            hint={
-              keySet
-                ? "已保存过密钥；留空表示不修改"
-                : needsKey
-                ? "该通道需要 Key 才能调用"
-                : "本地代理无需 Key，留空即可"
-            }
-          >
-            <input
-              id="api_key"
-              type="password"
-              autoComplete="off"
-              className={inputCls}
-              value={apiKey}
-              placeholder={settings?.key_masked ? `已保存：${settings.key_masked}` : "尚未配置"}
-              onChange={(e) => setApiKey(e.target.value)}
-            />
-          </Field>
-
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <Button variant="primary" onClick={onSave} disabled={saving}>
-              <Save className="h-4 w-4" />
-              {saving ? "保存中" : "保存"}
-            </Button>
-            <Button variant="ghost" onClick={onTest} disabled={testing}>
-              <PlugZap className="h-4 w-4" />
-              {testing ? "测试中" : "测试连接"}
-            </Button>
-            <a
-              href="#/chat"
-              className="ml-auto inline-flex items-center gap-1 text-[12px] text-accent hover:underline"
-            >
-              去对话页试运行 <ArrowRight className="h-3 w-3" />
-            </a>
-          </div>
-
-          {testResult && (
-            <div
-              className={cn(
-                "rounded-md border px-3 py-2 text-[12px]",
-                testResult.ok
-                  ? "border-ok/40 bg-ok/5 text-ok"
-                  : "border-bad/40 bg-bad/5 text-bad"
-              )}
-            >
-              {testResult.ok ? (
-                <>
-                  连接成功
-                  {testResult.seen && <> · 模型 {testResult.seen}</>}
-                  {typeof testResult.latency === "number" && <> · {testResult.latency} ms</>}
-                </>
-              ) : (
-                <>
-                  连接失败：{testResult.text}
-                  {testResult.text.includes("未配置密钥") && (
-                    <> —— 也可以先用本地代理通道跑通（无需 Key）</>
-                  )}
-                </>
-              )}
-            </div>
-          )}
-
-          {needsKey && !keySet && (
-            <p className="text-[11px] leading-relaxed text-muted">
-              提示：未配置 Key 时，对话页会收到{" "}
-              <Term term="no_credential" desc="后端返回的错误码，表示当前通道缺少可用凭据" />
-              ，这是预期行为，不是故障。
-            </p>
-          )}
-        </CardBody>
-      </Card>
+        </div>
+      </Section>
     </div>
   );
 }

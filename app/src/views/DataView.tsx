@@ -83,6 +83,14 @@ export const loadGoldValidate = () =>
 
 export const DASH = "—";
 
+const RUN_STATE: Record<string, string> = {
+  queued: "排队",
+  running: "运行中",
+  done: "完成",
+  failed: "失败",
+};
+const runState = (s: string) => RUN_STATE[s] ?? s;
+
 export function fmtNum(v: number | null | undefined, digits = 3): string {
   if (v === null || v === undefined || Number.isNaN(v)) return DASH;
   return v.toFixed(digits);
@@ -143,15 +151,15 @@ function MetricCard({
       <Modal open={open} onClose={() => setOpen(false)} title={explain.title}>
         <dl className="space-y-3 text-[13px] leading-relaxed">
           <div>
-            <dt className="text-[12px] font-medium text-muted">怎么算</dt>
+            <dt className="text-xs font-medium text-muted">怎么算</dt>
             <dd className="mt-0.5">{explain.formula}</dd>
           </div>
           <div>
-            <dt className="text-[12px] font-medium text-muted">分母</dt>
+            <dt className="text-xs font-medium text-muted">分母</dt>
             <dd className="mt-0.5">{explain.denominator}</dd>
           </div>
           <div>
-            <dt className="text-[12px] font-medium text-muted">已知限制</dt>
+            <dt className="text-xs font-medium text-muted">已知限制</dt>
             <dd className="mt-0.5">{explain.limit}</dd>
           </div>
         </dl>
@@ -165,7 +173,21 @@ function MetricCard({
    ============================================================ */
 
 function StartCard({ onGoChat }: { onGoChat: () => void }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(() => {
+    try {
+      return localStorage.getItem("s2t-start-seen") !== "1";
+    } catch {
+      return true;
+    }
+  });
+  const collapse = () => {
+    try {
+      localStorage.setItem("s2t-start-seen", "1");
+    } catch {
+      /* ignore */
+    }
+    setOpen(false);
+  };
   const ask = (text: string) => {
     try {
       localStorage.setItem("s2t-suggest", text);
@@ -181,7 +203,7 @@ function StartCard({ onGoChat }: { onGoChat: () => void }) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="mt-4 flex w-full items-center gap-2 rounded-md border border-line bg-surface px-3 py-2 text-left text-[12px] text-muted hover:bg-canvas"
+        className="mt-6 flex w-full items-center gap-2 rounded-md border border-line bg-surface px-3 py-2 text-left text-xs text-muted hover:bg-canvas"
       >
         <BookOpenCheck className="h-4 w-4 text-accent" />
         三步看懂这个产品（展开）
@@ -189,19 +211,19 @@ function StartCard({ onGoChat }: { onGoChat: () => void }) {
     );
   }
   return (
-    <Card className="mt-4 border-accent/30 bg-accent/[0.04]">
+    <Card className="mt-6 border-accent/30 bg-accent/[0.04]">
       <CardBody className="space-y-2.5">
         <div className="flex items-center gap-2">
           <BookOpenCheck className="h-4 w-4 text-accent" />
           <span className="text-[13px] font-medium">三步看懂这个产品</span>
-          <Button variant="subtle" size="sm" className="ml-auto" onClick={() => setOpen(false)}>
+          <Button variant="subtle" size="sm" className="ml-auto" onClick={collapse}>
             收起
           </Button>
         </div>
         <div className="grid gap-3 md:grid-cols-3">
           <div>
-            <b className="text-[12.5px]">1. 这是什么</b>
-            <div className="mt-1 text-[12px] leading-relaxed text-muted">
+            <b className="text-[13px]">1. 这是什么</b>
+            <div className="mt-1 text-xs leading-relaxed text-muted">
               把 3GPP 规范条款编译成可执行测试意图，再用
               <Term
                 term="确定性校验器"
@@ -211,7 +233,7 @@ function StartCard({ onGoChat }: { onGoChat: () => void }) {
             </div>
           </div>
           <div>
-            <b className="text-[12.5px]">2. 能问什么</b>
+            <b className="text-[13px]">2. 能问什么</b>
             <div className="mt-1 flex flex-col gap-1">
               {[
                 ["通过", "6.7.1.3 生成测试步骤"],
@@ -221,7 +243,7 @@ function StartCard({ onGoChat }: { onGoChat: () => void }) {
                 <button
                   key={text}
                   onClick={() => ask(text)}
-                  className="text-left text-[12px] text-accent hover:underline"
+                  className="text-left text-xs text-accent hover:underline"
                 >
                   {label}：{text}
                 </button>
@@ -229,7 +251,7 @@ function StartCard({ onGoChat }: { onGoChat: () => void }) {
             </div>
           </div>
           <div>
-            <b className="text-[12.5px]">3. 结果怎么读</b>
+            <b className="text-[13px]">3. 结果怎么读</b>
             <div className="mt-1 flex flex-wrap gap-1.5">
               <button onClick={() => goCase("6.7.1.3")} title="看一条通过的用例">
                 <Chip tone="ok">通过</Chip>
@@ -241,7 +263,7 @@ function StartCard({ onGoChat }: { onGoChat: () => void }) {
                 <Chip tone="muted">弃权</Chip>
               </button>
             </div>
-            <div className="mt-1 text-[11.5px] text-muted">点颜色看对应单例；结论以校验器为准。</div>
+            <div className="mt-1 text-xs text-muted">点颜色看对应单例；结论以校验器为准。</div>
           </div>
         </div>
         <div>
@@ -368,8 +390,8 @@ export function DataView() {
     return (
       <div className="h-full overflow-y-auto scroll-thin">
         <div className="mx-auto max-w-[1100px] px-6 py-6">
-          <h1 className="text-[20px] font-semibold tracking-tight">数据面板</h1>
-          <Card className="mt-4">
+          <h1 className="text-xl font-semibold tracking-tight">数据面板</h1>
+          <Card className="mt-6">
             <Empty
               title="还没有评测数据。先在仓库根目录运行 scripts/repro.sh 生成数据，再刷新本页。"
               icon={<Table2 className="h-5 w-5" />}
@@ -390,8 +412,8 @@ export function DataView() {
       <div className="mx-auto max-w-[1100px] px-6 py-6">
         <div className="flex flex-wrap items-end gap-3">
           <div>
-            <h1 className="text-[20px] font-semibold tracking-tight">数据面板</h1>
-            <p className="mt-1 text-[13px] text-muted">
+            <h1 className="text-xl font-semibold tracking-tight">数据面板</h1>
+            <p className="mt-1 max-w-prose text-[13px] text-muted">
               TS 38.523-1 §6.7 NTN 切片的逐例结果、运行历史与校验口径。
             </p>
           </div>
@@ -406,7 +428,7 @@ export function DataView() {
         </div>
 
         {source === "snapshot" && (
-          <p className="mt-2 text-[12px] text-muted">
+          <p className="mt-2 max-w-prose text-xs text-muted">
             当前显示的是仓库自带的结果快照；运行 <code className="font-mono">scripts/repro.sh</code> 可生成你自己的结果。
           </p>
         )}
@@ -414,7 +436,7 @@ export function DataView() {
         <StartCard onGoChat={() => (window.location.hash = "#/chat")} />
 
         {/* 指标 */}
-        <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           <MetricCard
             label="用例数"
             value={String(metrics.n)}
@@ -481,11 +503,11 @@ export function DataView() {
         </div>
 
         {/* 用例矩阵 */}
-        <Card className="mt-4">
+        <Card className="mt-6">
           <CardHead>
             <Table2 className="h-4 w-4 text-muted" />
             <span className="text-[13px] font-medium">用例矩阵</span>
-            <span className="ml-auto text-[12px] text-muted">点击行查看单例全链条</span>
+            <span className="ml-auto text-xs text-muted">点击行查看单例全链条</span>
           </CardHead>
           <CardBody className="p-0">
             <div className="flex flex-wrap items-center gap-1.5 border-b border-line px-3 py-2">
@@ -501,7 +523,8 @@ export function DataView() {
                 <button
                   key={k}
                   onClick={() => setFilter(k)}
-                  className={`rounded-full border px-2.5 py-1 text-[11.5px] ${
+                  aria-pressed={filter === k}
+                  className={`rounded-full border px-2.5 py-1 text-xs ${
                     filter === k
                       ? "border-accent bg-accent/10 text-accent"
                       : "border-line text-muted hover:bg-surface"
@@ -535,9 +558,18 @@ export function DataView() {
                   .map((r) => (
                   <tr
                     key={r.case}
-                    className="cursor-pointer hover:bg-surface"
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`查看用例 ${r.case} 的单例全链条`}
+                    className="cursor-pointer hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/40"
                     onClick={() => {
                       window.location.hash = `#/case?case=${encodeURIComponent(r.case)}`;
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        window.location.hash = `#/case?case=${encodeURIComponent(r.case)}`;
+                      }
                     }}
                   >
                     <Td className="num font-mono">{r.case}</Td>
@@ -554,7 +586,7 @@ export function DataView() {
                 {filter !== "all" &&
                   !(rows || []).some((r) => (verdicts[r.case] ?? "unknown") === filter) && (
                     <tr>
-                      <Td colSpan={7} className="py-6 text-center text-[12.5px] text-muted">
+                      <Td colSpan={7} className="py-6 text-center text-[13px] text-muted">
                         没有符合条件的用例。
                       </Td>
                     </tr>
@@ -565,19 +597,19 @@ export function DataView() {
         </Card>
 
         {/* 运行历史 */}
-        <Card className="mt-4">
+        <Card className="mt-6">
           <CardHead>
             <History className="h-4 w-4 text-muted" />
             <span className="text-[13px] font-medium">运行历史</span>
-            {runs?.length ? <span className="ml-auto text-[12px] text-muted">最近 {runs.length} 次</span> : null}
+            {runs?.length ? <span className="ml-auto text-xs text-muted">最近 {runs.length} 次</span> : null}
           </CardHead>
           <CardBody className="p-0">
             {runsError ? (
-              <div className="flex items-center gap-2 px-4 py-4 text-[12.5px] text-bad">
+              <div className="flex items-center gap-2 px-4 py-4 text-[13px] text-bad">
                 <TriangleAlert className="h-4 w-4" /> 运行历史不可用：{runsError}
               </div>
             ) : !runs ? (
-              <div className="px-4 py-4 text-[12.5px] text-muted">正在读取…</div>
+              <div className="px-4 py-4 text-[13px] text-muted">正在读取…</div>
             ) : runs.length === 0 ? (
               <Empty
                 title="还没有运行记录。运行一次用例后，这里会出现 job、耗时与 verdict。"
@@ -602,10 +634,10 @@ export function DataView() {
                 <tbody>
                   {runs.map((x) => (
                     <tr key={x.job_id}>
-                      <Td className="font-mono text-[12px]">{x.job_id}</Td>
+                      <Td className="font-mono text-xs">{x.job_id}</Td>
                       <Td className="num font-mono">{x.case}</Td>
                       <Td>
-                        <Chip tone={x.state === "done" ? "ok" : x.state === "failed" ? "bad" : "muted"}>{x.state}</Chip>
+                        <Chip tone={x.state === "done" ? "ok" : x.state === "failed" ? "bad" : "muted"}>{runState(x.state)}</Chip>
                       </Td>
                       <Td>{statusChip(undefined, x.verdict ?? null)}</Td>
                       <Td className="num text-right">{x.seconds != null ? `${Number(x.seconds).toFixed(2)}s` : DASH}</Td>
@@ -618,15 +650,15 @@ export function DataView() {
         </Card>
 
         {/* 弃权 vs 无依据 */}
-        <Card className="mt-4">
+        <Card className="mt-6">
           <CardHead>
             <ShieldCheck className="h-4 w-4 text-muted" />
             <span className="text-[13px] font-medium">弃权 vs 无依据生成</span>
-            <span className="ml-auto text-[12px] text-muted">同一输入下，系统与裸 prompt 基线的对照</span>
+            <span className="ml-auto text-xs text-muted">同一输入下，系统与裸 prompt 基线的对照</span>
           </CardHead>
           <CardBody className="p-0">
             {!abstain?.length ? (
-              <div className="px-4 py-4 text-[12.5px] text-muted">该快照未包含弃权统计。</div>
+              <div className="px-4 py-4 text-[13px] text-muted">该快照未包含弃权统计。</div>
             ) : (
               <Table>
                 <thead>
@@ -649,7 +681,7 @@ export function DataView() {
                         <Td className="num text-right">
                           {a.calls} / {a.sys_ies}
                         </Td>
-                        <Td className="text-[12.5px]">
+                        <Td className="text-[13px]">
                           {a.base_status === "prose" ? (
                             <span className="text-muted">
                               散文 {a.base_chars} 字 / {a.base_ies} IE
@@ -665,7 +697,7 @@ export function DataView() {
                           ) : a.unsupported ? (
                             <Chip tone="warn">unsupported</Chip>
                           ) : (
-                            <span className="text-[12px] text-muted">{a.status}</span>
+                            <span className="text-xs text-muted">{a.status}</span>
                           )}
                         </Td>
                       </tr>
@@ -677,7 +709,7 @@ export function DataView() {
           </CardBody>
         </Card>
 
-        <p className="mt-4 text-[11.5px] leading-relaxed text-muted">
+        <p className="mt-6 max-w-prose text-xs leading-relaxed text-muted">
           说明：本页只报逐例矩阵，不报平均数——8 个用例的样本量不支持统计结论。口径见每条指标的
           <HelpCircle className="mx-0.5 inline h-3 w-3" />
           说明。

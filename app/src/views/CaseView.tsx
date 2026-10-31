@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ChevronDown, Info, MessageSquare, ShieldAlert, ShieldCheck, XCircle } from "lucide-react";
-import { Button, Card, CardBody, CardHead, Chip, Modal, Table, Td, Term, Th } from "../ui";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { ArrowLeft, Info, MessageSquare, ShieldAlert, ShieldCheck, XCircle } from "lucide-react";
+import { Button, Card, CardBody, CardHead, Chip, Modal, Section, Table, Td, Term, Th } from "../ui";
 import { AsyncState } from "../components/AsyncState";
+import { cn } from "../lib/cn";
 import {
   goldForMessage,
   loadSymbols,
@@ -141,11 +142,11 @@ function buildStages(report?: ReportRow, abstain?: AbstainRow, ie?: IeFile | nul
   ];
 }
 
-const STATUS_META: Record<Stage["status"], { label: string; cls: string; dot: string }> = {
-  ok: { label: "完成", cls: "border-ok/40 text-ok bg-ok/10", dot: "bg-ok" },
-  skipped: { label: "skipped", cls: "border-line text-muted bg-surface", dot: "bg-muted/40" },
-  failed: { label: "有违规", cls: "border-bad/40 text-bad bg-bad/10", dot: "bg-bad" },
-  pending: { label: "待执行", cls: "border-line text-muted bg-surface", dot: "bg-muted/40" },
+const STATUS_META: Record<Stage["status"], { label: string; tone: "ok" | "bad" | "muted"; dot: string }> = {
+  ok: { label: "完成", tone: "ok", dot: "bg-ok" },
+  skipped: { label: "skipped", tone: "muted", dot: "bg-muted/40" },
+  failed: { label: "有违规", tone: "bad", dot: "bg-bad" },
+  pending: { label: "待执行", tone: "muted", dot: "bg-muted/40" },
 };
 
 function StageList({ stages }: { stages: Stage[] }) {
@@ -157,10 +158,10 @@ function StageList({ stages }: { stages: Stage[] }) {
           <li key={s.key} className="flex items-start gap-3 px-4 py-2.5">
             <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${meta.dot}`} aria-hidden />
             <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                 <span className="text-[13px] font-medium">{s.label}</span>
-                <span className="font-mono text-[11px] text-muted">{s.key}</span>
-                <span className={`rounded-full border px-1.5 py-[1px] text-[10.5px] ${meta.cls}`}>{meta.label}</span>
+                <span className="font-mono text-[11.5px] text-muted">{s.key}</span>
+                <Chip tone={meta.tone}>{meta.label}</Chip>
               </div>
               <div className="mt-0.5 text-[12.5px] leading-relaxed text-muted">{s.summary}</div>
             </div>
@@ -171,17 +172,13 @@ function StageList({ stages }: { stages: Stage[] }) {
   );
 }
 
-function RawJson({ value }: { value: unknown }) {
+/* 页面内的一级分组标题：把「结论 / 证据 / 过程」拉开层级 */
+function SectionLabel({ children, meta }: { children: ReactNode; meta?: ReactNode }) {
   return (
-    <details className="px-4 py-3">
-      <summary className="cursor-pointer text-[12.5px] text-muted hover:text-ink">
-        <ChevronDown className="mr-1 inline h-3.5 w-3.5" />
-        原始数据（只读）
-      </summary>
-      <pre className="scroll-thin mt-2 max-h-[320px] overflow-auto rounded-md border border-line bg-surface p-3 font-mono text-[11.5px] leading-relaxed">
-        {JSON.stringify(value, null, 2)}
-      </pre>
-    </details>
+    <div className="mb-2 mt-8 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+      <h2 className="text-[11.5px] font-semibold uppercase tracking-wide text-muted">{children}</h2>
+      {meta && <span className="text-[11.5px] text-muted">{meta}</span>}
+    </div>
   );
 }
 
@@ -311,10 +308,16 @@ export function CaseView({ caseId }: { caseId: string }) {
     ? sysMsgs.find((m) => (m.message || "") === picked.msg)?.derivation_path || ""
     : "";
 
+  const doneStages = stages.filter((s) => s.status === "ok").length;
+  const verdictBorder =
+    verdict === "pass" ? "border-l-ok" : verdict === "reject" ? "border-l-bad" : "border-l-muted/50";
+
   if (loading) {
     return (
-      <div className="mx-auto max-w-[1100px] px-6 py-6">
-        <AsyncState state="loading" title={`正在读取用例 ${caseId}…`} />
+      <div className="h-full overflow-y-auto scroll-thin">
+        <div className="mx-auto max-w-[1100px] px-6 py-6">
+          <AsyncState state="loading" title={`正在读取用例 ${caseId}…`} />
+        </div>
       </div>
     );
   }
@@ -351,11 +354,12 @@ export function CaseView({ caseId }: { caseId: string }) {
   return (
     <div className="h-full overflow-y-auto scroll-thin">
       <div className="mx-auto max-w-[1100px] px-6 py-6">
+        {/* 导航条：返回与用例号是次要信息，唯一主操作是「在对话中继续」 */}
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="subtle" onClick={() => (window.location.hash = "#/data")}>
             <ArrowLeft className="h-4 w-4" /> 数据面板
           </Button>
-          <span className="num font-mono text-[13px] text-muted">{caseId}</span>
+          <span className="num truncate font-mono text-[12px] text-muted">{caseId}</span>
           <div className="ml-auto">
             <Button variant="primary" onClick={() => (window.location.hash = "#/chat")}>
               <MessageSquare className="h-4 w-4" /> 在对话中继续
@@ -363,156 +367,168 @@ export function CaseView({ caseId }: { caseId: string }) {
           </div>
         </div>
 
-        {/* 条款依据：先让人知道这条用例在验什么，再看生成物 */}
-        {ctx && (
-          <Card className="mt-4">
-            <CardHead>
-              <span className="text-[13px] font-medium">条款依据</span>
-              <span className="ml-auto font-mono text-[12px] text-muted">TS 38.523-1 §{caseId}</span>
-            </CardHead>
-            <CardBody className="space-y-2">
-              <div className="text-[13px] font-semibold">{ctx.title || "（无标题）"}</div>
-              {ctx.test_purpose && (
-                <details className="rounded-md border border-line">
-                  <summary className="cursor-pointer px-3 py-2 text-[12px] text-muted">
-                    测试目的（TP 原文）
-                  </summary>
-                  <pre className="scroll-thin max-h-[220px] overflow-auto whitespace-pre-wrap border-t border-line bg-surface px-3 py-2 font-mono text-[11.5px] leading-relaxed">
-                    {ctx.test_purpose}
-                  </pre>
-                </details>
+        {/* 一、结论：判定 + 关键指标 + 关键字段，页面唯一的重心 */}
+        <Card className={cn("mt-4 border-l-4", verdictBorder)}>
+          <CardBody className="py-5">
+            <div className="flex items-start gap-3">
+              {verdict === "pass" ? (
+                <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-ok" aria-hidden />
+              ) : verdict === "reject" ? (
+                <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-bad" aria-hidden />
+              ) : (
+                <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-muted" aria-hidden />
               )}
-              {ctx.conformance_requirements && (
-                <details className="rounded-md border border-line">
-                  <summary className="cursor-pointer px-3 py-2 text-[12px] text-muted">
-                    符合性要求（规范引文）
-                  </summary>
-                  <pre className="scroll-thin max-h-[220px] overflow-auto whitespace-pre-wrap border-t border-line bg-surface px-3 py-2 font-mono text-[11.5px] leading-relaxed">
-                    {ctx.conformance_requirements}
-                  </pre>
-                </details>
-              )}
-            </CardBody>
-          </Card>
-        )}
-        {!ctx && !loading && (
-          <Card className="mt-4">
-            <CardBody>
-              <p className="text-[12.5px] text-muted">
-                该用例没有条款上下文快照（data/ctx/{caseId}.json），只能看到生成与校验结果。
-              </p>
-            </CardBody>
-          </Card>
-        )}
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-baseline gap-2">
+                  <h1 className="text-[16px] font-semibold leading-snug">{conclusion.text}</h1>
+                  {verdict === "unknown" ? (
+                    <Chip tone="muted">未判定</Chip>
+                  ) : (
+                    statusChip(report?.status, verdict)
+                  )}
+                </div>
 
-        {/* 结论行 */}
-        <Card className="mt-4">
-          <CardBody className="flex flex-wrap items-center gap-3">
-            {verdict === "pass" ? (
-              <ShieldCheck className="h-5 w-5 text-ok" />
-            ) : verdict === "reject" ? (
-              <XCircle className="h-5 w-5 text-bad" />
-            ) : (
-              <ShieldAlert className="h-5 w-5 text-muted" />
-            )}
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[14px] font-semibold">{conclusion.text}</span>
-                {verdict === "unknown" ? (
-                  <Chip tone="muted">未判定</Chip>
-                ) : (
-                  statusChip(report?.status, verdict)
+                <dl className="mt-3 flex flex-wrap items-baseline gap-x-6 gap-y-2">
+                  <div className="flex items-baseline gap-1.5">
+                    <dt className="text-[11.5px] text-muted">
+                      <Term term="L1" desc="结构合法率：生成物能否解析成 IR，且每步有主体/方向/消息。" />
+                    </dt>
+                    <dd className="num text-[13px] font-medium text-ink">{fmtNum(report?.L1)}</dd>
+                  </div>
+                  <div className="flex items-baseline gap-1.5">
+                    <dt className="text-[11.5px] text-muted">
+                      <Term term="L3" desc="关键 IE 命中率：生成字段对官方叶子字段的召回。" />
+                    </dt>
+                    <dd className="num text-[13px] font-medium text-ink">{fmtL3(report?.L3_recall)}</dd>
+                  </div>
+                  <div className="flex items-baseline gap-1.5">
+                    <dt className="text-[11.5px] text-muted">
+                      <Term term="gold" desc="官方答案的叶子字段数。" />
+                    </dt>
+                    <dd className="num text-[13px] font-medium text-ink">{report?.gold_ie_n ?? goldCount}</dd>
+                  </div>
+                  <div className="flex items-baseline gap-1.5">
+                    <dt className="text-[11.5px] text-muted">调用数</dt>
+                    <dd className="num text-[13px] font-medium text-ink">{report?.calls ?? DASH}</dd>
+                  </div>
+                </dl>
+
+                {keyIes.length > 0 && (
+                  <div className="mt-3">
+                    <div className="mb-1.5 text-[11.5px] text-muted">关键字段（点击查看证据）</div>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {keyIes.map(({ msg, ie }) => (
+                        <button
+                          key={msg + "|" + ie.name}
+                          onClick={(e) => {
+                            triggerRef.current = e.currentTarget;
+                            setPicked({ msg, ie });
+                          }}
+                          aria-label={`查看 ${ie.name} 的证据`}
+                          className="rounded-full border border-line bg-canvas px-2 py-0.5 font-mono text-[11.5px] text-ink transition-colors hover:border-accent/40 hover:bg-accent/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                        >
+                          {ie.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
-              <div className="mt-1 flex flex-wrap gap-4 text-[12.5px] text-muted">
-                <span>
-                  <Term term="L1" desc="结构合法率：生成物能否解析成 IR，且每步有主体/方向/消息。" />{" "}
-                  <span className="num font-mono text-ink">{fmtNum(report?.L1)}</span>
-                </span>
-                <span>
-                  <Term term="L3" desc="关键 IE 命中率：生成字段对官方叶子字段的召回。" />{" "}
-                  <span className="num font-mono text-ink">{fmtL3(report?.L3_recall)}</span>
-                </span>
-                <span>
-                  <Term term="gold" desc="官方答案的叶子字段数。" />{" "}
-                  <span className="num font-mono text-ink">{report?.gold_ie_n ?? goldCount}</span>
-                </span>
-                <span>
-                  调用数 <span className="num font-mono text-ink">{report?.calls ?? DASH}</span>
-                </span>
-              </div>
-              {explain?.headline && (
-                <p className="mt-2 text-[13px] font-medium text-ink">{explain.headline}</p>
-              )}
-              {keyIes.length > 0 && (
-                <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                  <span className="text-[11.5px] text-muted">关键字段</span>
-                  {keyIes.map(({ msg, ie }) => (
-                    <button
-                      key={msg + "|" + ie.name}
-                      onClick={(e) => {
-                        triggerRef.current = e.currentTarget;
-                        setPicked({ msg, ie });
-                      }}
-                      className="rounded-full border border-line bg-canvas px-2 py-0.5 font-mono text-[11.5px] text-ink hover:border-accent/40 hover:bg-accent/5"
-                      title="查看证据"
-                    >
-                      {ie.name}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
           </CardBody>
         </Card>
 
-        {/* 智能解读：LLM 用自然语言解释结果与数据 */}
-        <Card className="mt-4 border-accent/30 bg-accent/5">
-          <CardHead>
-            <span className="flex items-center gap-1.5 text-[13px] font-medium">
-              <Info className="h-3.5 w-3.5" /> 智能解读（LLM）
+        {/* 二、智能解读：紧贴结论，用浅色表头表明来源，不整块上色以免与结论争重心 */}
+        <Card className="mt-4">
+          <CardHead className="rounded-t-lg bg-accent/5">
+            <span className="flex items-center gap-1.5 text-[13px] font-medium text-accent">
+              <Info className="h-3.5 w-3.5" aria-hidden /> 智能解读
             </span>
             <span className="ml-auto text-[11.5px] text-muted">
-              {explain ? `${explain.model || "model"}${explain.generated_at ? " · " + explain.generated_at.slice(0, 10) : ""}` : "未生成"}
+              {explain
+                ? `${explain.model || "model"}${explain.generated_at ? " · " + explain.generated_at.slice(0, 10) : ""}`
+                : "未生成"}
             </span>
           </CardHead>
           <CardBody className="space-y-3">
             {explain ? (
               <>
-                {explain.headline && <p className="text-[13.5px] font-semibold">{explain.headline}</p>}
+                {explain.headline && <p className="max-w-[68ch] text-[13.5px] font-semibold leading-snug">{explain.headline}</p>}
                 <div className="grid gap-3 md:grid-cols-2">
                   {(explain.sections || []).map((s) => (
-                    <div key={s.key} className="rounded-md border border-line bg-canvas px-3 py-2">
+                    <div key={s.key} className="rounded-md bg-surface px-3 py-2">
                       <div className="mb-1 text-[12px] font-medium text-accent">{s.title}</div>
-                      <p className="whitespace-pre-wrap text-[12.5px] leading-relaxed text-ink/90">{s.body}</p>
+                      <p className="max-w-[68ch] whitespace-pre-wrap text-[12.5px] leading-relaxed text-ink">
+                        {s.body}
+                      </p>
                     </div>
                   ))}
                 </div>
-                <p className="text-[11.5px] text-muted">
+                <p className="max-w-[68ch] text-[11.5px] leading-relaxed text-muted">
                   由 LLM 基于本页数据生成；判定以校验器与官方答案为准，可对照下方证据逐条核对。
                 </p>
               </>
             ) : (
-              <p className="text-[12.5px] text-muted">
+              <p className="max-w-[68ch] text-[12.5px] leading-relaxed text-muted">
                 尚未生成智能解读。运行 <code className="font-mono">py -3.12 tools/explain.py {caseId}</code> 生成后再刷新。
               </p>
             )}
           </CardBody>
         </Card>
 
-        {/* 六阶段 */}
-        <Card className="mt-4">
-          <CardHead>
-            <span className="text-[13px] font-medium">全链条 · 六阶段</span>
-            <span className="ml-auto text-[12px] text-muted">弃权路径以灰色 skipped 标注</span>
-          </CardHead>
-          <CardBody className="p-0">
-            <StageList stages={stages} />
-          </CardBody>
-        </Card>
+        {/* 三、证据与过程：全部降一级，长内容默认折叠 */}
+        <SectionLabel meta="折叠项点击表头展开">证据与过程</SectionLabel>
 
-        {/* 三面板 */}
-        <div className="mt-4 grid gap-3 lg:grid-cols-3">
+        <Section
+          title="条款依据"
+          meta={ctx ? ctx.title || "（无标题）" : "无上下文快照"}
+          className="mt-0"
+        >
+          {ctx ? (
+            <div className="space-y-2 px-4 py-3">
+              {ctx.test_purpose && (
+                <details className="rounded-md border border-line">
+                  <summary className="cursor-pointer px-3 py-2 text-[12px] text-muted hover:text-ink">
+                    测试目的（TP 原文）
+                  </summary>
+                  <pre className="scroll-thin max-h-[220px] max-w-[75ch] overflow-auto whitespace-pre-wrap border-t border-line bg-surface px-3 py-2 font-mono text-[11.5px] leading-relaxed">
+                    {ctx.test_purpose}
+                  </pre>
+                </details>
+              )}
+              {ctx.conformance_requirements && (
+                <details className="rounded-md border border-line">
+                  <summary className="cursor-pointer px-3 py-2 text-[12px] text-muted hover:text-ink">
+                    符合性要求（规范引文）
+                  </summary>
+                  <pre className="scroll-thin max-h-[220px] max-w-[75ch] overflow-auto whitespace-pre-wrap border-t border-line bg-surface px-3 py-2 font-mono text-[11.5px] leading-relaxed">
+                    {ctx.conformance_requirements}
+                  </pre>
+                </details>
+              )}
+              {!ctx.test_purpose && !ctx.conformance_requirements && (
+                <p className="text-[12.5px] text-muted">该用例的条款快照中没有 TP 原文或符合性要求。</p>
+              )}
+            </div>
+          ) : (
+            <p className="max-w-[68ch] px-4 py-3 text-[12.5px] leading-relaxed text-muted">
+              该用例没有条款上下文快照（data/ctx/{caseId}.json），只能看到生成与校验结果。
+            </p>
+          )}
+        </Section>
+
+        <Section
+          title="全链条 · 六阶段"
+          meta={`${doneStages} / ${stages.length} 完成 · 弃权以灰色 skipped 标注`}
+          defaultOpen
+          className="mt-3"
+          bodyClassName="p-0"
+        >
+          <StageList stages={stages} />
+        </Section>
+
+        {/* 字段对照：三列等权，属于同一组，故不折叠 */}
+        <div className="mt-3 grid gap-3 lg:grid-cols-3">
           <Card>
             <CardHead>
               <span className="text-[13px] font-medium">gold 字段（官方答案）</span>
@@ -520,7 +536,7 @@ export function CaseView({ caseId }: { caseId: string }) {
             </CardHead>
             <CardBody className="scroll-thin max-h-[320px] overflow-auto">
               {!goldTables.length ? (
-                <p className="text-[12.5px] text-muted">
+                <p className="text-[12.5px] leading-relaxed text-muted">
                   该用例原文的信令内容为 None，没有 gold 字段（不参与 L3 分母）。
                 </p>
               ) : (
@@ -533,8 +549,8 @@ export function CaseView({ caseId }: { caseId: string }) {
                       </div>
                       <ul className="mt-1 space-y-0.5">
                         {leafFields(t).map((n) => (
-                          <li key={n} className="flex justify-between gap-2 font-mono text-[11.5px]">
-                            <span className="truncate">{n}</span>
+                          <li key={n} className="truncate font-mono text-[11.5px]">
+                            {n}
                           </li>
                         ))}
                       </ul>
@@ -552,13 +568,13 @@ export function CaseView({ caseId }: { caseId: string }) {
             </CardHead>
             <CardBody className="scroll-thin max-h-[320px] overflow-auto">
               {!out ? (
-                <p className="text-[12.5px] text-muted">快照中不含该用例的系统产出。</p>
+                <p className="text-[12.5px] leading-relaxed text-muted">快照中不含该用例的系统产出。</p>
               ) : out.status === "abstained" ? (
-                <p className="text-[12.5px] text-muted">
+                <p className="text-[12.5px] leading-relaxed text-muted">
                   已弃权：{out.reason || "输入中没有消息/SIB 名"}。未调用模型，未产出信令内容。
                 </p>
               ) : !sysMsgs.length ? (
-                <p className="text-[12.5px] text-muted">没有产出消息。</p>
+                <p className="text-[12.5px] leading-relaxed text-muted">没有产出消息。</p>
               ) : (
                 <div className="space-y-2">
                   {sysMsgs.map((m, i) => (
@@ -573,12 +589,12 @@ export function CaseView({ caseId }: { caseId: string }) {
                                 setPicked({ msg: m.message || "", ie: f });
                               }}
                               title="查看该字段的证据"
-                              className="group flex w-full items-center justify-between gap-2 rounded px-1 py-0.5 text-left font-mono text-[11.5px] hover:bg-surface"
+                              className="group flex w-full items-center justify-between gap-2 rounded px-1 py-0.5 text-left font-mono text-[11.5px] hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
                             >
                               <span className="truncate">{f.name}</span>
                               <span className="flex shrink-0 items-center gap-1 text-muted">
                                 {f.value || ""}
-                                <Info className="h-3 w-3 opacity-40 group-hover:opacity-100" />
+                                <Info className="h-3 w-3 opacity-40 group-hover:opacity-100" aria-hidden />
                               </span>
                             </button>
                           </li>
@@ -598,18 +614,20 @@ export function CaseView({ caseId }: { caseId: string }) {
             </CardHead>
             <CardBody className="scroll-thin max-h-[320px] overflow-auto">
               {out?.status === "abstained" ? (
-                <p className="text-[12.5px] text-muted">弃权：无产物可校验。</p>
+                <p className="text-[12.5px] leading-relaxed text-muted">弃权：无产物可校验。</p>
               ) : !violations.length ? (
-                <p className="text-[12.5px] text-muted">无违规（R1 消息存在 / R2 字段合法 / R3 覆盖完整）。</p>
+                <p className="text-[12.5px] leading-relaxed text-muted">
+                  无违规（R1 消息存在 / R2 字段合法 / R3 覆盖完整）。
+                </p>
               ) : (
                 <ul className="space-y-2">
                   {violations.map((v, i) => (
                     <li key={i} className="text-[12px]">
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex flex-wrap items-center gap-1.5">
                         <Chip tone="bad">{v.rule}</Chip>
-                        <span className="font-mono text-[11.5px]">{v.path}</span>
+                        <span className="break-all font-mono text-[11.5px]">{v.path}</span>
                       </div>
-                      <div className="mt-0.5 text-muted">{v.detail}</div>
+                      <div className="mt-0.5 leading-relaxed text-muted">{v.detail}</div>
                     </li>
                   ))}
                 </ul>
@@ -618,47 +636,46 @@ export function CaseView({ caseId }: { caseId: string }) {
           </Card>
         </div>
 
-        {/* 步骤表 */}
         {!!out?.steps?.length && (
-          <Card className="mt-4">
-            <CardHead>
-              <span className="text-[13px] font-medium">生成的步骤序列</span>
-              <span className="ml-auto num text-[12px] text-muted">{out.steps.length} 步</span>
-            </CardHead>
-            <CardBody className="p-0">
-              <Table>
-                <thead>
-                  <tr>
-                    <Th className="w-12 text-right">#</Th>
-                    <Th>主体</Th>
-                    <Th>方向</Th>
-                    <Th>消息</Th>
-                    <Th>关联 TP</Th>
+          <Section
+            title="生成的步骤序列"
+            meta={`${out.steps.length} 步`}
+            defaultOpen
+            className="mt-3"
+            bodyClassName="p-0"
+          >
+            <Table>
+              <thead>
+                <tr>
+                  <Th className="w-12 text-right">#</Th>
+                  <Th>主体</Th>
+                  <Th>方向</Th>
+                  <Th>消息</Th>
+                  <Th>关联 TP</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {out.steps.map((s) => (
+                  <tr key={s.st} className="hover:bg-surface">
+                    <Td className="num text-right">{s.st}</Td>
+                    <Td>{s.actor || DASH}</Td>
+                    <Td className="font-mono text-[12px]">{s.direction || DASH}</Td>
+                    <Td className="max-w-[420px] truncate" title={s.message || ""}>
+                      {s.message || DASH}
+                    </Td>
+                    <Td className="num">{s.tp_ref?.length ? s.tp_ref.join(", ") : DASH}</Td>
                   </tr>
-                </thead>
-                <tbody>
-                  {out.steps.map((s) => (
-                    <tr key={s.st}>
-                      <Td className="num text-right">{s.st}</Td>
-                      <Td>{s.actor || DASH}</Td>
-                      <Td className="font-mono text-[12px]">{s.direction || DASH}</Td>
-                      <Td className="max-w-[420px] truncate" title={s.message || ""}>
-                        {s.message || DASH}
-                      </Td>
-                      <Td className="num">{s.tp_ref?.length ? s.tp_ref.join(", ") : DASH}</Td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </CardBody>
-          </Card>
+                ))}
+              </tbody>
+            </Table>
+          </Section>
         )}
 
-        <Card className="mt-4">
-          <CardBody className="p-0">
-            <RawJson value={{ report, abstain, ie, out }} />
-          </CardBody>
-        </Card>
+        <Section title="原始数据（只读）" className="mt-3" bodyClassName="p-0">
+          <pre className="scroll-thin max-h-[360px] overflow-auto p-3 font-mono text-[11.5px] leading-relaxed">
+            {JSON.stringify({ report, abstain, ie, out }, null, 2)}
+          </pre>
+        </Section>
 
         <Modal
           open={!!picked}
@@ -666,7 +683,7 @@ export function CaseView({ caseId }: { caseId: string }) {
           title={picked ? `${picked.msg} · ${picked.ie.name}` : ""}
         >
           {picked && (
-            <div className="space-y-3 text-[12.5px]">
+            <div className="space-y-4 text-[12.5px]">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-muted">取值</span>
                 <span className="font-mono">{picked.ie.value || DASH}</span>
@@ -680,7 +697,7 @@ export function CaseView({ caseId }: { caseId: string }) {
               </div>
 
               <div>
-                <div className="mb-1 text-muted">符号表路径（本地收录的 TS 38.331 子集）</div>
+                <div className="mb-1 text-[12px] font-medium text-ink">符号表路径（本地收录的 TS 38.331 子集）</div>
                 {pickedPaths.length ? (
                   <ul className="space-y-1">
                     {pickedPaths.map((p) => (
@@ -703,8 +720,8 @@ export function CaseView({ caseId }: { caseId: string }) {
 
               {picked.ie.condition && (
                 <div>
-                  <div className="mb-1 text-muted">模型给出的适用条件</div>
-                  <p className="whitespace-pre-wrap rounded border border-line bg-surface px-2 py-1">
+                  <div className="mb-1 text-[12px] font-medium text-ink">模型给出的适用条件</div>
+                  <p className="max-w-[68ch] whitespace-pre-wrap rounded border border-line bg-surface px-2 py-1 leading-relaxed">
                     {picked.ie.condition}
                   </p>
                 </div>
@@ -712,13 +729,13 @@ export function CaseView({ caseId }: { caseId: string }) {
 
               {pickedDerivation && (
                 <div>
-                  <div className="mb-1 text-muted">模板来源（derivation path）</div>
+                  <div className="mb-1 text-[12px] font-medium text-ink">模板来源（derivation path）</div>
                   <p className="break-words font-mono text-[11.5px]">{pickedDerivation}</p>
                 </div>
               )}
 
               <div>
-                <div className="mb-1 text-muted">校验器</div>
+                <div className="mb-1 text-[12px] font-medium text-ink">校验器</div>
                 {pickedViolations.length ? (
                   <ul className="space-y-1">
                     {pickedViolations.map((v, i) => (
