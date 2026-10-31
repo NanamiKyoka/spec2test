@@ -34,16 +34,16 @@ export function StageTimeline({ job }: { job?: Job }) {
               aria-expanded={expanded}
             >
               <span className={`mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full ${DOT[s.status]}`} />
-              <span className="w-24 shrink-0 text-[13px] font-medium">{s.label}</span>
-              <span className="shrink-0 text-[12px] text-muted">{LABEL[s.status]}</span>
-              <span className="min-w-0 flex-1 truncate text-[12px] text-muted">
+              <span className="w-24 shrink-0 text-sm font-medium">{s.label}</span>
+              <span className="shrink-0 text-xs text-muted">{LABEL[s.status]}</span>
+              <span className="min-w-0 flex-1 truncate text-xs text-muted">
                 {s.summary}
               </span>
             </button>
             {expanded && s.lines.length > 0 && (
               <div className="ml-5 mt-1 space-y-0.5 border-l border-line pl-3">
                 {s.lines.map((ln, i) => (
-                  <div key={i} className="prose-cn font-mono text-[12px] text-muted">
+                  <div key={i} className="prose-cn font-mono text-xs text-muted">
                     {ln}
                   </div>
                 ))}
@@ -60,7 +60,7 @@ export function skippedNote(job?: Job) {
   const skipped = buildStages(job).filter((s) => s.status === "skipped").length;
   if (skipped < 3) return null;
   return (
-    <div className="mt-2 rounded border border-line bg-canvas px-3 py-2 text-[12px] text-muted">
+    <div className="mt-2 rounded border border-line bg-canvas px-3 py-2 text-xs text-muted">
       未调用模型，calls=0；弃权不计分（不是 0 分）。
     </div>
   );

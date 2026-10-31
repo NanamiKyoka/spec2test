@@ -52,11 +52,11 @@ function StatCard({
   return (
     <Card>
       <CardBody>
-        <div className="text-[11px] text-muted">
+        <div className="text-xs text-muted">
           <Term term={label} desc={term} />
         </div>
-        <div className="num mt-1 text-[22px] font-semibold leading-none">{value}</div>
-        {sub && <div className="mt-1.5 text-[11px] leading-relaxed text-muted">{sub}</div>}
+        <div className="num mt-1 text-2xl font-semibold leading-none">{value}</div>
+        {sub && <div className="mt-1.5 text-xs leading-relaxed text-muted">{sub}</div>}
       </CardBody>
     </Card>
   );
@@ -76,7 +76,7 @@ function PairedBar({
     : null;
   return (
     <div className="flex items-center gap-2">
-      <span className="w-8 shrink-0 text-[11px] text-muted">{label}</span>
+      <span className="w-8 shrink-0 text-xs text-muted">{label}</span>
       <div className="h-2.5 min-w-0 flex-1 overflow-hidden rounded-full bg-surface">
         {numeric !== null && (
           <div
@@ -85,7 +85,7 @@ function PairedBar({
           />
         )}
       </div>
-      <span className="num w-11 shrink-0 text-right text-[11px]">{fmtL3(value)}</span>
+      <span className="num w-11 shrink-0 text-right text-xs">{fmtL3(value)}</span>
     </div>
   );
 }
@@ -234,7 +234,7 @@ export function EvalView() {
         <div className="flex flex-wrap items-end gap-3">
           <div>
             <h1 className="text-xl font-semibold tracking-tight">评测总览</h1>
-            <p className="mt-1 max-w-prose text-[13px] text-muted">
+            <p className="mt-1 max-w-prose text-sm text-muted">
               8 个 NTN 用例逐例报数：与结构化解码基线配对对照，判对错由确定性校验器给出，不报平均数。
             </p>
           </div>
@@ -285,12 +285,13 @@ export function EvalView() {
           />
         </div>
 
-        {/* 逐例配对条形图 */}
-        <Card className="mt-6">
+        {/* 逐例：配对条形图 + 逐例矩阵（同组，组内间距小于组间距） */}
+        <section aria-label="逐例结果" className="mt-8 space-y-3 rounded-lg bg-surface p-3">
+        <Card>
           <CardHead>
             <BarChart3 className="h-4 w-4 text-muted" />
-            <span className="text-[13px] font-medium">L3 配对对照</span>
-            <span className="ml-auto flex items-center gap-3 text-[11px] text-muted">
+            <span className="text-sm font-medium">L3 配对对照</span>
+            <span className="ml-auto flex items-center gap-3 text-xs text-muted">
               <span className="flex items-center gap-1">
                 <span className="h-2 w-4 rounded-full bg-accent" /> 系统
               </span>
@@ -306,7 +307,7 @@ export function EvalView() {
                   <div className="flex flex-wrap items-center gap-1.5">
                     <button
                       onClick={() => goCase(r.case)}
-                      className="num font-mono text-[12px] text-accent hover:underline"
+                      className="num font-mono text-xs text-accent-ink hover:underline"
                       title={`查看用例 ${r.case}`}
                     >
                       {r.case}
@@ -320,15 +321,15 @@ export function EvalView() {
                 </div>
               ))}
             </div>
-            {!rows?.length && <div className="py-6 text-center text-[13px] text-muted">该快照未包含逐例报告。</div>}
+            {!rows?.length && <div className="py-6 text-center text-sm text-muted">该快照未包含逐例报告。</div>}
           </CardBody>
         </Card>
 
         {/* 逐例矩阵 */}
-        <Card className="mt-6">
+        <Card>
           <CardHead>
             <Table2 className="h-4 w-4 text-muted" />
-            <span className="text-[13px] font-medium">逐例矩阵</span>
+            <span className="text-sm font-medium">逐例矩阵</span>
             <span className="ml-auto text-xs text-muted">点击用例号查看单例全链条</span>
           </CardHead>
           <CardBody className="p-0">
@@ -374,7 +375,7 @@ export function EvalView() {
                       <Td>
                         <button
                           onClick={() => goCase(r.case)}
-                          className="num font-mono text-accent hover:underline"
+                          className="num font-mono text-accent-ink hover:underline"
                           title={`查看用例 ${r.case}`}
                         >
                           {r.case}
@@ -386,7 +387,7 @@ export function EvalView() {
                       <Td className="num text-right">{fmtL3(r.L3_base)}</Td>
                       <Td
                         className={`num text-right ${
-                          d === DASH ? "" : d.startsWith("+") ? "text-ok" : d.startsWith("-") ? "text-bad" : ""
+                          d === DASH ? "" : d.startsWith("+") ? "text-ok-ink" : d.startsWith("-") ? "text-bad-ink" : ""
                         }`}
                       >
                         {d}
@@ -398,7 +399,7 @@ export function EvalView() {
                 })}
                 {!rows?.length && (
                   <tr>
-                    <Td colSpan={8} className="py-6 text-center text-[13px] text-muted">
+                    <Td colSpan={8} className="py-6 text-center text-sm text-muted">
                       该快照未包含逐例报告。
                     </Td>
                   </tr>
@@ -407,16 +408,18 @@ export function EvalView() {
             </Table>
           </CardBody>
         </Card>
+        </section>
 
         {abstainCount !== null && (
           <p className="mt-2 text-xs text-muted">弃权统计快照含 {abstainCount} 条用例记录。</p>
         )}
 
-        {/* 校验器能力 */}
-        <Card className="mt-6">
+        {/* 校验器能力 + 已知限制（同组） */}
+        <section aria-label="校验器与已知限制" className="mt-8 space-y-3 rounded-lg bg-surface p-3">
+        <Card>
           <CardHead>
             <ShieldCheck className="h-4 w-4 text-muted" />
-            <span className="text-[13px] font-medium">校验器能力</span>
+            <span className="text-sm font-medium">校验器能力</span>
             <span className="ml-auto text-xs text-muted">确定性规则，不调用模型</span>
           </CardHead>
           <CardBody>
@@ -428,10 +431,10 @@ export function EvalView() {
               ].map(([rule, name, desc]) => (
                 <div key={rule} className="rounded-md border border-line bg-surface/60 px-3 py-2.5">
                   <div className="flex items-baseline gap-2">
-                    <span className="num text-[18px] font-semibold">{defectStats.byRule[rule] || 0}</span>
-                    <span className="text-[12px] font-medium">{rule} · {name}</span>
+                    <span className="num text-lg font-semibold">{defectStats.byRule[rule] || 0}</span>
+                    <span className="text-xs font-medium">{rule} · {name}</span>
                   </div>
-                  <div className="mt-1 text-[11px] leading-relaxed text-muted">{desc}</div>
+                  <div className="mt-1 text-xs leading-relaxed text-muted">{desc}</div>
                 </div>
               ))}
             </div>
@@ -443,19 +446,20 @@ export function EvalView() {
         </Card>
 
         {/* 已知限制 */}
-        <Card className="mt-6">
+        <Card>
           <CardHead>
             <TriangleAlert className="h-4 w-4 text-muted" />
-            <span className="text-[13px] font-medium">已知限制</span>
+            <span className="text-sm font-medium">已知限制</span>
           </CardHead>
           <CardBody>
-            <ul className="list-disc space-y-1.5 pl-5 text-[12.5px] leading-relaxed text-muted">
+            <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-muted">
               <li>L2 不计分：样本仅 16 条，不足以支撑统计结论。</li>
               <li>6G 尚未标准化：相关结论基于 Rel-19 验证，不代表最终标准。</li>
               <li>L3 只衡量字段召回，不衡量取值是否正确。</li>
             </ul>
           </CardBody>
         </Card>
+        </section>
       </div>
     </div>
   );

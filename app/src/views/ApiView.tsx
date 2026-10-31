@@ -43,7 +43,7 @@ const NO_KEY_PROVIDERS: Provider[] = ["openai", "anthropic"];
 
 /* 表单分组标题：比字段标签弱一档，比正文强一档 */
 function GroupHead({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-[11.5px] font-semibold uppercase tracking-wide text-muted">{children}</h2>;
+  return <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{children}</h2>;
 }
 
 export function ApiView() {
@@ -192,10 +192,10 @@ export function ApiView() {
 
   const header = (
     <>
-      <h1 className="text-[20px] font-semibold tracking-tight">API 管理</h1>
-      <p className="mt-1 max-w-[68ch] text-[13px] leading-relaxed text-muted">
+      <h1 className="text-xl font-semibold tracking-tight">API 管理</h1>
+      <p className="mt-1 max-w-[68ch] text-sm leading-relaxed text-muted">
         选择模型通道并配置凭据。凭据只保存在本机{" "}
-        <code className="rounded bg-surface px-1 py-0.5 font-mono text-[12px]">data/settings.json</code>
+        <code className="rounded bg-surface px-1 py-0.5 font-mono text-xs">data/settings.json</code>
         （已被 gitignore），页面只显示掩码，不会回传明文。
       </p>
     </>
@@ -230,7 +230,7 @@ export function ApiView() {
       {/* 主区：表单。可操作的内容在前，说明性内容折叠到后面 */}
       <Card className="mt-5">
         <CardHead>
-          <span className="flex items-center gap-2 text-[13px] font-medium">
+          <span className="flex items-center gap-2 text-sm font-medium">
             <KeyRound className="h-4 w-4 text-accent" aria-hidden />
             模型通道与密钥
           </span>
@@ -315,10 +315,10 @@ export function ApiView() {
                   </Button>
                 </div>
                 {models?.source === "catalog" && (
-                  <p className="mt-1 text-[11.5px] text-muted">{models.note || "已回退到内置目录"}</p>
+                  <p className="mt-1 text-xs text-muted">{models.note || "已回退到内置目录"}</p>
                 )}
                 {models?.source === "error" && (
-                  <p className="mt-1 text-[11.5px] text-bad">获取失败：{models.note || "未知原因"}</p>
+                  <p className="mt-1 text-xs text-bad-ink">获取失败：{models.note || "未知原因"}</p>
                 )}
               </Field>
 
@@ -331,10 +331,26 @@ export function ApiView() {
                     max={1}
                     step={0.1}
                     value={temperature}
+                    aria-valuetext={temperature.toFixed(1)}
                     onChange={(e) => setTemperature(Number(e.target.value))}
-                    className="h-1.5 flex-1 cursor-pointer accent-[rgb(var(--accent))]"
+                    style={{ "--pct": `${Math.round(temperature * 100)}%` } as React.CSSProperties}
+                    className={cn(
+                      "h-4 min-w-0 flex-1 cursor-pointer appearance-none rounded-full bg-transparent",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
+                      // 轨道：已选段用强调色，未选段用分隔线色
+                      "[&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-full",
+                      "[&::-webkit-slider-runnable-track]:bg-[linear-gradient(to_right,rgb(var(--accent))_var(--pct),rgb(var(--line))_var(--pct))]",
+                      "[&::-moz-range-track]:h-1 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-line",
+                      "[&::-moz-range-progress]:h-1 [&::-moz-range-progress]:rounded-full [&::-moz-range-progress]:bg-accent-solid",
+                      // 滑块：与按钮同色的实心圆点
+                      "[&::-webkit-slider-thumb]:-mt-[5px] [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5",
+                      "[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full",
+                      "[&::-webkit-slider-thumb]:bg-accent-solid [&::-webkit-slider-thumb]:shadow-card",
+                      "[&::-moz-range-thumb]:h-3.5 [&::-moz-range-thumb]:w-3.5 [&::-moz-range-thumb]:rounded-full",
+                      "[&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-accent-solid [&::-moz-range-thumb]:shadow-card"
+                    )}
                   />
-                  <span className="num w-8 shrink-0 text-right text-[12px] text-muted">
+                  <span className="num w-8 shrink-0 text-right text-xs text-muted">
                     {temperature.toFixed(1)}
                   </span>
                 </div>
@@ -369,7 +385,7 @@ export function ApiView() {
               </Field>
 
               {needsKey && !keySet && (
-                <p className="max-w-[68ch] text-[11.5px] leading-relaxed text-muted">
+                <p className="max-w-[68ch] text-xs leading-relaxed text-muted">
                   提示：未配置 Key 时，对话页会收到{" "}
                   <Term term="no_credential" desc="后端返回的错误码，表示当前通道缺少可用凭据" />
                   ，这是预期行为，不是故障。
@@ -390,7 +406,7 @@ export function ApiView() {
             </Button>
             <a
               href="#/chat"
-              className="ml-auto inline-flex items-center gap-1 rounded text-[12px] text-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+              className="ml-auto inline-flex items-center gap-1 rounded text-xs text-accent-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
             >
               去对话页试运行 <ArrowRight className="h-3 w-3" aria-hidden />
             </a>
@@ -399,8 +415,8 @@ export function ApiView() {
           {saveError && (
             <div role="alert" className="flex items-start gap-2 rounded-md border border-bad/40 bg-bad/5 px-3 py-2">
               <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-bad" aria-hidden />
-              <div className="min-w-0 text-[12px] leading-relaxed">
-                <span className="font-medium text-bad">保存失败</span>
+              <div className="min-w-0 text-xs leading-relaxed">
+                <span className="font-medium text-bad-ink">保存失败</span>
                 <span className="ml-1 text-ink">{saveError}</span>
               </div>
             </div>
@@ -420,8 +436,8 @@ export function ApiView() {
               ) : (
                 <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-bad" aria-hidden />
               )}
-              <div className="min-w-0 text-[12px] leading-relaxed">
-                <span className={cn("font-medium", testResult.ok ? "text-ok" : "text-bad")}>
+              <div className="min-w-0 text-xs leading-relaxed">
+                <span className={cn("font-medium", testResult.ok ? "text-ok-ink" : "text-bad-ink")}>
                   {testResult.ok ? "连接成功" : "连接失败"}
                 </span>
                 <span className="ml-1 text-ink">
@@ -454,7 +470,7 @@ export function ApiView() {
         className="mt-8"
         bodyClassName="px-4 py-3"
       >
-        <div className="max-w-[68ch] space-y-2 text-[12.5px] leading-relaxed text-muted">
+        <div className="max-w-[68ch] space-y-2 text-sm leading-relaxed text-muted">
           <p>
             <b className="text-ink">本地代理</b>：适合"手上没有厂商 Key"的情况——只要本机 OpenCode
             代理在跑，<b className="text-ink">不需要填 Key</b>。它的模型列表无法枚举，页面会显示内置目录。

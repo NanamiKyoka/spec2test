@@ -159,11 +159,11 @@ function StageList({ stages }: { stages: Stage[] }) {
             <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${meta.dot}`} aria-hidden />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <span className="text-[13px] font-medium">{s.label}</span>
-                <span className="font-mono text-[11.5px] text-muted">{s.key}</span>
+                <span className="text-sm font-medium">{s.label}</span>
+                <span className="font-mono text-xs text-muted">{s.key}</span>
                 <Chip tone={meta.tone}>{meta.label}</Chip>
               </div>
-              <div className="mt-0.5 text-[12.5px] leading-relaxed text-muted">{s.summary}</div>
+              <div className="mt-0.5 text-sm leading-relaxed text-muted">{s.summary}</div>
             </div>
           </li>
         );
@@ -175,9 +175,9 @@ function StageList({ stages }: { stages: Stage[] }) {
 /* 页面内的一级分组标题：把「结论 / 证据 / 过程」拉开层级 */
 function SectionLabel({ children, meta }: { children: ReactNode; meta?: ReactNode }) {
   return (
-    <div className="mb-2 mt-8 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-      <h2 className="text-[11.5px] font-semibold uppercase tracking-wide text-muted">{children}</h2>
-      {meta && <span className="text-[11.5px] text-muted">{meta}</span>}
+    <div className="mb-3 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 border-b border-line pb-2">
+      <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{children}</h2>
+      {meta && <span className="text-xs text-muted">{meta}</span>}
     </div>
   );
 }
@@ -366,7 +366,7 @@ export function CaseView({ caseId }: { caseId: string }) {
           <Button variant="subtle" onClick={() => (window.location.hash = "#/data")}>
             <ArrowLeft className="h-4 w-4" /> 数据面板
           </Button>
-          <span className="num truncate font-mono text-[12px] text-muted">{caseId}</span>
+          <span className="num truncate font-mono text-xs text-muted">{caseId}</span>
           <div className="ml-auto">
             <Button variant="primary" onClick={() => (window.location.hash = "#/chat")}>
               <MessageSquare className="h-4 w-4" /> 在对话中继续
@@ -387,7 +387,7 @@ export function CaseView({ caseId }: { caseId: string }) {
               )}
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-baseline gap-2">
-                  <h1 className="text-[16px] font-semibold leading-snug">{conclusion.text}</h1>
+                  <h1 className="text-base font-semibold leading-snug">{conclusion.text}</h1>
                   {verdict === "unknown" ? (
                     <Chip tone="muted">未判定</Chip>
                   ) : (
@@ -397,32 +397,32 @@ export function CaseView({ caseId }: { caseId: string }) {
 
                 <dl className="mt-3 flex flex-wrap items-baseline gap-x-6 gap-y-2">
                   <div className="flex items-baseline gap-1.5">
-                    <dt className="text-[11.5px] text-muted">
+                    <dt className="text-xs text-muted">
                       <Term term="L1" desc="结构合法率：生成物能否解析成 IR，且每步有主体/方向/消息。" />
                     </dt>
-                    <dd className="num text-[13px] font-medium text-ink">{fmtNum(report?.L1)}</dd>
+                    <dd className="num text-sm font-medium text-ink">{fmtNum(report?.L1)}</dd>
                   </div>
                   <div className="flex items-baseline gap-1.5">
-                    <dt className="text-[11.5px] text-muted">
+                    <dt className="text-xs text-muted">
                       <Term term="L3" desc="关键 IE 命中率：生成字段对官方叶子字段的召回。" />
                     </dt>
-                    <dd className="num text-[13px] font-medium text-ink">{fmtL3(report?.L3_recall)}</dd>
+                    <dd className="num text-sm font-medium text-ink">{fmtL3(report?.L3_recall)}</dd>
                   </div>
                   <div className="flex items-baseline gap-1.5">
-                    <dt className="text-[11.5px] text-muted">
+                    <dt className="text-xs text-muted">
                       <Term term="gold" desc="官方答案的叶子字段数。" />
                     </dt>
-                    <dd className="num text-[13px] font-medium text-ink">{report?.gold_ie_n ?? goldCount}</dd>
+                    <dd className="num text-sm font-medium text-ink">{report?.gold_ie_n ?? goldCount}</dd>
                   </div>
                   <div className="flex items-baseline gap-1.5">
-                    <dt className="text-[11.5px] text-muted">调用数</dt>
-                    <dd className="num text-[13px] font-medium text-ink">{report?.calls ?? DASH}</dd>
+                    <dt className="text-xs text-muted">调用数</dt>
+                    <dd className="num text-sm font-medium text-ink">{report?.calls ?? DASH}</dd>
                   </div>
                 </dl>
 
                 {keyIes.length > 0 && (
                   <div className="mt-3">
-                    <div className="mb-1.5 text-[11.5px] text-muted">关键字段（点击查看证据）</div>
+                    <div className="mb-1.5 text-xs text-muted">关键字段（点击查看证据）</div>
                     <div className="flex flex-wrap items-center gap-1.5">
                       {keyIes.map(({ msg, ie }) => (
                         <button
@@ -432,7 +432,7 @@ export function CaseView({ caseId }: { caseId: string }) {
                             setPicked({ msg, ie });
                           }}
                           aria-label={`查看 ${ie.name} 的证据`}
-                          className="rounded-full border border-line bg-canvas px-2 py-0.5 font-mono text-[11.5px] text-ink transition-colors hover:border-accent/40 hover:bg-accent/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                          className="rounded-full border border-line bg-canvas px-2 py-0.5 font-mono text-xs text-ink transition-colors hover:border-accent/40 hover:bg-accent/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
                         >
                           {ie.name}
                         </button>
@@ -446,12 +446,12 @@ export function CaseView({ caseId }: { caseId: string }) {
         </Card>
 
         {/* 二、智能解读：紧贴结论，用浅色表头表明来源，不整块上色以免与结论争重心 */}
-        <Card className="mt-4">
+        <Card className="mt-4 bg-surface">
           <CardHead className="rounded-t-lg bg-accent/5">
-            <span className="flex items-center gap-1.5 text-[13px] font-medium text-accent">
+            <span className="flex items-center gap-1.5 text-sm font-medium text-accent-ink">
               <Info className="h-3.5 w-3.5" aria-hidden /> 智能解读
             </span>
-            <span className="ml-auto text-[11.5px] text-muted">
+            <span className="ml-auto text-xs text-muted">
               {explain
                 ? `${explain.model || "model"}${explain.generated_at ? " · " + explain.generated_at.slice(0, 10) : ""}`
                 : "未生成"}
@@ -460,31 +460,32 @@ export function CaseView({ caseId }: { caseId: string }) {
           <CardBody className="space-y-3">
             {explain ? (
               <>
-                {explain.headline && <p className="max-w-[68ch] text-[13.5px] font-semibold leading-snug">{explain.headline}</p>}
+                {explain.headline && <p className="max-w-[68ch] text-sm font-semibold leading-snug">{explain.headline}</p>}
                 <div className="grid gap-3 md:grid-cols-2">
                   {(explain.sections || []).map((s) => (
-                    <div key={s.key} className="rounded-md bg-surface px-3 py-2">
-                      <div className="mb-1 text-[12px] font-medium text-accent">{s.title}</div>
-                      <p className="max-w-[68ch] whitespace-pre-wrap text-[12.5px] leading-relaxed text-ink">
+                    <div key={s.key} className="rounded-md border border-line bg-canvas px-3 py-2">
+                      <div className="mb-1 text-xs font-medium text-accent-ink">{s.title}</div>
+                      <p className="max-w-[68ch] whitespace-pre-wrap text-sm leading-relaxed text-ink">
                         {s.body}
                       </p>
                     </div>
                   ))}
                 </div>
-                <p className="max-w-[68ch] text-[11.5px] leading-relaxed text-muted">
+                <p className="max-w-[68ch] text-xs leading-relaxed text-muted">
                   由 LLM 基于本页数据生成；判定以校验器与官方答案为准，可对照下方证据逐条核对。
                 </p>
               </>
             ) : (
-              <p className="max-w-[68ch] text-[12.5px] leading-relaxed text-muted">
+              <p className="max-w-[68ch] text-sm leading-relaxed text-muted">
                 该用例暂未生成智能解读；判定以校验器与下方证据为准。
               </p>
             )}
           </CardBody>
         </Card>
 
-        {/* 三、证据与过程：全部降一级，长内容默认折叠 */}
-        <SectionLabel meta="折叠项点击表头展开">证据与过程</SectionLabel>
+        {/* 三、证据与过程：整块下沉到浅底，与上方「结论 / 解读」拉开分区 */}
+        <div className="mt-5 rounded-lg bg-surface p-3 sm:p-4">
+          <SectionLabel meta="折叠项点击表头展开">证据与过程</SectionLabel>
 
         <Section
           title="条款依据"
@@ -495,30 +496,30 @@ export function CaseView({ caseId }: { caseId: string }) {
             <div className="space-y-2 px-4 py-3">
               {ctx.test_purpose && (
                 <details className="rounded-md border border-line">
-                  <summary className="cursor-pointer px-3 py-2 text-[12px] text-muted hover:text-ink">
+                  <summary className="cursor-pointer px-3 py-2 text-xs text-muted hover:text-ink">
                     测试目的（TP 原文）
                   </summary>
-                  <pre className="scroll-thin max-h-[220px] max-w-[75ch] overflow-auto whitespace-pre-wrap border-t border-line bg-surface px-3 py-2 font-mono text-[11.5px] leading-relaxed">
+                  <pre className="scroll-thin max-h-[220px] max-w-[75ch] overflow-auto whitespace-pre-wrap border-t border-line bg-surface px-3 py-2 font-mono text-xs leading-relaxed">
                     {ctx.test_purpose}
                   </pre>
                 </details>
               )}
               {ctx.conformance_requirements && (
                 <details className="rounded-md border border-line">
-                  <summary className="cursor-pointer px-3 py-2 text-[12px] text-muted hover:text-ink">
+                  <summary className="cursor-pointer px-3 py-2 text-xs text-muted hover:text-ink">
                     符合性要求（规范引文）
                   </summary>
-                  <pre className="scroll-thin max-h-[220px] max-w-[75ch] overflow-auto whitespace-pre-wrap border-t border-line bg-surface px-3 py-2 font-mono text-[11.5px] leading-relaxed">
+                  <pre className="scroll-thin max-h-[220px] max-w-[75ch] overflow-auto whitespace-pre-wrap border-t border-line bg-surface px-3 py-2 font-mono text-xs leading-relaxed">
                     {ctx.conformance_requirements}
                   </pre>
                 </details>
               )}
               {!ctx.test_purpose && !ctx.conformance_requirements && (
-                <p className="text-[12.5px] text-muted">该用例的条款快照中没有 TP 原文或符合性要求。</p>
+                <p className="text-sm text-muted">该用例的条款快照中没有 TP 原文或符合性要求。</p>
               )}
             </div>
           ) : (
-            <p className="max-w-[68ch] px-4 py-3 text-[12.5px] leading-relaxed text-muted">
+            <p className="max-w-[68ch] px-4 py-3 text-sm leading-relaxed text-muted">
               该用例没有条款上下文快照（data/ctx/{caseId}.json），只能看到生成与校验结果。
             </p>
           )}
@@ -538,25 +539,25 @@ export function CaseView({ caseId }: { caseId: string }) {
         <div className="mt-3 grid gap-3 lg:grid-cols-3">
           <Card>
             <CardHead>
-              <span className="text-[13px] font-medium">gold 字段（官方答案）</span>
-              <span className="ml-auto num text-[12px] text-muted">{goldCount}</span>
+              <span className="text-sm font-medium">gold 字段（官方答案）</span>
+              <span className="ml-auto num text-xs text-muted">{goldCount}</span>
             </CardHead>
             <CardBody className="scroll-thin max-h-[320px] overflow-auto">
               {!goldTables.length ? (
-                <p className="text-[12.5px] leading-relaxed text-muted">
+                <p className="text-sm leading-relaxed text-muted">
                   该用例原文的信令内容为 None，没有 gold 字段（不参与 L3 分母）。
                 </p>
               ) : (
                 <div className="space-y-2">
                   {goldTables.map((t, i) => (
                     <div key={i}>
-                      <div className="text-[12px] font-medium">
+                      <div className="text-xs font-medium">
                         {t.message || t.table_ref || `表 ${i + 1}`}
                         {t.step ? <span className="ml-1 text-muted">（步骤 {t.step}）</span> : null}
                       </div>
                       <ul className="mt-1 space-y-0.5">
                         {leafFields(t).map((n) => (
-                          <li key={n} className="truncate font-mono text-[11.5px]">
+                          <li key={n} className="truncate font-mono text-xs">
                             {n}
                           </li>
                         ))}
@@ -570,23 +571,23 @@ export function CaseView({ caseId }: { caseId: string }) {
 
           <Card>
             <CardHead>
-              <span className="text-[13px] font-medium">系统产出</span>
-              <span className="ml-auto text-[11.5px] text-muted">点字段看证据 · {sysMsgs.length} 条消息</span>
+              <span className="text-sm font-medium">系统产出</span>
+              <span className="ml-auto text-xs text-muted">点字段看证据 · {sysMsgs.length} 条消息</span>
             </CardHead>
             <CardBody className="scroll-thin max-h-[320px] overflow-auto">
               {!out ? (
-                <p className="text-[12.5px] leading-relaxed text-muted">快照中不含该用例的系统产出。</p>
+                <p className="text-sm leading-relaxed text-muted">快照中不含该用例的系统产出。</p>
               ) : out.status === "abstained" ? (
-                <p className="text-[12.5px] leading-relaxed text-muted">
+                <p className="text-sm leading-relaxed text-muted">
                   已弃权：{out.reason || "输入中没有消息/SIB 名"}。未调用模型，未产出信令内容。
                 </p>
               ) : !sysMsgs.length ? (
-                <p className="text-[12.5px] leading-relaxed text-muted">没有产出消息。</p>
+                <p className="text-sm leading-relaxed text-muted">没有产出消息。</p>
               ) : (
                 <div className="space-y-2">
                   {sysMsgs.map((m, i) => (
                     <div key={i}>
-                      <div className="text-[12px] font-medium">{m.message || "（未命名消息）"}</div>
+                      <div className="text-xs font-medium">{m.message || "（未命名消息）"}</div>
                       <ul className="mt-1 space-y-0.5">
                         {(m.ies || []).map((f, k) => (
                           <li key={k}>
@@ -596,7 +597,7 @@ export function CaseView({ caseId }: { caseId: string }) {
                                 setPicked({ msg: m.message || "", ie: f });
                               }}
                               title="查看该字段的证据"
-                              className="group flex w-full items-center justify-between gap-2 rounded px-1 py-0.5 text-left font-mono text-[11.5px] hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                              className="group flex w-full items-center justify-between gap-2 rounded px-1 py-0.5 text-left font-mono text-xs hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
                             >
                               <span className="truncate">{f.name}</span>
                               <span className="flex shrink-0 items-center gap-1 text-muted">
@@ -616,23 +617,23 @@ export function CaseView({ caseId }: { caseId: string }) {
 
           <Card>
             <CardHead>
-              <span className="text-[13px] font-medium">校验违规</span>
-              <span className="ml-auto num text-[12px] text-muted">{violations.length}</span>
+              <span className="text-sm font-medium">校验违规</span>
+              <span className="ml-auto num text-xs text-muted">{violations.length}</span>
             </CardHead>
             <CardBody className="scroll-thin max-h-[320px] overflow-auto">
               {out?.status === "abstained" ? (
-                <p className="text-[12.5px] leading-relaxed text-muted">弃权：无产物可校验。</p>
+                <p className="text-sm leading-relaxed text-muted">弃权：无产物可校验。</p>
               ) : !violations.length ? (
-                <p className="text-[12.5px] leading-relaxed text-muted">
+                <p className="text-sm leading-relaxed text-muted">
                   无违规（R1 消息存在 / R2 字段合法 / R3 覆盖完整）。
                 </p>
               ) : (
                 <ul className="space-y-2">
                   {violations.map((v, i) => (
-                    <li key={i} className="text-[12px]">
+                    <li key={i} className="text-xs">
                       <div className="flex flex-wrap items-center gap-1.5">
                         <Chip tone="bad">{v.rule}</Chip>
-                        <span className="break-all font-mono text-[11.5px]">{v.path}</span>
+                        <span className="break-all font-mono text-xs">{v.path}</span>
                       </div>
                       <div className="mt-0.5 leading-relaxed text-muted">{v.detail}</div>
                     </li>
@@ -666,7 +667,7 @@ export function CaseView({ caseId }: { caseId: string }) {
                   <tr key={s.st} className="hover:bg-surface">
                     <Td className="num text-right">{s.st}</Td>
                     <Td>{s.actor || DASH}</Td>
-                    <Td className="font-mono text-[12px]">{s.direction || DASH}</Td>
+                    <Td className="font-mono text-xs">{s.direction || DASH}</Td>
                     <Td className="max-w-[420px] truncate" title={s.message || ""}>
                       {s.message || DASH}
                     </Td>
@@ -679,10 +680,11 @@ export function CaseView({ caseId }: { caseId: string }) {
         )}
 
         <Section title="原始数据（只读）" className="mt-3" bodyClassName="p-0">
-          <pre className="scroll-thin max-h-[360px] overflow-auto p-3 font-mono text-[11.5px] leading-relaxed">
+          <pre className="scroll-thin max-h-[360px] overflow-auto p-3 font-mono text-xs leading-relaxed">
             {JSON.stringify({ report, abstain, ie, out }, null, 2)}
           </pre>
         </Section>
+        </div>
 
         <Modal
           open={!!picked}
@@ -690,7 +692,7 @@ export function CaseView({ caseId }: { caseId: string }) {
           title={picked ? `${picked.msg} · ${picked.ie.name}` : ""}
         >
           {picked && (
-            <div className="space-y-4 text-[12.5px]">
+            <div className="space-y-4 text-sm">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-muted">取值</span>
                 <span className="font-mono">{picked.ie.value || DASH}</span>
@@ -704,13 +706,13 @@ export function CaseView({ caseId }: { caseId: string }) {
               </div>
 
               <div>
-                <div className="mb-1 text-[12px] font-medium text-ink">符号表路径（本地收录的 TS 38.331 子集）</div>
+                <div className="mb-1 text-xs font-medium text-ink">符号表路径（本地收录的 TS 38.331 子集）</div>
                 {pickedPaths.length ? (
                   <ul className="space-y-1">
                     {pickedPaths.map((p) => (
                       <li
                         key={p}
-                        className="break-all rounded border border-line bg-surface px-2 py-1 font-mono text-[11.5px]"
+                        className="break-all rounded border border-line bg-surface px-2 py-1 font-mono text-xs"
                       >
                         {p}
                       </li>
@@ -727,7 +729,7 @@ export function CaseView({ caseId }: { caseId: string }) {
 
               {picked.ie.condition && (
                 <div>
-                  <div className="mb-1 text-[12px] font-medium text-ink">模型给出的适用条件</div>
+                  <div className="mb-1 text-xs font-medium text-ink">模型给出的适用条件</div>
                   <p className="max-w-[68ch] whitespace-pre-wrap rounded border border-line bg-surface px-2 py-1 leading-relaxed">
                     {picked.ie.condition}
                   </p>
@@ -736,19 +738,19 @@ export function CaseView({ caseId }: { caseId: string }) {
 
               {pickedDerivation && (
                 <div>
-                  <div className="mb-1 text-[12px] font-medium text-ink">模板来源（derivation path）</div>
-                  <p className="break-words font-mono text-[11.5px]">{pickedDerivation}</p>
+                  <div className="mb-1 text-xs font-medium text-ink">模板来源（derivation path）</div>
+                  <p className="break-words font-mono text-xs">{pickedDerivation}</p>
                 </div>
               )}
 
               <div>
-                <div className="mb-1 text-[12px] font-medium text-ink">校验器</div>
+                <div className="mb-1 text-xs font-medium text-ink">校验器</div>
                 {pickedViolations.length ? (
                   <ul className="space-y-1">
                     {pickedViolations.map((v, i) => (
                       <li key={i} className="rounded border border-bad/30 bg-bad/5 px-2 py-1">
-                        <span className="font-mono text-[11.5px] text-bad">{v.rule}</span>{" "}
-                        <span className="font-mono text-[11.5px]">{v.path}</span>
+                        <span className="font-mono text-xs text-bad-ink">{v.rule}</span>{" "}
+                        <span className="font-mono text-xs">{v.path}</span>
                         <div className="text-muted">{v.detail}</div>
                       </li>
                     ))}

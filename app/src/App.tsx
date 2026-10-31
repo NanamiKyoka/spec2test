@@ -97,10 +97,29 @@ export default function App() {
         view={caseId ? "data" : view}
         onNav={nav}
         status={
-          <Chip tone={netOffline ? "warn" : offline ? "bad" : "ok"}>
-            <span className={`h-1.5 w-1.5 rounded-full ${netOffline || offline ? "dot-bad" : "dot-ok"}`} />
-            {netOffline ? "离线" : offline ? "后端未连接" : `${health?.provider ?? "—"} · ${health?.model ?? "—"}`}
-          </Chip>
+          <>
+            <Chip
+              tone={netOffline ? "warn" : offline ? "bad" : "ok"}
+              className="px-1.5 sm:hidden"
+              title={
+                netOffline ? "网络离线" : offline ? "后端未连接" : "后端已连接"
+              }
+            >
+              <span className={`h-1.5 w-1.5 rounded-full ${netOffline || offline ? "dot-bad" : "dot-ok"}`} />
+              <span className="sr-only">
+                {netOffline ? "网络离线" : offline ? "后端未连接" : "后端已连接"}
+              </span>
+            </Chip>
+            <Chip
+              tone={netOffline ? "warn" : offline ? "bad" : "ok"}
+              className="hidden max-w-[220px] sm:inline-flex"
+            >
+              <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${netOffline || offline ? "dot-bad" : "dot-ok"}`} />
+              <span className="min-w-0 truncate">
+                {netOffline ? "离线" : offline ? "后端未连接" : `${health?.provider ?? "—"} · ${health?.model ?? "—"}`}
+              </span>
+            </Chip>
+          </>
         }
         right={
           <Button

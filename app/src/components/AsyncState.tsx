@@ -28,7 +28,7 @@ export function AsyncState({
   if (state === "loading") {
     return (
       <div role="status" aria-live="polite" className={`rounded-md border border-line bg-surface ${pad}`}>
-        <div className="text-[13px] text-muted">{title || "正在读取…"}</div>
+        <div className="text-sm text-muted">{title || "正在读取…"}</div>
         <div className="mt-3 space-y-2" aria-hidden>
           <div className="h-3 w-1/3 animate-pulse rounded bg-line/60" />
           <div className="h-3 w-2/3 animate-pulse rounded bg-line/40" />
@@ -46,9 +46,9 @@ export function AsyncState({
             <TriangleAlert className="h-3.5 w-3.5" aria-hidden />
           </span>
           <div className="min-w-0 flex-1">
-            <div className="text-[13px] font-medium text-bad">{title || "读取失败"}</div>
+            <div className="text-sm font-medium text-bad-ink">{title || "读取失败"}</div>
             {message && (
-              <div className="mt-1 max-w-[52ch] text-[12px] leading-relaxed text-bad">{message}</div>
+              <div className="mt-1 max-w-[52ch] text-xs leading-relaxed text-bad-ink">{message}</div>
             )}
             {onRetry && (
               <Button variant="subtle" size="sm" className="mt-2" onClick={onRetry}>
@@ -66,9 +66,9 @@ export function AsyncState({
       <div className="mx-auto grid h-10 w-10 place-items-center rounded-full bg-canvas text-muted">
         <Info className="h-5 w-5" aria-hidden />
       </div>
-      <div className="mt-2 text-[13px] font-medium text-ink">{title || "暂无数据"}</div>
+      <div className="mt-2 text-sm font-medium text-ink">{title || "暂无数据"}</div>
       {message && (
-        <div className="mx-auto mt-1 max-w-[52ch] text-[12px] leading-relaxed text-muted">{message}</div>
+        <div className="mx-auto mt-1 max-w-[52ch] text-xs leading-relaxed text-muted">{message}</div>
       )}
       {action && <div className="mt-3 flex flex-wrap justify-center gap-2">{action}</div>}
     </div>

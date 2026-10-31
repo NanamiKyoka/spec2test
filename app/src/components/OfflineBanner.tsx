@@ -11,10 +11,10 @@ export function OfflineBanner({
       role="status"
       aria-live="polite"
       className={
-        "border-b px-4 py-1.5 text-[12px] " +
+        "border-b px-4 py-1.5 text-xs " +
         (netOffline
-          ? "border-warn/30 bg-warn/10 text-warn"
-          : "border-bad/30 bg-bad/10 text-bad")
+          ? "border-warn/30 bg-warn/10 text-warn-ink"
+          : "border-bad/30 bg-bad/10 text-bad-ink")
       }
     >
       {netOffline

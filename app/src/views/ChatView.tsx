@@ -219,11 +219,11 @@ function AssistantBlock({
               <VerdictChip
                 verdict={verdict}
                 skipped={skipped}
-                className="px-2.5 py-0.5 text-[12.5px] font-medium"
+                className="px-2.5 py-0.5 text-sm font-medium"
               />
               {stopped && <Chip tone="warn">已停止（后端任务可能仍在运行）</Chip>}
               {hasMeta && (
-                <span className="flex flex-wrap items-baseline gap-x-2 text-[11.5px] text-muted">
+                <span className="flex flex-wrap items-baseline gap-x-2 text-xs text-muted">
                   {l1 !== undefined && (
                     <Term
                       term={`L1 ${l1.toFixed(3)}`}
@@ -240,35 +240,35 @@ function AssistantBlock({
               )}
             </div>
           )}
-          {content && <p className="whitespace-pre-wrap text-[13px] leading-relaxed text-ink">{content}</p>}
+          {content && <p className="whitespace-pre-wrap text-sm leading-relaxed text-ink">{content}</p>}
         </div>
       )}
 
       {explain && (
         <div className="border-l-2 border-accent/40 pl-3">
-          <div className="text-[11px] font-medium text-accent">智能解读</div>
-          <p className="mt-0.5 text-[12.5px] leading-relaxed text-ink/80">{explain}</p>
+          <div className="text-xs font-medium text-accent-ink">智能解读</div>
+          <p className="mt-0.5 text-sm leading-relaxed text-ink/80">{explain}</p>
         </div>
       )}
 
       {stageRows.length > 0 && (
         <div className="overflow-hidden rounded-md border border-line">
           <button
-            className="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-muted transition-colors hover:bg-surface hover:text-ink"
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-muted transition-colors hover:bg-surface hover:text-ink"
             onClick={() => setOpenStages((v) => !v)}
             aria-expanded={openStages}
           >
             <ChevronDown className={`h-3.5 w-3.5 shrink-0 transition-transform ${openStages ? "" : "-rotate-90"}`} />
             <span className="font-medium">六阶段</span>
-            <span className="num text-[11.5px]">
+            <span className="num text-xs">
               {done}/{stageRows.length}
             </span>
-            <span className="ml-auto text-[11px]">{openStages ? "收起" : "展开"}</span>
+            <span className="ml-auto text-xs">{openStages ? "收起" : "展开"}</span>
           </button>
           {openStages && (
             <ol className="border-t border-line px-3 py-2">
               {stageRows.map((r) => (
-                <li key={r.key} className="flex items-start gap-2 py-1 text-[12px]">
+                <li key={r.key} className="flex items-start gap-2 py-1 text-xs">
                   <span
                     className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${
                       r.status === "ok" ? "bg-ok" : r.status === "failed" ? "bg-bad" : "bg-muted/60"
@@ -288,10 +288,10 @@ function AssistantBlock({
 
       {violations.length > 0 && (
         <div className="rounded-md border border-bad/30 bg-bad/5 px-3 py-2">
-          <div className="mb-1 text-[11.5px] font-medium text-bad">校验违规 {violations.length} 条</div>
+          <div className="mb-1 text-xs font-medium text-bad-ink">校验违规 {violations.length} 条</div>
           <ul className="space-y-1">
             {violations.map((v, i) => (
-              <li key={i} className="break-words font-mono text-[11px] leading-relaxed text-ink/80">
+              <li key={i} className="break-words font-mono text-xs leading-relaxed text-ink/80">
                 [{v.rule}] {v.path} — {v.detail}
               </li>
             ))}
@@ -311,7 +311,7 @@ function AssistantBlock({
         </div>
       )}
       {openRaw && !running && (
-        <pre className="max-h-56 overflow-auto rounded-md border border-line bg-surface p-2 font-mono text-[11px] leading-relaxed">
+        <pre className="max-h-56 overflow-auto rounded-md border border-line bg-surface p-2 font-mono text-xs leading-relaxed">
           {JSON.stringify(raw, null, 2)}
         </pre>
       )}
@@ -856,7 +856,7 @@ export function ChatView() {
         } w-64 shrink-0 flex-col border-r border-line bg-surface md:relative md:flex md:shadow-none`}
       >
         <div className="flex items-center gap-2 px-3 py-3">
-          <Button variant="primary" size="sm" className="flex-1" onClick={newConv} title="新建对话">
+          <Button variant="ghost" size="sm" className="flex-1" onClick={newConv} title="新建对话">
             <Plus className="h-4 w-4" />
             新建对话
           </Button>
@@ -873,13 +873,13 @@ export function ChatView() {
         </div>
         <div className="scroll-thin min-h-0 flex-1 overflow-y-auto px-2 pb-2">
           {convs.length === 0 && (
-            <p className="px-2 py-3 text-[12px] leading-relaxed text-muted">还没有对话。点上面的「新建对话」开始。</p>
+            <p className="px-2 py-3 text-xs leading-relaxed text-muted">还没有对话。点上面的「新建对话」开始。</p>
           )}
           {convs.map((c) => (
             <div
               key={c.id}
-              className={`group flex items-center gap-1 rounded-md px-2 py-1.5 text-[13px] ${
-                current === c.id ? "bg-accent/10 font-medium text-accent" : "text-ink hover:bg-canvas"
+              className={`group flex items-center gap-1 rounded-md px-2 py-1.5 text-sm ${
+                current === c.id ? "bg-accent/10 font-medium text-accent-ink" : "text-ink hover:bg-canvas"
               }`}
               aria-current={current === c.id ? "true" : undefined}
             >
@@ -893,7 +893,7 @@ export function ChatView() {
                     if (e.key === "Enter") commitRename(c.id);
                     if (e.key === "Escape") { renamingRef.current = null; setRenaming(null); }
                   }}
-                  className="min-w-0 flex-1 rounded border border-line bg-canvas px-1.5 py-0.5 text-[12px] outline-none"
+                  className="min-w-0 flex-1 rounded border border-line bg-canvas px-1.5 py-0.5 text-xs outline-none"
                 />
               ) : (
                 <button
@@ -931,7 +931,7 @@ export function ChatView() {
             <Menu className="h-4 w-4" />
             会话
           </Button>
-          <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-ink">{currentTitle}</span>
+          <span className="min-w-0 flex-1 truncate text-sm font-medium text-ink">{currentTitle}</span>
         </div>
 
         <div ref={streamRef} onScroll={onScroll} className="scroll-thin min-h-0 flex-1 overflow-y-auto">
@@ -940,8 +940,8 @@ export function ChatView() {
               <Card className="border-line bg-surface">
                 <div className="flex items-start justify-between gap-3 px-4 py-3">
                   <div className="min-w-0 space-y-1.5">
-                    <div className="text-[12.5px] font-semibold text-ink">三步看懂这里</div>
-                    <ol className="list-decimal space-y-1 pl-4 text-[12px] leading-relaxed text-muted">
+                    <div className="text-sm font-semibold text-ink">三步看懂这里</div>
+                    <ol className="list-decimal space-y-1 pl-4 text-xs leading-relaxed text-muted">
                       <li>
                         这是<b className="text-ink">测试意图编译器</b>：把 3GPP 条款编译成步骤与信令，并用确定性校验器判对错。
                       </li>
@@ -969,7 +969,7 @@ export function ChatView() {
                   icon={<Sparkles className="h-5 w-5" />}
                 />
                 <div className="flex flex-col gap-2">
-                  <div className="text-[11.5px] font-medium text-muted">示例问题 · 三种典型结果</div>
+                  <div className="text-xs font-medium text-muted">示例问题 · 三种典型结果</div>
                   <div className="grid gap-2 md:grid-cols-3">
                     {SAMPLES.map((s) => (
                       <button
@@ -980,12 +980,12 @@ export function ChatView() {
                         className="flex flex-col items-start gap-1.5 rounded-lg border border-line bg-canvas px-3 py-2.5 text-left transition-colors hover:border-accent/40 hover:bg-accent/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-50"
                       >
                         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                          <Chip tone={s.tone} className="px-2 text-[11.5px] font-medium">
+                          <Chip tone={s.tone} className="px-2 text-xs font-medium">
                             {s.label}
                           </Chip>
-                          <span className="text-[11px] text-muted">{s.note}</span>
+                          <span className="text-xs text-muted">{s.note}</span>
                         </div>
-                        <span className="text-[12.5px] leading-snug text-ink">{s.text}</span>
+                        <span className="text-sm leading-snug text-ink">{s.text}</span>
                       </button>
                     ))}
                   </div>
@@ -996,12 +996,12 @@ export function ChatView() {
             {messages.map((m, i) =>
               m.role === "user" ? (
                 <div key={i} className="flex justify-end">
-                  <div className="max-w-[85%] whitespace-pre-wrap break-words rounded-lg bg-accent/10 px-3 py-2 text-[13px] leading-relaxed text-ink">
+                  <div className="max-w-[85%] whitespace-pre-wrap break-words rounded-lg bg-accent/10 px-3 py-2 text-sm leading-relaxed text-ink">
                     {m.content}
                   </div>
                 </div>
               ) : (
-                <div key={i} className="break-words text-[13px] leading-relaxed">
+                <div key={i} className="break-words text-sm leading-relaxed">
                   <StoredAssistant m={m} onCopy={copy} />
                 </div>
               )
@@ -1010,35 +1010,35 @@ export function ChatView() {
             {liveJob && (
               <div className="flex min-w-0 flex-col gap-2 break-words">
                 {busy && !awaitingApproval && (
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px]" role="status" aria-live="polite">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs" role="status" aria-live="polite">
                     <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-accent" />
                     <span className="font-medium text-ink">运行中</span>
                     <span className="text-muted">
                       {STAGE_LABEL[(liveJob.stage || "ingest") as keyof typeof STAGE_LABEL] || "准备中"}
                     </span>
-                    <span className="num text-[11.5px] text-muted">· 已等待 {elapsed} 秒</span>
+                    <span className="num text-xs text-muted">· 已等待 {elapsed} 秒</span>
                   </div>
                 )}
                 {awaitingApproval && (
                   <Card className="border-accent/40">
                     <CardBody className="flex flex-col gap-3">
                       <div className="flex flex-col gap-1">
-                        <div className="text-[12px] font-medium text-ink">
+                        <div className="text-xs font-medium text-ink">
                           候选消息已就绪 · 调用模型前需确认
                         </div>
-                        <div className="text-[11.5px] leading-relaxed text-muted">
+                        <div className="text-xs leading-relaxed text-muted">
                           确认后才会发起 1 次模型调用；取消则不会生成任何信令内容。
                         </div>
                       </div>
                       {approvalShown.length > 0 && (
                         <div className="flex flex-wrap items-center gap-1.5">
                           {approvalShown.map((name) => (
-                            <Chip key={name} tone="muted" className="font-mono text-[11.5px]">
+                            <Chip key={name} tone="muted" className="font-mono text-xs">
                               {name}
                             </Chip>
                           ))}
                           {approvalRest > 0 && (
-                            <span className="text-[11.5px] text-muted">另 {approvalRest} 条</span>
+                            <span className="text-xs text-muted">另 {approvalRest} 条</span>
                           )}
                         </div>
                       )}
@@ -1063,18 +1063,18 @@ export function ChatView() {
                           >
                             取消
                           </Button>
-                          <span className="text-[11.5px] text-muted">
+                          <span className="text-xs text-muted">
                             候选仅来自确定性抽取，不含模型输出
                           </span>
                         </div>
                       ) : (
-                        <div className="flex flex-wrap items-center gap-2 text-[12px] text-muted" role="status">
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted" role="status">
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
                           已提交，等待任务继续…
                         </div>
                       )}
                       {approvalError && (
-                        <p role="alert" className="text-[12px] leading-relaxed text-bad">
+                        <p role="alert" className="text-xs leading-relaxed text-bad-ink">
                           {approvalError}
                         </p>
                       )}
@@ -1101,7 +1101,7 @@ export function ChatView() {
                 className="flex flex-wrap items-center gap-2 rounded-md border border-bad/30 bg-bad/5 px-3 py-2"
               >
                 <AlertCircle className="h-3.5 w-3.5 shrink-0 text-bad" />
-                <span className="min-w-0 flex-1 text-[12px] leading-relaxed text-bad">{error}</span>
+                <span className="min-w-0 flex-1 text-xs leading-relaxed text-bad-ink">{error}</span>
                 <Button variant="ghost" size="sm" onClick={retry} title="重试">
                   <RefreshCw className="h-3.5 w-3.5" />
                   重试
@@ -1145,7 +1145,7 @@ export function ChatView() {
                 onChange={(e) => { setInput(e.target.value); autoGrow(e.target); }}
                 onKeyDown={onKeyDown}
                 aria-label="消息输入框"
-                className={`max-h-[200px] min-h-[38px] w-full min-w-0 flex-1 resize-none rounded-md border border-line bg-canvas px-3 py-2 text-[13px] leading-relaxed outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 ${
+                className={`max-h-[200px] min-h-[38px] w-full min-w-0 flex-1 resize-none rounded-md border border-line bg-canvas px-3 py-2 text-sm leading-relaxed outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 ${
                   busy ? "cursor-default text-muted caret-transparent" : ""
                 }`}
               />
@@ -1161,7 +1161,7 @@ export function ChatView() {
                 </Button>
               )}
             </div>
-            <p className="text-[11px] leading-relaxed text-muted">
+            <p className="text-xs leading-relaxed text-muted">
               判断依据：每条结论可指回条款；不合格产物会被拒收；输入信息不足时弃权而非编造。
             </p>
           </div>

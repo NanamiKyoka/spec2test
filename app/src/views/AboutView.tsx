@@ -23,17 +23,17 @@ export function AboutView() {
           <ShieldCheck className="h-5 w-5 text-accent" />
           <h1 className="text-xl font-semibold tracking-tight">五分钟了解</h1>
         </div>
-        <p className="mt-1 max-w-prose text-[13px] text-muted">没看过这个项目的人，从这里开始。</p>
+        <p className="mt-1 max-w-prose text-sm text-muted">没看过这个项目的人，从这里开始。</p>
 
         <Card className="mt-6">
           <CardHead>
-            <span className="text-[13px] font-medium">5 分钟评审路线</span>
+            <span className="text-sm font-medium">5 分钟评审路线</span>
             <Chip tone="accent" className="ml-auto">
               推荐
             </Chip>
           </CardHead>
           <CardBody className="space-y-2">
-            <p className="max-w-prose text-[13px] leading-relaxed text-muted">
+            <p className="max-w-prose text-sm leading-relaxed text-muted">
               按顺序看：先看通过的证据，再看拒收与弃权，最后回数据页看逐例矩阵。
             </p>
             {ROUTE.map(([n, label, caseId]) => (
@@ -42,9 +42,9 @@ export function AboutView() {
                 onClick={() => {
                   window.location.hash = caseId ? `#/case?case=${caseId}` : "#/data";
                 }}
-                className="flex w-full items-center gap-3 rounded-md border border-line px-3 py-2 text-left text-[13px] hover:border-accent/40 hover:bg-accent/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                className="flex w-full items-center gap-3 rounded-md border border-line px-3 py-2 text-left text-sm hover:border-accent/40 hover:bg-accent/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
               >
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/10 text-[11px] font-medium text-accent">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/10 text-xs font-medium text-accent-ink">
                   {n}
                 </span>
                 <span className="flex-1">{label}</span>
@@ -54,26 +54,31 @@ export function AboutView() {
           </CardBody>
         </Card>
 
-        <Card className="mt-6">
-          <CardHead>
-            <span className="text-[13px] font-medium">问题 → 方案 → 效果 → 局限</span>
-          </CardHead>
-          <CardBody className="space-y-3">
+        <section className="mt-8 rounded-lg bg-surface px-4 py-3" aria-labelledby="about-summary">
+          <h2
+            id="about-summary"
+            className="text-xs font-semibold uppercase tracking-wide text-muted"
+          >
+            问题 → 方案 → 效果 → 局限
+          </h2>
+          <div className="mt-3 space-y-3">
             {ROWS.map(([k, v]) => (
               <div key={k} className="flex gap-3">
                 <div className="w-12 shrink-0 pt-0.5 text-xs font-medium text-muted">{k}</div>
-                <div className="max-w-prose text-[13px] leading-relaxed">{v}</div>
+                <div className="max-w-prose text-sm leading-relaxed">{v}</div>
               </div>
             ))}
-          </CardBody>
-        </Card>
-
-        <section className="mt-6 rounded-lg bg-surface px-4 py-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-muted">诚实声明</span>
-            <span className="rounded-full border border-line px-2 py-[1px] text-[11px] text-muted">必读</span>
           </div>
-          <ul className="mt-2 max-w-prose list-disc space-y-1.5 pl-5 text-[13px] leading-relaxed">
+        </section>
+
+        <section className="mt-8 rounded-lg bg-surface px-4 py-3" aria-labelledby="about-honest">
+          <div className="flex items-center gap-2">
+            <h2 id="about-honest" className="text-xs font-semibold uppercase tracking-wide text-muted">
+              诚实声明
+            </h2>
+            <span className="rounded-full border border-line px-2 py-[1px] text-xs text-muted">必读</span>
+          </div>
+          <ul className="mt-2 max-w-prose list-disc space-y-1.5 pl-5 text-sm leading-relaxed">
             <li>6G 尚未标准化（首个 6G 规范冻结计划 2028-12），本系统在 NR Rel-19 上验证。</li>
             <li>暂无专利或软件著作权，真实性由可复现性担保：脚本与基准可重跑。</li>
             <li>消息序列（L2）不计分：全库仅 16 个交换，样本量不支持统计结论。</li>

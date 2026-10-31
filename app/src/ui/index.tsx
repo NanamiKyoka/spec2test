@@ -7,14 +7,14 @@ import { cn } from "../lib/cn";
 
 /* ---------------- Button ---------------- */
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md text-[13px] font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
+  "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
   {
     variants: {
       variant: {
-        primary: "bg-accent text-white hover:brightness-110 active:brightness-95",
+        primary: "bg-accent-solid text-white hover:brightness-110 active:brightness-95",
         ghost: "border border-line bg-canvas hover:bg-surface active:bg-surface text-ink",
         subtle: "text-muted hover:bg-surface active:bg-surface hover:text-ink",
-        danger: "border border-bad/40 text-bad hover:bg-bad/10 active:bg-bad/10",
+        danger: "border border-bad/40 text-bad-ink hover:bg-bad/10 active:bg-bad/10",
         icon: "text-muted hover:bg-surface hover:text-ink",
       },
       size: {
@@ -53,21 +53,28 @@ export function CardBody({ className, ...props }: React.HTMLAttributes<HTMLDivEl
 /* ---------------- Chip ---------------- */
 type ChipTone = "ok" | "warn" | "bad" | "muted" | "accent";
 const chipTone: Record<ChipTone, string> = {
-  ok: "border-ok/40 text-ok bg-ok/10",
-  warn: "border-warn/40 text-warn bg-warn/10",
-  bad: "border-bad/40 text-bad bg-bad/10",
+  ok: "border-ok/40 text-ok-ink bg-ok/10",
+  warn: "border-warn/40 text-warn-ink bg-warn/10",
+  bad: "border-bad/40 text-bad-ink bg-bad/10",
   muted: "border-line text-muted bg-surface",
-  accent: "border-accent/40 text-accent bg-accent/10",
+  accent: "border-accent/40 text-accent-ink bg-accent/10",
 };
 export function Chip({
   tone = "muted",
   className,
   children,
-}: { tone?: ChipTone; className?: string; children: React.ReactNode }) {
+  title,
+}: {
+  tone?: ChipTone;
+  className?: string;
+  children: React.ReactNode;
+  title?: string;
+}) {
   return (
     <span
+      title={title}
       className={cn(
-        "inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-[1px] text-[11px] leading-[18px]",
+        "inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-xs leading-5",
         chipTone[tone],
         className
       )}
@@ -81,7 +88,7 @@ export function Chip({
 export function Table({ className, ...props }: React.TableHTMLAttributes<HTMLTableElement>) {
   return (
     <div className="w-full overflow-x-auto">
-      <table className={cn("w-full border-collapse text-[13px]", className)} {...props} />
+      <table className={cn("w-full border-collapse text-sm", className)} {...props} />
     </div>
   );
 }
@@ -89,7 +96,7 @@ export function Th({ className, ...props }: React.ThHTMLAttributes<HTMLTableCell
   return (
     <th
       className={cn(
-        "sticky top-0 z-10 border-b border-line bg-surface px-3 py-2 text-left text-[12px] font-semibold text-muted",
+        "sticky top-0 z-10 border-b border-line bg-surface px-3 py-2 text-left text-xs font-semibold text-muted",
         className
       )}
       {...props}
@@ -116,17 +123,17 @@ export function Field({
 }) {
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
-      <label htmlFor={htmlFor} className="text-[12px] font-medium text-ink">
+      <label htmlFor={htmlFor} className="text-xs font-medium text-ink">
         {label}
       </label>
       {children}
-      {hint && <p className="text-[11.5px] leading-relaxed text-muted">{hint}</p>}
+      {hint && <p className="text-xs leading-relaxed text-muted">{hint}</p>}
     </div>
   );
 }
 
 export const inputCls =
-  "h-9 w-full rounded-md border border-line bg-canvas px-3 text-[13px] text-ink outline-none transition-colors placeholder:text-muted focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:cursor-not-allowed disabled:bg-surface disabled:opacity-60";
+  "h-9 w-full rounded-md border border-line bg-canvas px-3 text-sm text-ink outline-none transition-colors placeholder:text-muted focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:cursor-not-allowed disabled:bg-surface disabled:opacity-60";
 
 /* ---------------- Term（术语就地解释） ---------------- */
 export function Term({ term, desc }: { term: string; desc: string }) {
@@ -147,7 +154,7 @@ export function Term({ term, desc }: { term: string; desc: string }) {
       <Tooltip.Portal>
         <Tooltip.Content
           sideOffset={4}
-          className="z-50 max-w-[260px] rounded-md border border-line bg-canvas px-2.5 py-1.5 text-[12px] leading-relaxed text-ink shadow-card"
+          className="z-50 max-w-[260px] rounded-md border border-line bg-canvas px-2.5 py-1.5 text-xs leading-relaxed text-ink shadow-card"
         >
           {desc}
           <Tooltip.Arrow className="fill-[rgb(var(--line))]" />
@@ -177,7 +184,7 @@ export function Modal({
         <Dialog.Overlay className="fixed inset-0 z-40 bg-black/40" />
         <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-line bg-canvas shadow-card focus:outline-none">
           <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
-            <Dialog.Title className="min-w-0 truncate text-[14px] font-semibold">{title}</Dialog.Title>
+            <Dialog.Title className="min-w-0 truncate text-sm font-semibold">{title}</Dialog.Title>
             <Dialog.Description className="sr-only">{title}</Dialog.Description>
             <Dialog.Close asChild>
               <Button variant="icon" size="icon" aria-label="关闭">
@@ -222,12 +229,12 @@ export function Section({
         aria-expanded={open}
         aria-controls={id}
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[13px] font-medium hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/40"
+        className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-medium hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/40"
       >
         {icon}
         <span className="min-w-0 truncate">{title}</span>
         <span className="ml-auto flex min-w-0 items-center gap-2">
-          {meta && <span className="min-w-0 truncate text-[11.5px] font-normal text-muted">{meta}</span>}
+          {meta && <span className="min-w-0 truncate text-xs font-normal text-muted">{meta}</span>}
           <ChevronDown
             className={cn("h-3.5 w-3.5 shrink-0 text-muted transition-transform", open && "rotate-180")}
             aria-hidden
@@ -254,7 +261,7 @@ export function Empty({
   return (
     <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
       <div className="rounded-full bg-surface p-3 text-muted">{icon ?? <Inbox className="h-5 w-5" />}</div>
-      <p className="max-w-[420px] text-[13px] leading-relaxed text-muted">{title}</p>
+      <p className="max-w-[420px] text-sm leading-relaxed text-muted">{title}</p>
       {action}
     </div>
   );
@@ -274,7 +281,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastCtx.Provider value={push}>
       {children}
       {msg && (
-        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-md bg-ink px-3 py-2 text-[12px] text-canvas shadow-card">
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-md bg-ink px-3 py-2 text-xs text-canvas shadow-card">
           {msg}
         </div>
       )}
@@ -305,21 +312,21 @@ export function TopBar({
   right?: React.ReactNode;
 }) {
   return (
-    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-line bg-canvas px-4">
-      <div className="flex items-baseline gap-2">
-        <span className="text-[15px] font-semibold tracking-tight">Spec2Test</span>
-        <span className="hidden text-[12px] text-muted md:inline">自证式测试意图编译器</span>
+    <header className="flex h-14 shrink-0 items-center gap-2 border-b border-line bg-canvas px-3 sm:gap-3 sm:px-4">
+      <div className="flex shrink-0 items-baseline gap-2">
+        <span className="text-base font-semibold tracking-tight">Spec2Test</span>
+        <span className="hidden text-xs text-muted md:inline">自证式测试意图编译器</span>
       </div>
-      <nav className="ml-2 flex items-center gap-0.5" aria-label="主导航">
+      <nav className="ml-2 flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto" aria-label="主导航">
         {NAV.map((n) => (
           <button
             key={n.key}
             onClick={() => onNav(n.key)}
             aria-current={view === n.key ? "page" : undefined}
             className={cn(
-              "rounded-md px-2.5 py-1.5 text-[13px] transition-colors",
+              "shrink-0 rounded-md px-2 py-1.5 text-sm transition-colors sm:px-2.5",
               view === n.key
-                ? "bg-accent/10 font-medium text-accent"
+                ? "bg-accent/10 font-medium text-accent-ink"
                 : "text-muted hover:bg-surface hover:text-ink"
             )}
           >
@@ -327,7 +334,7 @@ export function TopBar({
           </button>
         ))}
       </nav>
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ml-auto flex shrink-0 items-center gap-2">
         {status}
         {right}
       </div>

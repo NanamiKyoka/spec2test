@@ -132,7 +132,7 @@ function MetricCard({
       <Card className="relative">
         <CardBody>
           <div className="flex items-start justify-between gap-2">
-            <div className="text-[11px] text-muted">{label}</div>
+            <div className="text-xs text-muted">{label}</div>
             <button
               type="button"
               onClick={() => setOpen(true)}
@@ -143,13 +143,13 @@ function MetricCard({
               <HelpCircle className="h-3.5 w-3.5" />
             </button>
           </div>
-          <div className="num mt-1 text-[22px] font-semibold leading-none">{value}</div>
-          {sub && <div className="mt-1.5 text-[11px] leading-relaxed text-muted">{sub}</div>}
+          <div className="num mt-1 text-2xl font-semibold leading-none">{value}</div>
+          {sub && <div className="mt-1.5 text-xs leading-relaxed text-muted">{sub}</div>}
         </CardBody>
       </Card>
 
       <Modal open={open} onClose={() => setOpen(false)} title={explain.title}>
-        <dl className="space-y-3 text-[13px] leading-relaxed">
+        <dl className="space-y-3 text-sm leading-relaxed">
           <div>
             <dt className="text-xs font-medium text-muted">怎么算</dt>
             <dd className="mt-0.5">{explain.formula}</dd>
@@ -226,14 +226,14 @@ function StartCard({
       <CardBody className="space-y-2.5">
         <div className="flex items-center gap-2">
           <BookOpenCheck className="h-4 w-4 text-accent" />
-          <span className="text-[13px] font-medium">三步看懂这个产品</span>
+          <span className="text-sm font-medium">三步看懂这个产品</span>
           <Button variant="subtle" size="sm" className="ml-auto" onClick={collapse}>
             收起
           </Button>
         </div>
         <div className="grid gap-3 md:grid-cols-3">
           <div>
-            <b className="text-[13px]">1. 这是什么</b>
+            <b className="text-sm">1. 这是什么</b>
             <div className="mt-1 text-xs leading-relaxed text-muted">
               把 3GPP 规范条款编译成可执行测试意图，再用
               <Term
@@ -244,7 +244,7 @@ function StartCard({
             </div>
           </div>
           <div>
-            <b className="text-[13px]">2. 能问什么</b>
+            <b className="text-sm">2. 能问什么</b>
             <div className="mt-1 flex flex-col gap-1">
               {[
                 ["通过", `${passCase || "6.7.1.3"} 生成测试步骤`],
@@ -254,7 +254,7 @@ function StartCard({
                 <button
                   key={text}
                   onClick={() => ask(text)}
-                  className="text-left text-xs text-accent hover:underline"
+                  className="text-left text-xs text-accent-ink hover:underline"
                 >
                   {label}：{text}
                 </button>
@@ -262,7 +262,7 @@ function StartCard({
             </div>
           </div>
           <div>
-            <b className="text-[13px]">3. 结果怎么读</b>
+            <b className="text-sm">3. 结果怎么读</b>
             <div className="mt-1 flex flex-wrap gap-1.5">
               {passCase ? (
                 <button onClick={() => goCase(passCase)} title={`看一条通过的用例：${passCase}`}>
@@ -407,7 +407,7 @@ export function DataView() {
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center text-[13px] text-muted">
+      <div className="flex h-full items-center justify-center text-sm text-muted">
         正在读取评测数据…
       </div>
     );
@@ -440,7 +440,7 @@ export function DataView() {
         <div className="flex flex-wrap items-end gap-3">
           <div>
             <h1 className="text-xl font-semibold tracking-tight">数据面板</h1>
-            <p className="mt-1 max-w-prose text-[13px] text-muted">
+            <p className="mt-1 max-w-prose text-sm text-muted">
               TS 38.523-1 §6.7 NTN 切片的逐例结果、运行历史与校验口径。
             </p>
           </div>
@@ -533,7 +533,7 @@ export function DataView() {
         <Card className="mt-6">
           <CardHead>
             <Table2 className="h-4 w-4 text-muted" />
-            <span className="text-[13px] font-medium">用例矩阵</span>
+            <span className="text-sm font-medium">用例矩阵</span>
             <span className="ml-auto text-xs text-muted">点击行查看单例全链条</span>
           </CardHead>
           <CardBody className="p-0">
@@ -553,7 +553,7 @@ export function DataView() {
                   aria-pressed={filter === k}
                   className={`rounded-full border px-2.5 py-1 text-xs ${
                     filter === k
-                      ? "border-accent bg-accent/10 text-accent"
+                      ? "border-accent bg-accent/10 text-accent-ink"
                       : "border-line text-muted hover:bg-surface"
                   }`}
                 >
@@ -613,7 +613,7 @@ export function DataView() {
                 {filter !== "all" &&
                   !(rows || []).some((r) => (verdicts[r.case] ?? "unknown") === filter) && (
                     <tr>
-                      <Td colSpan={7} className="py-6 text-center text-[13px] text-muted">
+                      <Td colSpan={7} className="py-6 text-center text-sm text-muted">
                         没有符合条件的用例。
                       </Td>
                     </tr>
@@ -627,16 +627,16 @@ export function DataView() {
         <Card className="mt-6">
           <CardHead>
             <History className="h-4 w-4 text-muted" />
-            <span className="text-[13px] font-medium">运行历史</span>
+            <span className="text-sm font-medium">运行历史</span>
             {runs?.length ? <span className="ml-auto text-xs text-muted">最近 {runs.length} 次</span> : null}
           </CardHead>
           <CardBody className="p-0">
             {runsError ? (
-              <div className="flex items-center gap-2 px-4 py-4 text-[13px] text-bad">
+              <div className="flex items-center gap-2 px-4 py-4 text-sm text-bad-ink">
                 <TriangleAlert className="h-4 w-4" /> 运行历史不可用：{runsError}
               </div>
             ) : !runs ? (
-              <div className="px-4 py-4 text-[13px] text-muted">正在读取…</div>
+              <div className="px-4 py-4 text-sm text-muted">正在读取…</div>
             ) : runs.length === 0 ? (
               <Empty
                 title="还没有运行记录。运行一次用例后，这里会出现 job、耗时与 verdict。"
@@ -680,12 +680,12 @@ export function DataView() {
         <Card className="mt-6">
           <CardHead>
             <ShieldCheck className="h-4 w-4 text-muted" />
-            <span className="text-[13px] font-medium">弃权 vs 无依据生成</span>
+            <span className="text-sm font-medium">弃权 vs 无依据生成</span>
             <span className="ml-auto text-xs text-muted">同一输入下，系统与裸 prompt 基线的对照</span>
           </CardHead>
           <CardBody className="p-0">
             {!abstain?.length ? (
-              <div className="px-4 py-4 text-[13px] text-muted">该快照未包含弃权统计。</div>
+              <div className="px-4 py-4 text-sm text-muted">该快照未包含弃权统计。</div>
             ) : (
               <Table>
                 <thead>
@@ -708,7 +708,7 @@ export function DataView() {
                         <Td className="num text-right">
                           {a.calls} / {a.sys_ies}
                         </Td>
-                        <Td className="text-[13px]">
+                        <Td className="text-sm">
                           {a.base_status === "prose" ? (
                             <span className="text-muted">
                               散文 {a.base_chars} 字 / {a.base_ies} IE

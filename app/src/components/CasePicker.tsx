@@ -43,11 +43,11 @@ export function CasePicker({ onPick, disabled }: { onPick: (caseId: string) => v
         disabled={disabled}
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="inline-flex items-center gap-1.5 rounded-md border border-line bg-canvas px-2.5 py-1.5 text-[12px] text-muted transition-colors hover:bg-surface hover:text-ink disabled:opacity-50"
+        className="inline-flex items-center gap-1.5 rounded-md border border-line bg-canvas px-2.5 py-1.5 text-xs text-muted transition-colors hover:bg-surface hover:text-ink disabled:opacity-50"
       >
         <ChevronDown className={`h-3.5 w-3.5 shrink-0 transition-transform ${open ? "" : "-rotate-90"}`} />
         选一个用例
-        {items ? <span className="num text-[11.5px]">（{items.length}）</span> : null}
+        {items ? <span className="num text-xs">（{items.length}）</span> : null}
       </button>
 
       {open && (
@@ -63,7 +63,7 @@ export function CasePicker({ onPick, disabled }: { onPick: (caseId: string) => v
               }}
               placeholder="搜索用例号或标题，如 NTN / 6.7.1.3"
               aria-label="搜索用例"
-              className="min-w-0 flex-1 bg-transparent text-[12px] outline-none placeholder:text-muted"
+              className="min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:text-muted"
             />
             {q && (
               <button
@@ -77,7 +77,7 @@ export function CasePicker({ onPick, disabled }: { onPick: (caseId: string) => v
             )}
           </div>
 
-          <div className="flex items-center justify-between px-2.5 py-1 text-[11px] text-muted">
+          <div className="flex items-center justify-between px-2.5 py-1 text-xs text-muted">
             <span className="num">
               {error ? "加载失败" : !items ? "读取中…" : query ? `匹配 ${filtered.length} / ${items.length}` : `共 ${items.length} 个用例`}
             </span>
@@ -87,21 +87,21 @@ export function CasePicker({ onPick, disabled }: { onPick: (caseId: string) => v
           <div className="scroll-thin max-h-[220px] overflow-y-auto p-1" role="group" aria-label="用例列表">
             {error ? (
               <div className="flex flex-col items-start gap-2 px-2 py-2">
-                <p className="text-[12px] leading-relaxed text-bad">用例列表加载失败：{error}</p>
+                <p className="text-xs leading-relaxed text-bad-ink">用例列表加载失败：{error}</p>
                 <Button variant="ghost" size="sm" onClick={() => setTick((v) => v + 1)}>
                   <RefreshCw className="h-3.5 w-3.5" />
                   重新加载
                 </Button>
               </div>
             ) : !items ? (
-              <p className="px-2 py-2 text-[12px] text-muted">正在读取用例…</p>
+              <p className="px-2 py-2 text-xs text-muted">正在读取用例…</p>
             ) : filtered.length === 0 ? (
               <div className="flex flex-col items-start gap-1 px-2 py-2">
-                <p className="text-[12px] leading-relaxed text-muted">没有匹配「{q.trim()}」的用例。</p>
+                <p className="text-xs leading-relaxed text-muted">没有匹配「{q.trim()}」的用例。</p>
                 <button
                   type="button"
                   onClick={() => setQ("")}
-                  className="text-[12px] font-medium text-accent hover:underline"
+                  className="text-xs font-medium text-accent-ink hover:underline"
                 >
                   清空搜索
                 </button>
@@ -115,8 +115,8 @@ export function CasePicker({ onPick, disabled }: { onPick: (caseId: string) => v
                   title={c.title || c.case}
                   className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left transition-colors hover:bg-surface"
                 >
-                  <span className="num shrink-0 font-mono text-[11.5px] text-accent">{c.case}</span>
-                  <span className="min-w-0 flex-1 truncate text-[12px] text-ink">{c.title || "（无标题）"}</span>
+                  <span className="num shrink-0 font-mono text-xs text-accent-ink">{c.case}</span>
+                  <span className="min-w-0 flex-1 truncate text-xs text-ink">{c.title || "（无标题）"}</span>
                   <Chip tone={c.status === "abstained" ? "muted" : "ok"}>
                     {c.status === "abstained" ? "弃权" : "已生成"}
                   </Chip>
