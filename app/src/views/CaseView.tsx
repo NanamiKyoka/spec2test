@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { ArrowLeft, Info, MessageSquare, ShieldAlert, ShieldCheck, XCircle } from "lucide-react";
+import { ArrowLeft, Download, Info, MessageSquare, ShieldAlert, ShieldCheck, XCircle } from "lucide-react";
 import { Button, Card, CardBody, CardHead, Chip, Modal, Section, Table, Td, Term, Th } from "../ui";
 import { AsyncState } from "../components/AsyncState";
 import { cn } from "../lib/cn";
+import { downloadIntentJson, downloadIntentMarkdown } from "../lib/export";
 import {
   goldForMessage,
   loadSymbols,
@@ -367,7 +368,25 @@ export function CaseView({ caseId }: { caseId: string }) {
             <ArrowLeft className="h-4 w-4" /> 数据面板
           </Button>
           <span className="num truncate font-mono text-xs text-muted">{caseId}</span>
-          <div className="ml-auto">
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            <Button
+              variant="subtle"
+              size="sm"
+              disabled={!out}
+              title={out ? "导出为 Markdown 文件" : "该用例没有可导出的产物"}
+              onClick={() => downloadIntentMarkdown(caseId, out, report, ctx)}
+            >
+              <Download className="h-3.5 w-3.5" aria-hidden /> 导出 Markdown
+            </Button>
+            <Button
+              variant="subtle"
+              size="sm"
+              disabled={!out}
+              title={out ? "导出为 JSON 文件" : "该用例没有可导出的产物"}
+              onClick={() => downloadIntentJson(caseId, out, report, ctx)}
+            >
+              <Download className="h-3.5 w-3.5" aria-hidden /> 导出 JSON
+            </Button>
             <Button variant="primary" onClick={() => (window.location.hash = "#/chat")}>
               <MessageSquare className="h-4 w-4" /> 在对话中继续
             </Button>

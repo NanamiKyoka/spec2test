@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, CardHead, Chip } from "../ui";
+import { Button, Card, CardBody, CardHead, Chip, Table, Td, Th } from "../ui";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 
 const ROWS: [string, string][] = [
@@ -10,9 +10,30 @@ const ROWS: [string, string][] = [
 
 const ROUTE: [string, string, string][] = [
   ["1", "看一条通过的用例", "6.7.1.3"],
-  ["2", "看一条被拒收的用例", "6.7.1.10"],
-  ["3", "看一条弃权的用例", "6.7.1.12"],
+  ["2", "看一条多字段的复杂用例", "6.7.1.10"],
+  ["3", "看一条弃权的用例", "6.7.1.4"],
   ["4", "回数据页看逐例矩阵与失败筛选", ""],
+];
+
+const PERSONAS: [string, string, string, string][] = [
+  [
+    "终端 / 模组测试工程师",
+    "拿到新 NTN 条款，手工拼步骤与 ASN.1 字段，容易漏 IE。",
+    "生成测试意图初稿，校验器兜底；人工只核对字段级证据与差异。",
+    "导出 Markdown / JSON 带入用例库",
+  ],
+  [
+    "认证实验室 / 运营商测试团队",
+    "需要可追溯、可复现的判定依据，模型输出不能黑箱。",
+    "每条结论可回指条款、符号表路径与违规位置；HITL 审批控制模型调用。",
+    "导出证据束归档与评审",
+  ],
+  [
+    "工具链 / 自动化团队",
+    "条款更新后回归成本高，难以判断生成物是否合法。",
+    "同一套 CLI/API 跑批，确定性校验器给出可复现判定。",
+    "接入 CI 做条款回归",
+  ],
 ];
 
 export function AboutView() {
@@ -69,6 +90,46 @@ export function AboutView() {
               </div>
             ))}
           </div>
+        </section>
+
+        <section className="mt-8 rounded-lg bg-surface px-4 py-3" aria-labelledby="about-personas">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2
+              id="about-personas"
+              className="text-xs font-semibold uppercase tracking-wide text-muted"
+            >
+              适用人群与工作流
+            </h2>
+            <span className="rounded-full border border-line px-2 py-0.5 text-xs text-muted">
+              设计假设 · 未做用户研究
+            </span>
+          </div>
+          <div className="mt-3 overflow-x-auto">
+            <Table className="min-w-[640px]">
+              <thead>
+                <tr>
+                  <Th>角色</Th>
+                  <Th>现在的做法</Th>
+                  <Th>用了之后</Th>
+                  <Th>带走什么</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {PERSONAS.map(([role, before, after, output]) => (
+                  <tr key={role}>
+                    <Td className="whitespace-nowrap font-medium">{role}</Td>
+                    <Td className="text-muted">{before}</Td>
+                    <Td>{after}</Td>
+                    <Td className="text-muted">{output}</Td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+          <p className="mt-3 max-w-prose text-xs leading-relaxed text-muted">
+            已实测指标：8 个用例、22 次模型调用、缺陷注入检出 27/31、官方答案误报 0/8。
+            人工耗时节省尚未验证，不作为承诺。
+          </p>
         </section>
 
         <section className="mt-8 rounded-lg bg-surface px-4 py-3" aria-labelledby="about-honest">
