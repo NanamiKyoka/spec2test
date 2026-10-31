@@ -35,7 +35,7 @@ python scripts/serve.py          # 或直接双击 start.bat
 # 浏览器打开 http://127.0.0.1:8000/web/
 ```
 
-点任一用例 → 进入 `case.html`，能看到六个阶段：
+点任一用例 → 进入 `#/case?case=6.7.1.3`，能看到六个阶段：
 `ingest（读规范）→ context（裁剪条款）→ candidates（抽候选消息）→ generate（生成 IR）→ validate（校验）→ score（打分）`
 
 **关键看两件事**：

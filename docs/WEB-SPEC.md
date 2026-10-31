@@ -25,24 +25,18 @@
 **`/api/run` 扩展**：`{case, instruction?, conversation_id?, hitl?, dry_run?}`；若带 `conversation_id`，任务完成后把一条 `role=assistant` 的摘要消息追加到该会话（含 `job_id`、`case`、`verdict`、`stages`）。`hitl=true` 时在 `candidates` 之后暂停等待审批（见下）；`dry_run=true` 走确定性桩，不调用模型。
 
 ## 页面与路由
-| 路由 | 文件 | 内容 |
+前端是 React 18 + Vite + Tailwind v3 的 SPA（源码 `app/`，构建产物 `web/`），使用 hash 路由；`web/index.html` 只是壳。
+
+| 路由 | 视图 | 内容 |
 |---|---|---|
-| `/web/` | `web/index.html` | 概览：逐例矩阵 + 弃权 vs 无依据对照 |
-| `/web/case.html?case=6.7.1.3` | `web/case.html` | 单例全链条：六个阶段的输入/输出/耗时/状态 |
-| `/web/chat.html` | `web/chat.html` | **对话式智能体**：自然语言 → 定位用例 → 六阶段 → 结论/拒收 |
-| `/web/settings.html` | `web/settings.html` | **设置**：模型通道、Base URL、模型名、温度、API Key（可写不可读） |
+| `/web/#/data` | `DataView` | 指标卡 + 逐例矩阵 + 运行历史 |
+| `/web/#/eval` | `EvalView` | 逐例 L3 与基线配对、缺陷检出、官方答案误报 |
+| `/web/#/chat` | `ChatView` | 对话式智能体 + HITL 审批卡 |
+| `/web/#/api` | `ApiView` | 通道、Base URL、模型、温度、Key（可写不可读） |
+| `/web/#/about` | `AboutView` | 5 分钟评审路径 + 诚实声明 |
+| `/web/#/case?case=6.7.1.3` | `CaseView` | 单例全链条、字段级证据、智能解读 |
 
-所有页面顶部共用导航：`概览 · 对话 · 设置`（当前页高亮）。**规范标记（三个页面必须逐字一致，由 H4 提供样式）**：
-
-```html
-<nav class="topnav">
-  <a href="./index.html">数据</a>
-  <a href="./chat.html">对话</a>
-  <a href="./settings.html">API</a>
-</nav>
-```
-
-当前页由 JS 或服务端给对应 `<a>` 加 `aria-current="page"`；`style.css` 中 `.topnav` 与 `.topnav a[aria-current="page"]` 的样式由 H4 统一定义，H2/H3 不得自定义。
+主导航：`数据 · 评测 · 对话 · API · 关于`，唯一实现在 `app/src/ui/index.tsx` 的 `NAV`；当前项用 `aria-current="page"` 标记。
 
 ## 后端 API（`scripts/serve.py`）
 | 方法 | 路径 | 请求 | 响应 |
@@ -73,7 +67,7 @@
 4. 写入后尽力 `chmod 600`（Windows 上退化为仅提示）。
 5. 未配置 Key 时：`/api/run` 返回 `400 {error:"no_credential"}`，前端展示"去设置"链接，**不得静默失败**。
 
-## 对话语义（`/web/chat.html`）
+## 对话语义（`#/chat`）
 - 输入自由文本；后端按顺序解析：① 文本内出现的用例号（如 `6.7.1.3`）→ 直接定位；② 否则按标题/关键词在 `/api/cases` 里检索，命中唯一则用，多个则回问澄清，零个则明确说"未找到对应用例"。
 - 定位后创建 job，前端按阶段流式展示（SSE 优先，轮询兜底）。
 - 结束时的回复必须包含：结论一句话 + 校验结果（通过 / 违规条目 + 路径）+ 是否被拒收。
@@ -103,17 +97,19 @@
 - 运行结果写入 `data/out/<case>.json` 并刷新页面阶段视图。
 
 ## 硬约束
-1. 零外链（`grep -c "http://\|https://" web/**` = 0）。
-2. 无框架、无构建、无 npm 依赖；纯静态 + 标准库 `http.server`。
+1. 构建产物自包含：`web/` 不发出任何运行时外部请求。
+2. 前端 React 18 + Vite + Tailwind v3（源码 `app/`，产物 `web/`）；后端只用标准库 `http.server`，不引入框架。
 3. 服务根 = 仓库根（要能 fetch `data/`、`results/`）。
-4. 任何异常必须在页面上可见（红字 + 原因），不许只有控制台。
+4. 任何异常必须在页面上可见（行内错误 + 原因），不许只有控制台。
 
 ## 文件所有权（并行作业边界）
 | Owner | 文件 |
 |---|---|
 | **F1 后端** | `scripts/serve.py`（静态服务、`/api/*`、回落逻辑、任务执行器） |
-| **F2 概览页** | `web/index.html`、`web/assets/style.css` |
-| **F3 单例页** | `web/case.html`、`web/assets/case.js` |
+| **F2 共享层** | `app/src/ui/index.tsx`、`app/src/styles.css`、`app/tailwind.config.js`、`app/src/App.tsx` |
+| **F3 数据/评测页** | `app/src/views/DataView.tsx`、`app/src/views/EvalView.tsx` |
+| **F4 对话/单例页** | `app/src/views/ChatView.tsx`、`app/src/views/CaseView.tsx` |
+| **F5 API/关于页** | `app/src/views/ApiView.tsx`、`app/src/views/AboutView.tsx` |
 | **C 启动与交付** | `start.bat`、`README.md`、`results/` |
 
-`web/assets/style.css` 为两页共用，只由 F2 修改；F3 需要新样式时在 `case.js` 里内联，不得改 `style.css`。
+共享层（token、字号标尺、Button/Card/Chip/Table/Section/Term/Modal）只由 F2 修改；页面批次不得绕过共享组件另起一套样式。

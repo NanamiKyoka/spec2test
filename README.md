@@ -20,7 +20,8 @@
 ```
 tools/     核心链路：切分/抽取/生成/校验/评分（纯 Python，无框架）
 docs/      决策与报告（ADR、基线、评测定义、架构边界）
-web/       单页结果浏览器（无框架、无外链）
+app/       前端源码（React 18 + Vite + Tailwind v3）
+web/       前端构建产物（自包含、无运行时外链）
 scripts/   一键复现与静态服务
 results/   结果快照（入库；无 data/ 时页面读这里）
 data/      运行产物（不入库）

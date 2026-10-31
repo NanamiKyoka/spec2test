@@ -15,35 +15,37 @@
 - ≤900px：侧栏改为抽屉（点 TopBar 左侧按钮滑出，遮罩关闭）。
 - ≤640px：Main 内边距 16px，表格内部横向滚动，页面本身**不得**横向溢出。
 
-## 2. 设计令牌（写入 `style.css` 的 `:root`）
-| 用途 | 亮色 | 暗色 |
-|---|---|---|
-| `--bg` | `#ffffff` | `#0f1115` |
-| `--bg-sub` 侧栏 | `#f7f8fa` | `#15181e` |
-| `--fg` | `#1a1a1a` | `#e6e8eb` |
-| `--fg-muted` | `#6b7280` | `#9aa3ad` |
-| `--line` | `#e8e8ec` | `#252a33` |
-| `--accent` | `#4d6bfe`（DeepSeek 蓝） | 同 |
-| `--ok` / `--warn` / `--bad` | `#0f9d58` / `#b45309` / `#d93025` | 略亮 |
-| 圆角 | `--r-sm:6px` `--r-md:10px` `--r-lg:14px` | 同 |
-| 阴影 | `--shadow:0 1px 2px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.06)` | 加深 |
+## 2. 设计令牌（`app/src/styles.css` 的 `:root` / `.dark`，由 `tailwind.config.js` 映射）
+| 用途 | 变量 | 亮色 | 暗色 |
+|---|---|---|---|
+| 画布 | `--canvas` | `#ffffff` | `#0f1115` |
+| 面板 | `--surface` | `#f7f8fa` | `#15181e` |
+| 描边 | `--line` | `#e8e8ec` | `#252a33` |
+| 正文 | `--ink` | `#1a1a1a` | `#e6e8eb` |
+| 次要文字 | `--muted` | `#6b7280` | `#9aa3ad` |
+| 品牌/圆点/描边 | `--accent` | `#4d6bfe` | `#7a91ff` |
+| 文字安全强调色 | `--accent-ink` | `#3b55e6` | `#8fa4ff` |
+| 实心主按钮底色 | `--accent-solid` | `#3b55e6` | `#4a67f0` |
+| 成功 | `--ok` / `--ok-ink` | `#0f9d58` / `#0b7a44` | `#34d399` / 同 |
+| 警告 | `--warn` / `--warn-ink` | `#b45309` / 同 | `#fbbf24` / 同 |
+| 危险 | `--bad` / `--bad-ink` | `#d93025` / `#c5221f` | `#f87171` / 同 |
+| 圆角 | `--r-sm/md/lg` | `6px / 10px / 14px` | 同 |
+| 阴影 | `shadow-card` | `0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06)` | 同 |
 
-字体：`system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif`；代码用 `ui-monospace`。**不允许远程字体**。
+规则：正文/小标签用 `*-ink`（≥ 4.5:1）；`accent/ok/warn/bad` 只用于圆点、图标、描边和大字号。字号只用 Tailwind 标尺（`text-xs/sm/base/lg/xl/2xl`），不写 `text-[Npx]`。字体：Inter Variable + 本地系统中文字体；**不允许远程字体**。
 
-## 3. 组件约定（类名固定，供各页复用）
-| 类名 | 形态 |
+## 3. 组件约定（`app/src/ui/index.tsx`）
+| 组件 | 形态 |
 |---|---|
-| `.app` | 整体网格：`grid-template-rows:56px 1fr; grid-template-columns:260px 1fr` |
-| `.topbar` / `.topbar__brand` / `.topbar__model` | 顶栏；模型选择器为原生 `<select>` 包一层 `.select` |
-| `.sidebar` / `.sidebar__new` / `.session` / `.session--active` | 侧栏；`.session` 单行省略 + 删除按钮 hover 出现 |
-| `.main` / `.composer` | 主区；输入框固定底部，圆角 `--r-lg`，聚焦时 `--accent` 描边 |
-| `.msg` / `.msg--user` / `.msg--bot` | 消息；用户气泡右对齐浅蓝底，机器人为无底色纯文本块 |
-| `.stages` / `.stage` / `.stage__dot` | 六阶段时间线；`skipped` 用 `--fg-muted` 中性色 |
-| `.chip` / `.chip--ok` / `.chip--warn` / `.chip--bad` | 状态徽标 |
-| `.table` / `.table--tight` | 数据表；表头 sticky、数字列右对齐等宽 |
-| `.modal` / `.modal__panel` | 弹窗（设置用），点击遮罩关闭，Esc 关闭 |
-| `.btn` / `.btn--primary` / `.btn--ghost` / `.btn--danger` | 按钮 |
-| `.empty` | 空态：图标 + 一句说明 + 一个主操作 |
+| `TopBar` / `NAV` | 顶栏 + 五视图导航；窄屏导航可横向滚动，状态 Chip 在 `<sm` 只显示圆点 |
+| `Button` | `primary` 用 `bg-accent-solid`，`ghost/subtle/danger/icon` 为次要层级；一屏一个 primary |
+| `Card` / `CardHead` / `CardBody` | 扁平卡片：描边、无阴影、圆角 `--r-lg` |
+| `Chip` | 状态徽标；弃权/取消用 `muted` 灰，拒收用 `bad`，通过用 `ok` |
+| `Section` | 可折叠分组，用于单例页/API 页的信息分层 |
+| `Term` | 术语就地解释（tooltip + 键盘可达） |
+| `Modal` | Radix Dialog；Esc/遮罩关闭，标题可截断 |
+| `Table` / `Th` / `Td` | 表头 sticky、数字右对齐等宽；窄屏容器内横向滚动 |
+| `AsyncState` | 统一 loading/error/empty；空态必须给下一步动作 |
 
 ## 4. 交互硬要求
 1. 发送后输入框清空，发送中禁用并显示"停止"。
@@ -53,7 +55,10 @@
 5. `undefined/null/NaN` 一律渲染 `—`。
 6. 键盘：`Enter` 发送、`Shift+Enter` 换行、`Esc` 关弹窗。
 
-## 5. 三个页面的信息架构
-- **对话**（`chat.html`）：左会话列表 + 中对话流 + 底部输入（含模型选择器）。首屏无会话时给 4 条示例问题，点击即发。
-- **数据**（`index.html`）：顶部 4 个指标卡（用例数/42 字段/2 弃权/误报 0-8）→ 用例矩阵（可点进 `case.html`）→ 运行历史表。
-- **API**（`settings.html`）：通道选择 → Base URL → **模型（下拉 + 「获取模型列表」按钮）** → 温度 → Key（掩码）→ 保存 / 测试连接。
+## 5. 五个视图的信息架构
+- **数据**（`#/data`）：首屏三步引导 → 4 个指标卡（可点开口径）→ 逐例矩阵 → 运行历史。
+- **评测**（`#/eval`）：判定分布/调用数/缺陷检出/官方误报四张卡 → L3 配对条形图 → 逐例矩阵 → 校验器能力 → 已知限制。
+- **对话**（`#/chat`）：左会话列表 + 中对话流 + 底部输入；语义命中先跑确定性阶段，候选消息就绪后 HITL 审批卡等待批准。
+- **API**（`#/api`）：连接参数 → 凭据 → 温度自绘滑杆 → 保存/测试连接；说明性内容折叠在操作区之后。
+- **关于**（`#/about`）：5 分钟评审路径 → 问题/方案/效果/局限 → 诚实声明。
+- **单例**（`#/case?case=...`）：结论 → 智能解读 → 证据与过程（条款、六阶段、字段对照）→ 原始数据。
