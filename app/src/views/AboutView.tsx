@@ -75,6 +75,18 @@ export function AboutView() {
           </CardBody>
         </Card>
 
+        <details className="mt-6 rounded-lg border border-line bg-canvas px-4 py-3">
+          <summary className="cursor-pointer text-sm font-medium">5 分钟演示脚本（点击展开）</summary>
+          <ol className="mt-3 max-w-prose list-decimal space-y-1.5 pl-5 text-sm leading-relaxed text-muted">
+            <li>先看数据：8 例、L1 8/8、缺陷检出 31/31、官方误报 0/8；点指标卡 `?` 看口径。</li>
+            <li>看通过证据：6.7.1.3 → 结论 → 字段抽屉 → 导出 Markdown/JSON。</li>
+            <li>看弃权：6.7.1.4 → 未调用模型、不计 0 分。</li>
+            <li>试对话：精确命中直接跑；语义输入触发 HITL 审批卡，批准后才调用模型。</li>
+            <li>看局限：评测页底部「已知限制」，含切片、L3 分母、解读覆盖与未验证项。</li>
+          </ol>
+          <p className="mt-2 text-xs text-muted">详细版见仓库 `docs/PITCH.md`。</p>
+        </details>
+
         <section className="mt-8 rounded-lg bg-surface px-4 py-3" aria-labelledby="about-summary">
           <h2
             id="about-summary"
@@ -151,6 +163,7 @@ export function AboutView() {
             看数据 <ArrowRight className="h-4 w-4" />
           </Button>
           <Button onClick={() => (window.location.hash = "#/chat")}>试对话</Button>
+          <Button onClick={() => (window.location.hash = "#/eval")}>看评测</Button>
           <Button onClick={() => (window.location.hash = "#/api")}>看口径与配置</Button>
         </div>
       </div>

@@ -16,6 +16,8 @@
 浏览结果只需 Python 3.9+，**不需要安装任何第三方依赖**；重跑数据才需要 `pip install -r requirements.txt` 和 3GPP 规范 PDF（`repro.sh` 会打印下载命令，仓库不附带 PDF）。
 `data/` 由 `scripts/repro.sh` 生成，存在时自动优先使用。
 
+> 评委：`docs/PITCH.md` 是 5 分钟演示脚本；`bash scripts/verify_clean.sh` 可做干净克隆自检。
+
 ## 目录
 
 ```

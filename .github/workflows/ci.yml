@@ -22,6 +22,8 @@ jobs:
         run: python -m pytest -q
       - name: Score snapshot consistency
         run: python tools/check_consistency.py --base results/score
+      - name: Clean-clone smoke (no UI)
+        run: PYTHON=python bash scripts/verify_clean.sh --no-smoke
 
   frontend:
     runs-on: ubuntu-latest
