@@ -8,14 +8,17 @@ export default function Page() {
 
   useEffect(() => {
     fetch("/api/health")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then(setHealth)
       .catch((e) => setError(String(e)));
   }, []);
 
   return (
     <main className="p-6 font-mono text-sm">
-      {error ? `后端不可达：${error}` : JSON.stringify(health)}
+      {error ? `后端不可达：${error}` : health ? JSON.stringify(health) : "检查中…"}
     </main>
   );
 }
