@@ -13,7 +13,7 @@ export default function Page() {
       return;
     }
     if (["data", "eval", "api", "about", "chat"].includes(path)) {
-      window.location.replace(path === "chat" ? "/" : `/${path}`);
+      window.location.replace(path === "chat" ? `/${query ? "?" + query : ""}` : `/${path}`);
     }
   }, []);
   return null;
