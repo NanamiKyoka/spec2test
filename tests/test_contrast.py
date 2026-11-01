@@ -3,7 +3,7 @@ import pathlib
 import re
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-CSS = (ROOT / "app" / "src" / "styles.css").read_text(encoding="utf-8")
+CSS = (ROOT / "webapp" / "app" / "globals.css").read_text(encoding="utf-8")
 
 
 def _block(selector):

@@ -37,7 +37,8 @@ MAX_CONCURRENT_RUNS = 4
 RUN_ONE = os.path.join(HERE, "run_one.py")
 
 CATALOG_PROXY = ["claude-sonnet-4-6[1M]", "claude-opus-4-8[1M]", "claude-haiku-4-5"]
-NULLABLE_FIELDS = {"L1", "L3", "status"}
+NULLABLE_FIELDS = {"L1", "L3", "status", "verdict"}
+DENIED_BASENAMES = {"settings.json", "secret.bin"}
 
 GUIDE_FALLBACK = (
     "你好！我可以把 3GPP §6.7 的 NR NTN 测试条款编译成测试意图。"
@@ -64,6 +65,7 @@ _jobs = {}
 _jobs_lock = threading.Lock()
 _conv_lock = threading.RLock()
 _approval_lock = threading.Lock()
+_slot_lock = threading.Lock()      # 串行化"槽位检查 + 入表"，避免并发突破上限
 
 
 def _job_path(jid):
@@ -140,6 +142,19 @@ def get_job(jid):
         return copy.deepcopy(job)
     except Exception:
         return None
+
+
+def _prune_jobs():
+    """内存只留最近 JOBS_KEEP 个终态任务；运行中的永不淘汰（文件另由 load_jobs 裁剪）。"""
+    with _jobs_lock:
+        excess = len(_jobs) - JOBS_KEEP
+        if excess <= 0:
+            return
+        finished = sorted((j.get("started") or j.get("created") or 0, jid)
+                          for jid, j in _jobs.items()
+                          if j.get("state") in ("done", "failed"))
+        for _, jid in finished[:excess]:
+            _jobs.pop(jid, None)
 
 
 # ---------- settings ----------
@@ -442,10 +457,14 @@ def _explain_of(cid):
 
 
 def _plain_summary(job, verdict):
-    """一句白话摘要：优先用智能解读的 headline，缺省时给判定 + 用例标题。"""
+    """一句白话摘要：智能解读的 headline 只在判定一致时复用，失败任务单独说明。"""
+    if job.get("state") == "failed" or verdict == "failed":
+        title = _case_title(job.get("case"))
+        return "运行失败：%s" % (title or job.get("case") or "未知用例")
     explain = _explain_of(job.get("case"))
-    if explain and (explain.get("headline") or "").strip():
-        return explain["headline"].strip()
+    headline = ((explain or {}).get("headline") or "").strip()
+    if headline and (explain.get("numbers") or {}).get("verdict") == verdict:
+        return headline
     label = {"pass": "通过", "reject": "已拒收", "abstained": "已弃权",
              "canceled": "已取消", "failed": "运行失败"}.get(verdict, "运行完成")
     title = _case_title(job.get("case"))
@@ -673,16 +692,18 @@ def start_job(cid, dry_run=False, conversation_id=None, hitl=False):
                         job["log"].append({"t": round(time.time(), 3),
                                            "msg": "会话写入失败：%s" % e})
                         save_job(job)
-
+            _prune_jobs()
 
     threading.Thread(target=worker, daemon=True).start()
     return jid
 
 
 def _job_verdict(job):
-    """pass / reject / abstained / canceled / None。"""
+    """pass / reject / abstained / canceled / None。失败任务不给判定，避免继承崩溃前的 pass。"""
     if (job.get("approval") or {}).get("status") in ("rejected", "timeout"):
         return "canceled"
+    if job.get("state") == "failed":
+        return None
     detail = ((job.get("result") or {}).get("detail") or {})
     v = detail.get("verdict") or job.get("verdict")
     if not v and job.get("state") == "done":
@@ -695,6 +716,17 @@ def _job_verdict(job):
 def _attach_job_result(conversation_id, jid, job):
     """任务结束后把一条 assistant 摘要写入会话（不含任何凭据）。"""
     approval = (job.get("approval") or {}).get("status")
+    if job.get("state") == "failed":
+        err = (job.get("error") or "").strip()
+        content = "用例 %s · 运行失败%s" % (
+            job.get("case"), "（%s）" % err[:80] if err else "")
+        append_message(conversation_id, "assistant", content,
+                       job_id=jid, case=job.get("case"), stages=job.get("stages") or [],
+                       verdict=None, L1=None, L3=None, status="failed",
+                       summary=content, explain=_explain_of(job.get("case")))
+        update_conv_state(conversation_id, active_case=job.get("case"),
+                          last_job_id=jid, last_verdict="failed")
+        return
     if approval in ("rejected", "timeout") or job.get("verdict") == "canceled":
         content = (("用例 %s · 审批超时（未调用模型）" if approval == "timeout"
                     else "用例 %s · 已取消（未批准候选消息，未调用模型）")
@@ -762,7 +794,7 @@ def resolve_static_path(root, path):
     if clean.startswith("/data/"):
         rel = clean[len("/data/"):]
         target = inside(data_root, rel)
-        if not target or os.path.basename(target).lower() == "settings.json":
+        if not target or os.path.basename(target).lower() in DENIED_BASENAMES:
             return denied
         if os.path.exists(target):
             return target
@@ -1173,18 +1205,21 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             conv_id = (body.get("conversation_id") or "").strip() or None
             if conv_id and _load_conv(conv_id) is None:
                 return self._json({"error": "conversation_not_found"}, 404)
-            with _jobs_lock:
-                active = [j for j in _jobs.values()
-                          if j.get("state") in ("queued", "running", "awaiting_approval")]
-                if conv_id and any(j.get("conversation_id") == conv_id for j in active):
-                    return self._json({"error": "run_in_progress"}, 409)
-                if len(active) >= MAX_CONCURRENT_RUNS:
-                    return self._json({"error": "too_many_runs"}, 429)
-            instruction = (body.get("instruction") or "").strip()
-            if conv_id and instruction:
-                append_message(conv_id, "user", instruction)
-            return self._json({"job_id": start_job(cid, bool(body.get("dry_run")), conv_id,
-                                                   hitl=bool(body.get("hitl")))})
+            # 槽位检查与任务入表必须在同一把锁内，否则并发请求会突破并发上限
+            with _slot_lock:
+                with _jobs_lock:
+                    active = [j for j in _jobs.values()
+                              if j.get("state") in ("queued", "running", "awaiting_approval")]
+                    if conv_id and any(j.get("conversation_id") == conv_id for j in active):
+                        return self._json({"error": "run_in_progress"}, 409)
+                    if len(active) >= MAX_CONCURRENT_RUNS:
+                        return self._json({"error": "too_many_runs"}, 429)
+                instruction = (body.get("instruction") or "").strip()
+                if conv_id and instruction:
+                    append_message(conv_id, "user", instruction)
+                jid = start_job(cid, bool(body.get("dry_run")), conv_id,
+                                hitl=bool(body.get("hitl")))
+            return self._json({"job_id": jid})
         return self._json({"error": "not_found"}, 404)
 
     def do_PATCH(self):
@@ -1238,13 +1273,13 @@ def main():
     args = ap.parse_args()
 
     os.chdir(ROOT)
-    if not os.path.isfile(os.path.join(ROOT, "web", "index.html")):
-        raise SystemExit("找不到 web/index.html，请在仓库根下运行")
+    if not os.path.isdir(os.path.join(ROOT, "data")):
+        raise SystemExit("找不到 data/，请在仓库根下运行")
 
     Handler.root = ROOT
     secret_store.migrate()
     load_jobs()
-    url = "http://%s:%d/web/" % (args.host, args.port)
+    url = "http://%s:%d/api/health" % (args.host, args.port)
     handler = functools.partial(Handler, directory=ROOT)
 
     socketserver.TCPServer.allow_reuse_address = True

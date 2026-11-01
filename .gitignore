@@ -17,11 +17,10 @@ __pycache__/
 .chainlit/
 .files/
 
-# 前端构建（源码入库，依赖与截图不入库）
-app/node_modules/
-app/smoke-about.png
+# 前端构建（源码入库，依赖与构建产物不入库）
+webapp/node_modules/
+webapp/.next/
 web_m2/
 
 # 本地会话/临时
 .claude/scheduled_tasks.lock
-app/_*

@@ -4,11 +4,12 @@
 
 > 本项目不含规范原文（ADR-0003）。你从 ETSI 下载公开 PDF，用本仓库脚本重放整条流水线——**可复现性是本作品唯一的真实性佐证**。
 
-## 三步启动
+## 快速开始
 
 ```
-1) 双击 start.bat              （或：py -3.12 scripts\serve.py）
-2) 浏览器打开 http://127.0.0.1:8000/web/
+1) 双击 start.bat                        （推荐：自动拉起界面 :3000 与 API :8000）
+   或分别启动：py -3.12 scripts\serve.py  与  cd webapp && npm run dev
+2) 浏览器打开 http://127.0.0.1:3000/
 3) 想自己重跑数据：bash scripts/repro.sh
 ```
 
@@ -23,8 +24,7 @@
 ```
 tools/     核心链路：切分/抽取/生成/校验/评分（纯 Python，无框架）
 docs/      决策与报告（ADR、基线、评测定义、架构边界）
-app/       前端源码（React 18 + Vite + Tailwind v3）
-web/       前端构建产物（自包含、无运行时外链）
+webapp/    前端源码（Next 16 + React 19 + CopilotKit）
 scripts/   一键复现与静态服务
 results/   结果快照（入库；无 data/ 时页面读这里）
 data/      运行产物（不入库）
@@ -114,6 +114,14 @@ cd ../..
 
 实测：金标 `files=8 violations=0`（无误报）。
 
+## 真实错误集盲测（补充证据）
+
+```bash
+py -3 tools/blindset.py    # 读 results/blindset/（或 data/blindset/），写 results/blindset/
+```
+
+用真实模型输出（非注入模板）标注 19 条错误：改动前校验器检出 2/19；当前校验器 16/19，范围内 R1/R2/R3 **16/16**，3 条漏检均为方向/顺序/完整性（未声明检查）。逐条见 `results/blindset/report.md`，口径见 `docs/EVAL.md` 第七节。这也是“校验器会拒收自己”的证据：产品输出 6.7.1.5 中一条错放字段被查出并已重生成。
+
 ## 结果解读与自然语言输入
 
 - `tools/explain.py <case...>`：用当前模型通道为每个用例生成"结果 + 数据"的自然语言解读，写入
@@ -129,8 +137,8 @@ cd ../..
 py -3.12 -m pip install -r requirements-dev.txt
 py -3.12 -m pytest -q
 
-# 前端：类型检查 + 构建 + 浏览器冒烟（需先启动 scripts/serve.py）
-cd app && npm ci && npm run build && npm run smoke
+# 前端：构建 + 单元测试 + Playwright E2E（E2E 自动起 :8010 API 与 :3100 UI）
+cd webapp && npm ci && npm run build && npm run test && npm run e2e
 
 # 干净克隆自检：clone → serve → 健康检查 → smoke → 清理
 bash scripts/verify_clean.sh

@@ -25,18 +25,18 @@
 **`/api/run` 扩展**：`{case, instruction?, conversation_id?, hitl?, dry_run?}`；若带 `conversation_id`，任务完成后把一条 `role=assistant` 的摘要消息追加到该会话（含 `job_id`、`case`、`verdict`、`stages`）。`hitl=true` 时在 `candidates` 之后暂停等待审批（见下）；`dry_run=true` 走确定性桩，不调用模型。
 
 ## 页面与路由
-前端是 React 18 + Vite + Tailwind v3 的 SPA（源码 `app/`，构建产物 `web/`），使用 hash 路由；`web/index.html` 只是壳。
+UI 由 `webapp/`（Next 16 + CopilotKit）在 `:3000` 提供，使用 App Router；Python `:8000` 只提供 `/api/*` 与 `/data`、`/results` 静态数据（Next 通过 rewrites 代理）。
 
 | 路由 | 视图 | 内容 |
 |---|---|---|
-| `/web/#/data` | `DataView` | 指标卡 + 逐例矩阵 + 运行历史 |
-| `/web/#/eval` | `EvalView` | 逐例 L3 与基线配对、缺陷检出、官方答案误报 |
-| `/web/#/chat` | `ChatView` | 对话式智能体 + HITL 审批卡 |
-| `/web/#/api` | `ApiView` | 通道、Base URL、模型、温度、Key（可写不可读） |
-| `/web/#/about` | `AboutView` | 5 分钟评审路径 + 诚实声明 |
-| `/web/#/case?case=6.7.1.3` | `CaseView` | 单例全链条、字段级证据、结果解读 |
+| `/` | 对话工作台 | 对话式智能体 + 运行卡 + HITL 审批卡 |
+| `/data` | `DataView` | 指标卡 + 逐例矩阵 + 运行历史 |
+| `/eval` | `EvalView` | 逐例 L3 与基线配对、缺陷检出、官方答案误报 |
+| `/api` | `ApiView` | 通道、Base URL、模型、温度、Key（可写不可读） |
+| `/about` | `AboutView` | 5 分钟评审路径 + 诚实声明 |
+| `/case/[id]` | `CaseView` | 单例全链条、字段级证据、结果解读 |
 
-主导航：`数据 · 评测 · 对话 · API · 关于`，唯一实现在 `app/src/ui/index.tsx` 的 `NAV`；当前项用 `aria-current="page"` 标记。
+旧的 `/#/...` 链接（如 `/#/data`、`/#/case?case=6.7.1.3`）会重定向到新路由。主导航唯一实现在 `webapp/ui/index.tsx` 的 `NAV`；当前项用 `aria-current="page"` 标记。
 
 ## 后端 API（`scripts/serve.py`）
 | 方法 | 路径 | 请求 | 响应 |
@@ -68,7 +68,7 @@
 4. 写入后尽力 `chmod 600`（Windows 上退化为仅提示）。
 5. 未配置 Key 时：`/api/run` 返回 `400 {error:"no_credential"}`，前端展示"去设置"链接，**不得静默失败**。
 
-## 对话语义（`#/chat`）
+## 对话语义（`/`）
 - 输入自由文本；后端按顺序解析：① 文本内出现的用例号（如 `6.7.1.3`）→ 直接定位；② 否则按标题/关键词在 `/api/cases` 里检索，命中唯一则用，多个则回问澄清，零个则明确说"未找到对应用例"。
 - 定位后创建 job，前端按阶段流式展示（SSE 优先，轮询兜底）。
 - 结束时的回复必须包含：结论一句话 + 校验结果（通过 / 违规条目 + 路径）+ 是否被拒收。
@@ -98,8 +98,8 @@
 - 运行结果写入 `data/out/<case>.json` 并刷新页面阶段视图。
 
 ## 硬约束
-1. 构建产物自包含：`web/` 不发出任何运行时外部请求。
-2. 前端 React 18 + Vite + Tailwind v3（源码 `app/`，产物 `web/`）；后端只用标准库 `http.server`，不引入框架。
+1. 前端构建自包含；UI 运行时只请求同源 `/api`、`/data`、`/results`（Next rewrites 转到 Python `:8000`）。
+2. 前端 Next 16 + React 19 + CopilotKit（源码 `webapp/`）；后端只用标准库 `http.server`，不引入框架。
 3. 服务根 = 仓库根（要能 fetch `data/`、`results/`）。
 4. 任何异常必须在页面上可见（行内错误 + 原因），不许只有控制台。
 
@@ -107,10 +107,10 @@
 | Owner | 文件 |
 |---|---|
 | **F1 后端** | `scripts/serve.py`（静态服务、`/api/*`、回落逻辑、任务执行器） |
-| **F2 共享层** | `app/src/ui/index.tsx`、`app/src/styles.css`、`app/tailwind.config.js`、`app/src/App.tsx` |
-| **F3 数据/评测页** | `app/src/views/DataView.tsx`、`app/src/views/EvalView.tsx` |
-| **F4 对话/单例页** | `app/src/views/ChatView.tsx`、`app/src/views/CaseView.tsx` |
-| **F5 API/关于页** | `app/src/views/ApiView.tsx`、`app/src/views/AboutView.tsx` |
+| **F2 共享层** | `webapp/ui/index.tsx`、`webapp/app/globals.css`、`webapp/tailwind.config.js`、`webapp/app/layout.tsx` |
+| **F3 数据/评测页** | `webapp/views/DataView.tsx`、`webapp/views/EvalView.tsx` |
+| **F4 对话/单例页** | `webapp/app/page.tsx`、`webapp/views/CaseView.tsx`、`webapp/components/copilot/*` |
+| **F5 API/关于页** | `webapp/views/ApiView.tsx`、`webapp/views/AboutView.tsx` |
 | **C 启动与交付** | `start.bat`、`README.md`、`results/` |
 
 共享层（token、字号标尺、Button/Card/Chip/Table/Section/Term/Modal）只由 F2 修改；页面批次不得绕过共享组件另起一套样式。

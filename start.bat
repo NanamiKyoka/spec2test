@@ -26,8 +26,25 @@ if errorlevel 1 (
   echo        需要重跑数据时再执行 py -3.12 -m pip install -r requirements.txt
   echo.
 )
-echo [ok] 启动后自动打开 http://127.0.0.1:8000/web/
-echo      关闭本窗口即停止服务（Ctrl+C 亦可）
+where node >nul 2>&1
+if errorlevel 1 (
+  echo [warn] 未检测到 Node.js：仅 API 与数据可用，界面需要 Node 20+
+) else (
+  if not exist "webapp\node_modules" (
+    echo [i] 首次运行，正在安装前端依赖...
+    pushd webapp
+    call npm install
+    popd
+  )
+  if not exist "webapp\.next" (
+    pushd webapp
+    call npm run build
+    popd
+  )
+  start "Spec2Test UI" cmd /c "cd /d %~dp0webapp && npm run start"
+)
+echo [ok] 界面：http://127.0.0.1:3000/   API：http://127.0.0.1:8000/api/health
+start "" http://127.0.0.1:3000/
 echo.
 %PYCMD% scripts\serve.py
 echo.
@@ -36,7 +53,7 @@ pause
 exit /b 0
 
 :running
-echo [i] 已在运行，请打开 http://127.0.0.1:8000/web/
+echo [i] 已在运行，请打开 http://127.0.0.1:3000/
 echo.
 pause
 exit /b 0
