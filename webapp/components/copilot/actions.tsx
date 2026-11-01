@@ -6,7 +6,10 @@ import { ApiError, api, type CaseItem } from "@/lib/api";
 import { followJob, startRun, waitTerminal } from "@/lib/followJob";
 import { getJob, setJob } from "@/lib/jobStore";
 import { ApprovalCard } from "./ApprovalCard";
+import { ResultCard } from "./ResultCard";
 import { RunCard } from "./RunCard";
+
+type Stage = { stage: string; status?: string; summary?: string; detail?: Record<string, any> };
 
 export function CopilotActions() {
   const [cases, setCases] = useState<CaseItem[]>([]);
@@ -70,6 +73,51 @@ export function CopilotActions() {
       return JSON.stringify(summarize(jobId, job));
     },
     render: ({ args }) => <RunCard caseId={args.case ?? ""} />,
+  });
+
+  useCopilotAction({
+    name: "get_case_evidence",
+    description: "读取某个用例的六阶段证据（不调用模型）。",
+    parameters: [{ name: "case", type: "string", description: "用例号", required: true }],
+    handler: async ({ case: caseId }: { case: string }) => {
+      const res = await fetch(`/api/case/${caseId}`);
+      const body = await res.json();
+      return JSON.stringify({ case: caseId, stages: body.stages ?? [] });
+    },
+    render: ({ result }) => {
+      if (!result) return <div className="text-xs text-muted">读取证据中…</div>;
+      let parsed: { case: string; stages: Stage[] } | null = null;
+      try {
+        parsed = JSON.parse(String(result));
+      } catch {
+        return <div className="text-xs text-bad">证据解析失败</div>;
+      }
+      if (!parsed) return <></>;
+      const stages = parsed.stages ?? [];
+      const byStage = Object.fromEntries(stages.map((s) => [s.stage, s]));
+      const score = (byStage.score?.detail ?? {}) as { L1?: number; L3?: number | null };
+      const verdict =
+        byStage.candidates?.status === "skipped" || byStage.generate?.status === "skipped"
+          ? "abstained"
+          : byStage.validate?.status === "rejected"
+            ? "reject"
+            : "pass";
+      const violations = (byStage.validate?.detail?.violations ?? []) as {
+        rule: string;
+        path: string;
+        detail: string;
+      }[];
+      return (
+        <ResultCard
+          caseId={parsed.case}
+          stages={stages}
+          verdict={verdict}
+          violations={violations}
+          L1={score.L1 ?? null}
+          L3={score.L3 ?? null}
+        />
+      );
+    },
   });
 
   useCopilotAction({
