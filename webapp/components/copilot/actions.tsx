@@ -1,10 +1,10 @@
 "use client";
 
 import { useCopilotAction, useCopilotReadable } from "@copilotkit/react-core";
-import { useEffect, useMemo, useState } from "react";
-import { api, type CaseItem } from "@/lib/api";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ApiError, api, type CaseItem } from "@/lib/api";
 import { followJob, startRun, waitTerminal } from "@/lib/followJob";
-import { getJob } from "@/lib/jobStore";
+import { getJob, setJob } from "@/lib/jobStore";
 import { ApprovalCard } from "./ApprovalCard";
 import { RunCard } from "./RunCard";
 
@@ -14,6 +14,11 @@ export function CopilotActions() {
   useEffect(() => {
     api.cases().then(setCases).catch(() => setCases([]));
   }, []);
+
+  const casesRef = useRef<CaseItem[]>([]);
+  useEffect(() => {
+    casesRef.current = cases;
+  }, [cases]);
 
   const caseList = useMemo(() => cases.map((c) => ({ case: c.case, title: c.title })), [cases]);
   useCopilotReadable({ description: "当前系统支持的 §6.7 用例清单（case=用例号，title=标题）", value: caseList });
@@ -26,8 +31,8 @@ export function CopilotActions() {
       { name: "hitl", type: "boolean", description: "是否启用人工审批", required: false },
     ],
     handler: async ({ case: caseId, hitl }: { case: string; hitl?: boolean }) => {
-      const known = cases.find((c) => c.case === caseId);
-      if (cases.length && !known) return JSON.stringify({ error: "unknown_case", case: caseId });
+      const known = casesRef.current.find((c) => c.case === caseId);
+      if (casesRef.current.length && !known) return JSON.stringify({ error: "unknown_case", case: caseId });
 
       let jobId: string;
       try {
@@ -42,6 +47,7 @@ export function CopilotActions() {
         if (hitl) {
           const first = await api.job(jobId);
           if (first.state === "awaiting_approval") {
+            setJob(jobId, { ...first, id: jobId, case: caseId });
             return JSON.stringify({
               job_id: jobId,
               state: "awaiting_approval",
@@ -73,23 +79,28 @@ export function CopilotActions() {
       { name: "job_id", type: "string", description: "run_case 返回的 job_id", required: true },
       { name: "case", type: "string", description: "用例号", required: true },
     ],
-    renderAndWaitForResponse: ({ args, respond }) => {
+    renderAndWaitForResponse: ({ args, respond, status }) => {
       const [busy, setBusy] = useState(false);
       const jobId = args.job_id ?? "";
       const caseId = args.case ?? "";
       const job = getJob(jobId);
 
       const decide = async (decision: "approve" | "reject") => {
+        if (busy) return;
         setBusy(true);
         try {
           await api.approveJob(jobId, decision);
           const ac = new AbortController();
           const { job: finalJob, sseOk } = await followJob(jobId, caseId, ac.signal, false);
-          const final = sseOk ? finalJob : await api.job(jobId);
+          const final = sseOk ? finalJob : await waitTerminal(jobId, caseId, ac.signal);
           respond?.(JSON.stringify({ job_id: jobId, state: final.state, verdict: final.verdict ?? null }));
         } catch (e) {
           setBusy(false);
-          respond?.(JSON.stringify({ error: String(e) }));
+          if (e instanceof ApiError && e.status === 409) {
+            respond?.(JSON.stringify({ state: "approval_expired", next: "审批窗口已关闭，勿再调用 approve_candidates；需要结果请重新 run_case" }));
+          } else {
+            respond?.(JSON.stringify({ error: String(e) }));
+          }
         }
       };
 
@@ -97,7 +108,7 @@ export function CopilotActions() {
         <ApprovalCard
           jobId={jobId}
           candidates={job?.approval?.candidates ?? []}
-          busy={busy}
+          busy={busy || status !== "executing"}
           onDecide={decide}
         />
       );
