@@ -21,7 +21,19 @@ export function RunCard({ caseId }: { caseId: string }) {
     <div className="rounded-md border border-line bg-surface p-3 text-sm">
       <div className="flex items-center justify-between">
         <span className="font-medium">用例 {caseId}</span>
-        <span className="text-xs text-muted">{job.state}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted">{job.state}</span>
+          <button
+            className="text-xs text-accent-ink"
+            onClick={() =>
+              window.dispatchEvent(
+                new CustomEvent("s2t-trace", { detail: { jobId: job.id ?? "", case: caseId } })
+              )
+            }
+          >
+            trace
+          </button>
+        </div>
       </div>
       <div className="mt-2 h-1.5 overflow-hidden rounded bg-line">
         <div className="h-full bg-accent-solid transition-all" style={{ width: `${pct}%` }} />

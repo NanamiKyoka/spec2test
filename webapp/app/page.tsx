@@ -1,11 +1,12 @@
 "use client";
 
 import { CopilotChat } from "@copilotkit/react-ui";
-import { useEffect } from "react";
-import { CopilotProvider } from "@/components/CopilotProvider";
+import { useEffect, useState } from "react";
 import { StatusBar } from "@/components/StatusBar";
 import { RunRail } from "@/components/RunRail";
 import { CopilotActions } from "@/components/copilot/actions";
+import { CopilotProvider } from "@/components/CopilotProvider";
+import { TracePanel } from "@/components/copilot/TracePanel";
 
 const INSTRUCTIONS = `你是 Spec2Test 的测试意图编译器助手，只覆盖 3GPP TS 38.523-1 §6.7 的 8 个 NR NTN 用例。
 规则：
@@ -14,7 +15,11 @@ const INSTRUCTIONS = `你是 Spec2Test 的测试意图编译器助手，只覆�
 3. abstained 是弃权、reject 是拒收，都不能说成“通过”；failed 直接说明失败原因。
 4. 不编造不存在的用例号；范围外请求明确说明只覆盖 §6.7 的 8 个用例。`;
 
+type TraceTarget = { jobId: string; case: string };
+
 export default function Page() {
+  const [trace, setTrace] = useState<TraceTarget | null>(null);
+
   useEffect(() => {
     const raw = window.location.hash.replace(/^#\/?/, "");
     const [path, query] = raw.split("?");
@@ -29,12 +34,21 @@ export default function Page() {
     }
   }, []);
 
+  useEffect(() => {
+    const onTrace = (e: Event) => {
+      const d = (e as CustomEvent<TraceTarget>).detail;
+      if (d?.jobId) setTrace(d);
+    };
+    window.addEventListener("s2t-trace", onTrace);
+    return () => window.removeEventListener("s2t-trace", onTrace);
+  }, []);
+
   return (
     <CopilotProvider>
       <div className="flex h-full flex-col">
         <StatusBar />
         <div className="flex min-h-0 flex-1">
-          <RunRail />
+          <RunRail onPickRun={(r) => setTrace({ jobId: r.job_id, case: r.case })} />
           <main className="relative min-w-0 flex-1">
             <CopilotActions />
             <CopilotChat
@@ -47,6 +61,7 @@ export default function Page() {
               instructions={INSTRUCTIONS}
             />
           </main>
+          {trace && <TracePanel jobId={trace.jobId} caseId={trace.case} onClose={() => setTrace(null)} />}
         </div>
       </div>
     </CopilotProvider>
