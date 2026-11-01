@@ -6,10 +6,8 @@ import { ApiError, api, type CaseItem } from "@/lib/api";
 import { followJob, startRun, waitTerminal } from "@/lib/followJob";
 import { getJob, setJob } from "@/lib/jobStore";
 import { ApprovalCard } from "./ApprovalCard";
-import { ResultCard } from "./ResultCard";
+import { ResultCard, type Stage } from "./ResultCard";
 import { RunCard } from "./RunCard";
-
-type Stage = { stage: string; status?: string; summary?: string; detail?: Record<string, any> };
 
 export function CopilotActions() {
   const [cases, setCases] = useState<CaseItem[]>([]);
@@ -81,6 +79,7 @@ export function CopilotActions() {
     parameters: [{ name: "case", type: "string", description: "用例号", required: true }],
     handler: async ({ case: caseId }: { case: string }) => {
       const res = await fetch(`/api/case/${caseId}`);
+      if (!res.ok) return JSON.stringify({ case: caseId, stages: [], error: res.status });
       const body = await res.json();
       return JSON.stringify({ case: caseId, stages: body.stages ?? [] });
     },
@@ -101,12 +100,17 @@ export function CopilotActions() {
         path: string;
         detail: string;
       }[];
+      const bad = ["candidates", "generate", "validate", "score"].some(
+        (k) => !byStage[k] || byStage[k].status === "unavailable"
+      );
       const verdict =
-        byStage.candidates?.status === "skipped" || byStage.generate?.status === "skipped"
-          ? "abstained"
-          : violations.length > 0
-            ? "reject"
-            : "pass";
+        !stages.length || bad
+          ? "undetermined"
+          : byStage.candidates?.status === "skipped" || byStage.generate?.status === "skipped"
+            ? "abstained"
+            : violations.length > 0
+              ? "reject"
+              : "pass";
       return (
         <ResultCard
           caseId={parsed.case}

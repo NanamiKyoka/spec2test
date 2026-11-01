@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-type Stage = { stage: string; status?: string; summary?: string; detail?: Record<string, unknown> };
+export type Stage = { stage: string; status?: string; summary?: string; detail?: Record<string, unknown> };
 type Violation = { rule: string; path: string; detail: string };
 
 export function ResultCard({
@@ -40,8 +40,16 @@ export function ResultCard({
         {stages.map((s) => (
           <li key={s.stage} className="flex justify-between gap-2">
             <span>{s.stage}</span>
-            <span className={s.status === "ok" ? "text-ok-ink" : s.status === "skipped" ? "text-muted" : "text-bad"}>
-              {s.summary || s.status}
+            <span
+              className={
+                s.status === "ok"
+                  ? "text-ok-ink"
+                  : s.status === "rejected" || s.status === "failed"
+                    ? "text-bad"
+                    : "text-muted"
+              }
+            >
+              {s.summary || s.status || "未知"}
             </span>
           </li>
         ))}
