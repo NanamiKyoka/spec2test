@@ -2,6 +2,7 @@ import { defineConfig } from "@playwright/test";
 
 const PY = "http://127.0.0.1:8010";
 const UI = "http://localhost:3100";
+const PYTHON = process.env.PYTHON_CMD ?? (process.platform === "win32" ? "py -3.12" : "python3");
 
 export default defineConfig({
   testDir: "./e2e",
@@ -9,7 +10,7 @@ export default defineConfig({
   use: { baseURL: UI, trace: "retain-on-failure" },
   webServer: [
     {
-      command: "py -3.12 ../scripts/serve.py --port 8010 --no-browser",
+      command: `${PYTHON} ../scripts/serve.py --port 8010 --no-browser`,
       url: `${PY}/api/health`,
       reuseExistingServer: false,
       timeout: 30000,

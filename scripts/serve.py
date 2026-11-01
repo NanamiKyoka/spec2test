@@ -1274,7 +1274,7 @@ def main():
 
     os.chdir(ROOT)
     if not os.path.isdir(os.path.join(ROOT, "data")):
-        raise SystemExit("找不到 data/，请在仓库根下运行")
+        print("[warn] 未找到 data/：仅能使用 results/ 快照")
 
     Handler.root = ROOT
     secret_store.migrate()

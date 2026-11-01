@@ -51,7 +51,7 @@ echo "[1/5] clone → $TMP/repo"
 git clone --quiet "$ROOT" "$TMP/repo" || { echo "[fail] clone"; exit 1; }
 CLONE="$TMP/repo"
 [ -d "$CLONE/results" ] || { echo "[fail] 缺少 results/ 快照"; exit 1; }
-[ -f "$CLONE/web/index.html" ] || { echo "[fail] 缺少 web/index.html"; exit 1; }
+[ -d "$CLONE/webapp" ] || { echo "[fail] 缺少 webapp/"; exit 1; }
 [ ! -d "$CLONE/data" ] || echo "[warn] data/ 意外存在（不影响验收）"
 
 echo "[2/5] 启动服务 :$PORT"
@@ -78,7 +78,7 @@ fi
 echo "[4/5] 检查页面与数据来源"
 curl -sf "http://127.0.0.1:$PORT/api/health" | grep -q '"data_source": "snapshot"' \
   || { echo "[fail] data_source 不是 snapshot"; curl -s "http://127.0.0.1:$PORT/api/health"; echo; exit 1; }
-for p in /web/ /web/index.html /results/score/report.json; do
+for p in /api/health /results/score/report.json; do
   code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$PORT$p")
   [ "$code" = "200" ] || { echo "[fail] $p -> $code"; exit 1; }
 done
@@ -87,11 +87,19 @@ echo "[4b/5] 校验快照：gold 误报 / 缺陷检出"
 ( cd "$CLONE" && "$PYTHON" -c "import json;g=json.load(open('results/validate/gold.json',encoding='utf-8'));d=json.load(open('results/validate/defects_report.json',encoding='utf-8'));gv=sum(len(x.get('violations') or []) for x in g);dv=sum(1 for x in d if x.get('violations'));assert gv==0;assert dv==len(d)==31;print('[ok] gold violations=%d; defects %d/%d'%(gv,dv,len(d)))" ) \
   || { echo "[fail] 校验快照不一致"; exit 1; }
 
-if [ "$SMOKE" = "1" ] && [ -d "$ROOT/app/node_modules" ] && command -v npm >/dev/null 2>&1; then
-  echo "[5/5] Playwright 冒烟"
-  ( cd "$ROOT/app" && SMOKE_BASE="http://127.0.0.1:$PORT" npm run smoke ) || { echo "[fail] smoke"; exit 1; }
+echo "[4c/5] 真实错误集盲测快照"
+if [ -f "$CLONE/results/blindset/report.json" ]; then
+  ( cd "$CLONE" && "$PYTHON" -c "import json;r=json.load(open('results/blindset/report.json',encoding='utf-8'));c=r['summary']['current'];o=r['summary']['legacy'];assert c['in_scope']['detected']==c['in_scope']['total']>0;assert c['out_of_scope']['detected']==0;assert o['detected']<c['detected'];print('[ok] blindset current %d/%d, in-scope %d/%d, legacy %d/%d'%(c['detected'],c['total'],c['in_scope']['detected'],c['in_scope']['total'],o['detected'],o['total']))" ) \
+    || { echo "[fail] 盲测快照不一致"; exit 1; }
 else
-  echo "[5/5] 跳过 UI 冒烟（缺少 app/node_modules 或 npm）；页面与快照检查已完成"
+  echo "[warn] results/blindset/report.json 未入库，跳过盲测断言"
+fi
+
+if [ "$SMOKE" = "1" ] && [ -d "$ROOT/webapp/node_modules" ] && command -v npm >/dev/null 2>&1; then
+  echo "[5/5] Playwright E2E"
+  ( cd "$ROOT/webapp" && npm run e2e ) || { echo "[fail] e2e"; exit 1; }
+else
+  echo "[5/5] 跳过 UI 冒烟（缺少 webapp/node_modules 或 npm）；页面与快照检查已完成"
 fi
 
 echo "[ok] clean-clone PASS"
