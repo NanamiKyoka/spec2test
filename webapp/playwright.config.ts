@@ -11,13 +11,13 @@ export default defineConfig({
     {
       command: "py -3.12 ../scripts/serve.py --port 8010 --no-browser",
       url: `${PY}/api/health`,
-      reuseExistingServer: true,
+      reuseExistingServer: false,
       timeout: 30000,
     },
     {
       command: "npm run dev -- -p 3100",
       url: UI,
-      reuseExistingServer: true,
+      reuseExistingServer: false,
       timeout: 120000,
       env: { PY_API_URL: PY },
     },

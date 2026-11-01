@@ -11,13 +11,17 @@ test("五个视图路由可达", async ({ page }) => {
     ["/data", "数据面板"],
     ["/eval", "评测总览"],
     ["/about", "演示步骤（5 分钟）"],
-    ["/case/6.7.1.3", "6.7.1.3"],
   ];
   for (const [path, text] of routes) {
     const res = await page.goto(path);
     expect(res?.status()).toBe(200);
     await expect(page.locator("body")).toContainText(text);
   }
+
+  const res = await page.goto("/case/6.7.1.3");
+  expect(res?.status()).toBe(200);
+  await expect(page.getByText(/正在读取用例/)).toHaveCount(0);
+  await expect(page.locator("body")).toContainText("6.7.1.3");
 });
 
 test("旧 hash 链接重定向到新路由", async ({ page }) => {
