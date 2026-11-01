@@ -13,7 +13,7 @@ export default function Page() {
     if (!allowed) return;
     setJob("fixture", {
       id: "fixture",
-      case: "6.7.1.3",
+      case: "6.7.1.99",
       state: "running",
       log: [
         { t: 0, msg: "[ingest] 读取规范用例" },
@@ -27,27 +27,35 @@ export default function Page() {
 
   return (
     <main className="space-y-4 p-6" data-testid="cards">
-      <RunCard caseId="6.7.1.3" />
-      <ApprovalCard jobId="fixture" candidates={["SIB1"]} onDecide={() => {}} />
-      <ResultCard
-        caseId="6.7.1.3"
-        verdict="reject"
-        L1={1}
-        L3={0.5}
-        stages={[
-          { stage: "generate", status: "ok", summary: "生成 3 条消息" },
-          { stage: "validate", status: "rejected", summary: "违规 1 条" },
-        ]}
-        violations={[{ rule: "R2", path: "messages[SIB1].ies[0].name", detail: "unknown field" }]}
-      />
-      <ResultCard
-        caseId="6.7.1.4"
-        verdict="abstained"
-        L1={1}
-        L3={null}
-        stages={[{ stage: "generate", status: "skipped", summary: "弃权：未调用模型" }]}
-        violations={[]}
-      />
+      <div data-testid="run">
+        <RunCard caseId="6.7.1.99" />
+      </div>
+      <div data-testid="approval">
+        <ApprovalCard jobId="fixture" candidates={["SIB1"]} onDecide={() => {}} />
+      </div>
+      <div data-testid="result-reject">
+        <ResultCard
+          caseId="6.7.1.99"
+          verdict="reject"
+          L1={1}
+          L3={0.5}
+          stages={[
+            { stage: "generate", status: "ok", summary: "生成 3 条消息" },
+            { stage: "validate", status: "rejected", summary: "违规 1 条" },
+          ]}
+          violations={[{ rule: "R2", path: "messages[SIB1].ies[0].name", detail: "unknown field" }]}
+        />
+      </div>
+      <div data-testid="result-abstain">
+        <ResultCard
+          caseId="6.7.1.98"
+          verdict="abstained"
+          L1={1}
+          L3={null}
+          stages={[{ stage: "generate", status: "skipped", summary: "弃权：未调用模型" }]}
+          violations={[]}
+        />
+      </div>
     </main>
   );
 }
