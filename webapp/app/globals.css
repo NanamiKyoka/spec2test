@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --canvas: 255 255 255;
+  --surface: 247 248 250;
+  --line: 232 232 236;
+  --ink: 26 26 26;
+  --muted: 107 114 128;
+  --accent: 77 107 254;
+  --accent-ink: 59 85 230;
+  --accent-solid: 59 85 230;
+  --ok: 15 157 88;
+  --ok-ink: 11 122 68;
+  --warn: 180 83 9;
+  --warn-ink: 180 83 9;
+  --bad: 217 48 37;
+  --bad-ink: 197 34 31;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+}
+
+.dark {
+  --canvas: 15 17 21;
+  --surface: 21 24 30;
+  --line: 37 42 51;
+  --ink: 230 232 235;
+  --muted: 154 163 173;
+  --accent: 122 145 255;
+  --accent-ink: 143 164 255;
+  --accent-solid: 74 103 240;
+  --ok: 52 211 153;
+  --ok-ink: 52 211 153;
+  --warn: 251 191 36;
+  --warn-ink: 251 191 36;
+  --bad: 248 113 113;
+  --bad-ink: 248 113 113;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: rgb(var(--canvas));
+  color: rgb(var(--ink));
+  font-family: "Inter Variable", system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.scroll-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: rgb(var(--line));
+  border-radius: 8px;
+}
+.scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 结论色点：绿=通过 红=拒收 灰=弃权（弃权不得用红色） */
+.dot-ok { background: rgb(var(--ok)); }
+.dot-bad { background: rgb(var(--bad)); }
+.dot-muted { background: rgb(var(--muted)); }
