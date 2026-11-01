@@ -96,17 +96,17 @@ export function CopilotActions() {
       const stages = parsed.stages ?? [];
       const byStage = Object.fromEntries(stages.map((s) => [s.stage, s]));
       const score = (byStage.score?.detail ?? {}) as { L1?: number; L3?: number | null };
-      const verdict =
-        byStage.candidates?.status === "skipped" || byStage.generate?.status === "skipped"
-          ? "abstained"
-          : byStage.validate?.status === "rejected"
-            ? "reject"
-            : "pass";
       const violations = (byStage.validate?.detail?.violations ?? []) as {
         rule: string;
         path: string;
         detail: string;
       }[];
+      const verdict =
+        byStage.candidates?.status === "skipped" || byStage.generate?.status === "skipped"
+          ? "abstained"
+          : violations.length > 0
+            ? "reject"
+            : "pass";
       return (
         <ResultCard
           caseId={parsed.case}

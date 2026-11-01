@@ -21,7 +21,7 @@ export function ResultCard({
   L3?: number | null;
 }) {
   const tone =
-    verdict === "pass" ? "border-ok/40" : verdict === "abstained" ? "border-line" : "border-bad/40";
+    verdict === "pass" ? "border-ok/40" : verdict === "reject" ? "border-bad/40" : "border-line";
 
   return (
     <div className={`rounded-md border ${tone} bg-surface p-3 text-sm`}>
