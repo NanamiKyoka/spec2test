@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
 import {
   AnthropicAdapter,
@@ -10,9 +11,25 @@ export const dynamic = "force-dynamic";
 const runtime = new CopilotRuntime();
 
 // @ai-sdk/anthropic appends `/messages` to the base URL, so it must end in /v1.
-function anthropicBase(url?: string) {
-  const u = (url || "http://127.0.0.1:15721").replace(/\/+$/, "");
-  return u.endsWith("/v1") ? u : `${u}/v1`;
+// Accept full endpoint URLs too and reduce them to the API root.
+function anthropicBase(raw?: string) {
+  const input = (raw || "http://127.0.0.1:15721").trim();
+  try {
+    const parsed = new URL(input);
+    let path = parsed.pathname.replace(/\/+$/, "");
+    for (const suffix of ["/v1/messages", "/messages", "/chat/completions"]) {
+      if (path.endsWith(suffix)) {
+        path = path.slice(0, -suffix.length);
+        break;
+      }
+    }
+    if (!path.endsWith("/v1")) path = `${path}/v1`;
+    parsed.pathname = path.replace(/\/{2,}/g, "/");
+    parsed.search = "";
+    return parsed.toString().replace(/\/+$/, "");
+  } catch {
+    return input;
+  }
 }
 
 const serviceAdapter = new AnthropicAdapter({
@@ -22,7 +39,7 @@ const serviceAdapter = new AnthropicAdapter({
     defaultHeaders: {
       "user-agent": "claude-cli/1.0 (external)",
       // OpenCode proxy refuses requests without a session id.
-      "x-opencode-session": process.env.LLM_SESSION_ID || "spec2test-webapp",
+      "x-opencode-session": process.env.LLM_SESSION_ID || randomUUID(),
     },
   }),
   model: process.env.LLM_MODEL || "claude-sonnet-4-6[1M]",
