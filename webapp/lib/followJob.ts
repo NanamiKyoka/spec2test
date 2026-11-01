@@ -15,13 +15,19 @@ export function followJob(
     let last: Job = { state: "queued", log: [] };
     let es: EventSource | null = null;
 
-    const done = (sseOk: boolean) => {
+    function done(sseOk: boolean) {
       if (settled) return;
       settled = true;
+      signal.removeEventListener("abort", onAbort);
       es?.close();
       resolve({ job: last, sseOk });
-    };
+    }
 
+    function onAbort() {
+      done(false);
+    }
+
+    if (signal.aborted) return done(false);
     if (typeof EventSource === "undefined") return done(false);
 
     try {
@@ -42,7 +48,7 @@ export function followJob(
       }
     };
     es.onerror = () => done(false);
-    signal.addEventListener("abort", () => done(false), { once: true });
+    signal.addEventListener("abort", onAbort, { once: true });
   });
 }
 
