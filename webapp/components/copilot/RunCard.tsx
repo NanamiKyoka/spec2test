@@ -24,7 +24,8 @@ export function RunCard({ caseId }: { caseId: string }) {
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted">{job.state}</span>
           <button
-            className="text-xs text-accent-ink"
+            className="text-xs text-accent-ink disabled:opacity-40"
+            disabled={!job.id}
             onClick={() =>
               window.dispatchEvent(
                 new CustomEvent("s2t-trace", { detail: { jobId: job.id ?? "", case: caseId } })

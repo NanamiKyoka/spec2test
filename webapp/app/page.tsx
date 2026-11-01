@@ -37,7 +37,7 @@ export default function Page() {
   useEffect(() => {
     const onTrace = (e: Event) => {
       const d = (e as CustomEvent<TraceTarget>).detail;
-      if (d?.jobId) setTrace(d);
+      if (d?.jobId && d?.case) setTrace(d);
     };
     window.addEventListener("s2t-trace", onTrace);
     return () => window.removeEventListener("s2t-trace", onTrace);

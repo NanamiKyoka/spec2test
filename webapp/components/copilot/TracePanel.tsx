@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { api } from "@/lib/api";
 import { getJob, setJob, subscribeJobs } from "@/lib/jobStore";
 
@@ -13,6 +13,7 @@ export function TracePanel({
   caseId?: string;
   onClose: () => void;
 }) {
+  const [error, setError] = useState(false);
   const job = useSyncExternalStore(
     subscribeJobs,
     () => (jobId ? getJob(jobId) : undefined),
@@ -24,7 +25,7 @@ export function TracePanel({
       api
         .job(jobId)
         .then((j) => setJob(jobId, { ...j, id: jobId, case: caseId }))
-        .catch(() => {});
+        .catch(() => setError(true));
     }
   }, [jobId, caseId]);
 
@@ -37,7 +38,7 @@ export function TracePanel({
         </button>
       </div>
       <div className="scroll-thin min-h-0 flex-1 overflow-y-auto p-3 text-xs">
-        {!job && <p className="text-muted">暂无运行记录。</p>}
+        {!job && (error ? <p className="text-bad">加载失败</p> : <p className="text-muted">暂无运行记录。</p>)}
         {(job?.log ?? []).map((l, i) => (
           <div key={i} className="border-b border-line/60 py-1 font-mono">
             {l.msg}
