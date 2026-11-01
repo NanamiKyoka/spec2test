@@ -10,13 +10,16 @@ export function RunRail({ onPickRun }: { onPickRun?: (run: RunRec) => void }) {
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
 
   useEffect(() => {
-    Promise.all([api.cases(), api.runs(8)])
-      .then(([c, r]) => {
-        setCases(c);
-        setRuns(r);
-        setState("ready");
-      })
-      .catch(() => setState("error"));
+    let alive = true;
+    Promise.allSettled([api.cases(), api.runs(8)]).then(([c, r]) => {
+      if (!alive) return;
+      if (c.status === "fulfilled") setCases(c.value);
+      if (r.status === "fulfilled") setRuns(r.value);
+      setState(c.status === "rejected" && r.status === "rejected" ? "error" : "ready");
+    });
+    return () => {
+      alive = false;
+    };
   }, []);
 
   return (
@@ -41,6 +44,8 @@ export function RunRail({ onPickRun }: { onPickRun?: (run: RunRec) => void }) {
       </ul>
       <div className="border-t border-line px-3 py-2 text-xs uppercase tracking-wide text-muted">最近运行</div>
       <ul className="max-h-48 overflow-y-auto px-2 pb-2 text-xs">
+        {state === "loading" && <li className="px-2 py-1 text-muted">加载中…</li>}
+        {state === "error" && <li className="px-2 py-1 text-muted">读取失败</li>}
         {state === "ready" && runs.length === 0 && <li className="px-2 py-1 text-muted">暂无运行</li>}
         {runs.map((r) => (
           <li key={r.job_id}>

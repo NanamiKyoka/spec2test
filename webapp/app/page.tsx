@@ -34,7 +34,7 @@ export default function Page() {
       <div className="flex h-full flex-col">
         <StatusBar />
         <div className="flex min-h-0 flex-1">
-          <RunRail onPickRun={() => {}} />
+          <RunRail />
           <main className="relative min-w-0 flex-1">
             <CopilotActions />
             <CopilotChat

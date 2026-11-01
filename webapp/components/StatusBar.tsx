@@ -32,9 +32,14 @@ export function StatusBar() {
     };
     check();
     const id = window.setInterval(check, 15000);
+    const onVisible = () => {
+      if (!document.hidden) check();
+    };
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
       alive = false;
       window.clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisible);
       ac?.abort();
     };
   }, []);
