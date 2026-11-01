@@ -2,6 +2,7 @@
 
 import { CopilotChat } from "@copilotkit/react-ui";
 import { useEffect } from "react";
+import { CopilotProvider } from "@/components/CopilotProvider";
 import { StatusBar } from "@/components/StatusBar";
 import { RunRail } from "@/components/RunRail";
 import { CopilotActions } from "@/components/copilot/actions";
@@ -29,23 +30,25 @@ export default function Page() {
   }, []);
 
   return (
-    <div className="flex h-full flex-col">
-      <StatusBar />
-      <div className="flex min-h-0 flex-1">
-        <RunRail onPickRun={() => {}} />
-        <main className="relative min-w-0 flex-1">
-          <CopilotActions />
-          <CopilotChat
-            className="h-full"
-            labels={{
-              title: "Spec2Test 助手",
-              initial:
-                "给我用例号（如 6.7.1.3），或描述场景（卫星小区被禁止、GNSS 禁用、Sintrasearch、PLMN 重选）。",
-            }}
-            instructions={INSTRUCTIONS}
-          />
-        </main>
+    <CopilotProvider>
+      <div className="flex h-full flex-col">
+        <StatusBar />
+        <div className="flex min-h-0 flex-1">
+          <RunRail onPickRun={() => {}} />
+          <main className="relative min-w-0 flex-1">
+            <CopilotActions />
+            <CopilotChat
+              className="h-full"
+              labels={{
+                title: "Spec2Test 助手",
+                initial:
+                  "给我用例号（如 6.7.1.3），或描述场景（卫星小区被禁止、GNSS 禁用、Sintrasearch、PLMN 重选）。",
+              }}
+              instructions={INSTRUCTIONS}
+            />
+          </main>
+        </div>
       </div>
-    </div>
+    </CopilotProvider>
   );
 }

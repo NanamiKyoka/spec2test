@@ -1,26 +1,42 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Health = { provider?: string; model?: string; data_source?: string };
 
 export function StatusBar() {
   const [health, setHealth] = useState<Health | null>(null);
   const [offline, setOffline] = useState(false);
+  const seq = useRef(0);
 
   useEffect(() => {
-    const check = () =>
-      fetch("/api/health")
+    let alive = true;
+    let ac: AbortController | null = null;
+    const check = () => {
+      if (document.hidden) return;
+      const my = ++seq.current;
+      ac?.abort();
+      ac = new AbortController();
+      fetch("/api/health", { signal: ac.signal })
         .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
         .then((h) => {
-          setHealth(h);
-          setOffline(false);
+          if (alive && my === seq.current) {
+            setHealth(h);
+            setOffline(false);
+          }
         })
-        .catch(() => setOffline(true));
+        .catch((e) => {
+          if (alive && my === seq.current && (e as Error).name !== "AbortError") setOffline(true);
+        });
+    };
     check();
     const id = window.setInterval(check, 15000);
-    return () => window.clearInterval(id);
+    return () => {
+      alive = false;
+      window.clearInterval(id);
+      ac?.abort();
+    };
   }, []);
 
   return (
@@ -33,7 +49,7 @@ export function StatusBar() {
         <Link href="/api">API</Link>
         <Link href="/about">关于</Link>
       </nav>
-      <span className="ml-auto text-xs text-muted">
+      <span className="ml-auto text-xs text-muted" role="status" aria-live="polite">
         {offline ? "后端未连接" : `${health?.provider ?? "—"} · ${health?.model ?? "—"}`}
       </span>
     </header>
