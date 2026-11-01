@@ -1,4 +1,4 @@
-import { fetchJson } from "../views/DataView";
+import { fetchJson } from "./http";
 
 export type SymbolTable = {
   messages: Record<string, { fields?: string[]; paths?: string[] }>;
