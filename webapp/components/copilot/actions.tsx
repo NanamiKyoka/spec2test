@@ -1,9 +1,9 @@
 "use client";
 
 import { useCopilotAction, useCopilotReadable } from "@copilotkit/react-core";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api, type CaseItem } from "@/lib/api";
-import { followJob, startRun } from "@/lib/followJob";
+import { followJob, startRun, waitTerminal } from "@/lib/followJob";
 import { RunCard } from "./RunCard";
 
 export function CopilotActions() {
@@ -13,10 +13,8 @@ export function CopilotActions() {
     api.cases().then(setCases).catch(() => setCases([]));
   }, []);
 
-  useCopilotReadable({
-    description: "当前系统支持的 §6.7 用例清单（case=用例号，title=标题）",
-    value: cases.map((c) => ({ case: c.case, title: c.title })),
-  });
+  const caseList = useMemo(() => cases.map((c) => ({ case: c.case, title: c.title })), [cases]);
+  useCopilotReadable({ description: "当前系统支持的 §6.7 用例清单（case=用例号，title=标题）", value: caseList });
 
   useCopilotAction({
     name: "run_case",
@@ -27,21 +25,22 @@ export function CopilotActions() {
     ],
     handler: async ({ case: caseId, hitl }: { case: string; hitl?: boolean }) => {
       const known = cases.find((c) => c.case === caseId);
-      if (!known) return JSON.stringify({ error: "unknown_case", case: caseId });
+      if (cases.length && !known) return JSON.stringify({ error: "unknown_case", case: caseId });
 
       const jobId = await startRun(caseId, Boolean(hitl));
       const ac = new AbortController();
       const { job, sseOk, stoppedAtApproval } = await followJob(jobId, caseId, ac.signal, true);
 
       if (!sseOk) {
-        return JSON.stringify({ job_id: jobId, state: "unknown", note: "SSE 不可用，请打开结果卡片确认" });
+        const j = await waitTerminal(jobId, caseId, ac.signal);
+        return JSON.stringify(summarize(jobId, j));
       }
       if (stoppedAtApproval) {
         return JSON.stringify({
           job_id: jobId,
           state: "awaiting_approval",
           candidates: job.approval?.candidates ?? [],
-          next: "请让用户确认候选消息，然后调用 approve_candidates",
+          next: "请在审批卡确认候选消息后再继续",
         });
       }
       return JSON.stringify(summarize(jobId, job));
