@@ -16,7 +16,7 @@ export default defineConfig({
       timeout: 30000,
     },
     {
-      command: "npm run dev -- -p 3100",
+      command: "npx next dev -p 3100",
       url: UI,
       reuseExistingServer: false,
       timeout: 120000,

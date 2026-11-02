@@ -26,25 +26,36 @@ if errorlevel 1 (
   echo        需要重跑数据时再执行 py -3.12 -m pip install -r requirements.txt
   echo.
 )
+set "UI_OK="
 where node >nul 2>&1
 if errorlevel 1 (
   echo [warn] 未检测到 Node.js：仅 API 与数据可用，界面需要 Node 20+
 ) else (
+  set "UI_OK=1"
   if not exist "webapp\node_modules" (
     echo [i] 首次运行，正在安装前端依赖...
     pushd webapp
     call npm install
+    if errorlevel 1 set "UI_OK="
     popd
   )
-  if not exist "webapp\.next" (
+  if not exist "webapp\.next\BUILD_ID" (
+    echo [i] 正在构建前端...
     pushd webapp
     call npm run build
+    if errorlevel 1 set "UI_OK="
     popd
+  ) else (
+    echo [i] 已存在构建产物；如需重建请删除 webapp\.next
   )
-  start "Spec2Test UI" cmd /c "cd /d %~dp0webapp && npm run start"
+  if defined UI_OK (
+    start "Spec2Test UI" cmd /c "cd /d %~dp0webapp && npm run start"
+    echo [ok] 界面：http://127.0.0.1:3000/   API：http://127.0.0.1:8000/api/health
+    start "" http://127.0.0.1:3000/
+  ) else (
+    echo [warn] 前端依赖安装或构建失败，已跳过界面启动
+  )
 )
-echo [ok] 界面：http://127.0.0.1:3000/   API：http://127.0.0.1:8000/api/health
-start "" http://127.0.0.1:3000/
 echo.
 %PYCMD% scripts\serve.py
 echo.

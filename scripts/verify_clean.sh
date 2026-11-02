@@ -97,7 +97,11 @@ fi
 
 if [ "$SMOKE" = "1" ] && [ -d "$ROOT/webapp/node_modules" ] && command -v npm >/dev/null 2>&1; then
   echo "[5/5] Playwright E2E"
-  ( cd "$ROOT/webapp" && npm run e2e ) || { echo "[fail] e2e"; exit 1; }
+  if ( cd "$ROOT/webapp" && npx playwright install chromium ); then
+    ( cd "$ROOT/webapp" && npm run e2e ) || { echo "[fail] e2e"; exit 1; }
+  else
+    echo "[warn] 浏览器安装失败，跳过 UI 冒烟"
+  fi
 else
   echo "[5/5] 跳过 UI 冒烟（缺少 webapp/node_modules 或 npm）；页面与快照检查已完成"
 fi

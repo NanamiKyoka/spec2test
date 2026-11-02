@@ -32,10 +32,10 @@ bash scripts/repro.sh --live   # 真实调用模型，写 data/，产出可用�
 
 ```bash
 python scripts/serve.py          # 或直接双击 start.bat
-# 浏览器打开 http://127.0.0.1:8000/web/
+# 浏览器打开 http://127.0.0.1:3000/
 ```
 
-点任一用例 → 进入 `#/case?case=6.7.1.3`，能看到六个阶段：
+点任一用例 → 进入 `/case/6.7.1.3`，能看到六个阶段：
 `ingest（读规范）→ context（裁剪条款）→ candidates（抽候选消息）→ generate（生成 IR）→ validate（校验）→ score（打分）`
 
 **关键看两件事**：
@@ -52,7 +52,7 @@ python scripts/serve.py          # 或直接双击 start.bat
 
 ### 用法 D：把结果带走（导出测试意图）
 
-1. 打开单例页（如 `#/case?case=6.7.1.3`）；
+1. 打开单例页（如 `/case/6.7.1.3`）；
 2. 点「导出 Markdown」用于评审/归档，或「导出 JSON」接入用例库/CI；
 3. JSON 保留 `steps` / `messages` / `violations` 与 `provenance`，Markdown 直接可读。
 

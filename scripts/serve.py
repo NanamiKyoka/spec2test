@@ -90,6 +90,8 @@ def save_job(job):
 
 def load_jobs():
     """启动时恢复历史任务；上次异常退出留下的 running/queued 标记为中断。"""
+    if not os.path.isdir(os.path.join(ROOT, "data")):
+        return
     try:
         os.makedirs(JOBS_DIR, exist_ok=True)
         names = [n for n in os.listdir(JOBS_DIR) if n.endswith(".json")]
