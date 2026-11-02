@@ -5,10 +5,13 @@
       "rrcsetuprequest"
     ],
     "system_sequence": [
+      "mib",
+      "sib1",
       "sib19",
       "rrcsetuprequest",
       "rrcsetup",
       "rrcsetupcomplete",
+      "registrationrequest",
       "registrationaccept",
       "registrationcomplete"
     ]
@@ -29,11 +32,7 @@
       "paging"
     ],
     "system_sequence": [
-      "systeminformation",
-      "rrcconnectionrelease",
-      "systeminformation",
-      "rrcrelease",
-      "systeminformation"
+      "systeminformationblocktype24"
     ]
   },
   {
@@ -58,13 +57,14 @@
       "rrcsetuprequest"
     ],
     "system_sequence": [
-      "mib",
       "sib1",
-      "mib",
       "sib1",
-      "mib",
+      "rrcsetuprequest",
+      "rrcsetup",
+      "rrcsetupcomplete",
+      "rrcrelease",
       "sib1",
-      "sib1"
+      "paging"
     ]
   },
   {
@@ -102,8 +102,17 @@
     "gold_sequence": [],
     "system_sequence": [
       "systeminformation",
+      "paging",
+      "rrcsetuprequest",
+      "rrcsetup",
+      "rrcsetupcomplete",
       "rrcrelease",
-      "systeminformation"
+      "systeminformation",
+      "paging",
+      "rrcsetuprequest",
+      "rrcsetup",
+      "rrcsetupcomplete",
+      "rrcrelease"
     ]
   },
   {
