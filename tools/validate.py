@@ -13,9 +13,30 @@ import sys
 STOP = {"the", "that", "with", "shall", "should", "from", "into", "this", "ue", "ss",
         "and", "not", "for", "does", "when", "then", "after", "before", "case", "cell"}
 
+# 非 RRC 的物理层/NAS 步骤写法，R1 不判消息存在性
+NON_RRC = re.compile(
+    r"^(PDCCH|PDSCH|PUSCH|PRACH|PUCCH|DCI|NAS|REGISTRATION|CONFIGURATION UPDATE|"
+    r"Authentication|Security Mode|Registration)", re.I)
+
+# 人工复核的嵌套/别名字段：ASN.1 可达但自动抽取遗漏（TS 38.331 v19.4.0）。
+# 用于 R2 的消息作用域判定；不放进全局集合，避免把“字段放错消息”误判为合法。
+MESSAGE_FIELD_EXTRA = {
+    "SIB1": {"trackingAreaList", "mcc", "mnc"},
+    "SIB2": {"s-NonIntraSearch"},
+    "SIB19": {"ephemerisInfo-r17", "t-service-r17", "ta-Info-r17",
+              "epochTime-r17", "cellSpecificKoffset-r17",
+              "ntn-UlSyncValidityDuration-r17"},
+    "Paging": {"systemInfoModification"},
+}
+
 
 def norm(s):
     return re.sub(r"[^a-z0-9-]+", " ", (s or "").lower()).strip()
+
+
+def leaf_name(name):
+    """取 IE 路径的叶子名：a.b[0].c -> c；用于接受合法嵌套路径。"""
+    return re.sub(r"\[\d+\]", "", (name or "").rsplit(".", 1)[-1]).strip()
 
 
 PAREN = re.compile(r"\([^)]*\)")
@@ -74,31 +95,35 @@ def validate(ir, symbols):
         raw = (m.get("message") or "").strip()
         if not raw:
             continue
-        parts = split_messages(raw)
-        first = parts[0] if parts else raw
-        # 只对"看起来是 RRC 消息"的条目做存在性检查，避免把 PDCCH/PRACH/NAS 误判
-        if not re.match(r"^(RRC|SIB\s?\d|MIB|Paging|SystemInformationBlockType|MasterInformationBlock)",
-                        first, re.I):
+        # 物理层/NAS 写法本来就不是 ASN.1 消息名，跳过；其余非空写法一律判。
+        if NON_RRC.match(raw):
             continue
         ok, unknown = resolve_message(raw, known)
         if not ok:
             out.append({"rule": "R1", "path": f"steps[{m.get('st')}].message",
                         "detail": f"unknown message: {'/'.join(unknown)}"})
 
+    extras = symbols.get("manual_review_by_message") or MESSAGE_FIELD_EXTRA
     for mt in ir.get("messages") or []:
         msg = (mt.get("message") or "").strip()
         if msg not in msgs:          # 未覆盖消息跳过 R2
             continue
         if msgs[msg].get("_partial"):  # LTE 子集只保证存在性（R1），字段不完整
             continue
-        fields = set(msgs[msg]["fields"])
+        fields = set(msgs[msg]["fields"]) | set(extras.get(msg, []))
         for k, ie in enumerate(mt.get("ies") or []):
             nm = (ie.get("name") or "").strip()
             if not nm:
                 continue
-            if nm not in fields and nm not in gids:
-                out.append({"rule": "R2", "path": f"messages[{msg}].ies[{k}].name",
-                            "detail": f"unknown field {nm!r} for {msg}"})
+            lf = leaf_name(nm)
+            if lf in fields:
+                continue
+            if lf in gids:
+                detail = f"field {nm!r} is defined in ASN.1 but not in {msg}"
+            else:
+                detail = f"unknown field {nm!r} for {msg}"
+            out.append({"rule": "R2", "path": f"messages[{msg}].ies[{k}].name",
+                        "detail": detail})
 
     # R3：每条 TP 必须被至少一个步骤引用（兼容 tp_ref 列表与旧 tp 字符串）
     refs = set()

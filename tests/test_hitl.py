@@ -158,3 +158,31 @@ def test_reject_skips_model(base):
 def test_approve_unknown_job_404(base):
     code, _ = _request(base + "/api/job/deadbeef/approve", {"decision": "approve"})
     assert code == 404
+
+
+@NEEDS_DATA
+def test_options_flow_through_run_and_approval(base):
+    code, body = _request(base + "/api/run", {
+        "case": "6.7.1.3", "dry_run": True, "hitl": True,
+        "options": {"mode": "steps", "repairs": 0, "strictness": "r1_only"},
+    })
+    assert code == 200
+    assert body["options"] == {"messages": [], "mode": "steps", "repairs": 0,
+                               "strictness": "r1_only", "engine": "pipeline",
+                               "skills": [], "mcpTools": None}
+    jid = body["job_id"]
+    job = _wait_state(base, jid, ("awaiting_approval",))
+    assert job["options"]["mode"] == "steps"
+
+    picked = job["approval"]["candidates"][:1]
+    code, body = _request(base + "/api/job/%s/approve" % jid, {
+        "decision": "approve",
+        "options": {"mode": "steps", "repairs": 0, "strictness": "r1_only",
+                    "messages": picked},
+    })
+    assert code == 200 and body["options"]["messages"] == picked
+
+    done = _wait_state(base, jid, ("done", "failed"))
+    assert done["state"] == "done"
+    # 只生成步骤（dry-run 下走桩生成）时没有字段可召回，L3 记为空而不是 0
+    assert done["result"]["detail"]["L3"] is None

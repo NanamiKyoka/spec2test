@@ -1,0 +1,139 @@
+{
+  "case_id": "6.7.1.12",
+  "text": "{\n  \"steps\": [\n    {\"st\": 1, \"actor\": \"SS\", \"direction\": \"S->U\", \"message\": \"E-UTRA SIB1\"},\n    {\"st\": 2, \"actor\": \"SS\", \"direction\": \"S->U\", \"message\": \"E-UTRA SIB3\"},\n    {\"st\": 3, \"actor\": \"SS\", \"direction\": \"S->U\", \"message\": \"E-UTRA SIB24\"},\n    {\"st\": 4, \"actor\": \"SS\", \"direction\": \"S->U\", \"message\": \"NR SIB1\"},\n    {\"st\": 5, \"actor\": \"UE\", \"direction\": \"U->S\", \"message\": \"\"},\n    {\"st\": 6, \"actor\": \"UE\", \"direction\": \"U->S\", \"message\": \"\"},\n    {\"st\": 7, \"actor\": \"SS\", \"direction\": \"S->U\", \"message\": \"E-UTRA SIB24\"},\n    {\"st\": 8, \"actor\": \"UE\", \"direction\": \"U->S\", \"message\": \"\"},\n    {\"st\": 9, \"actor\": \"UE\", \"direction\": \"U->S\", \"message\": \"\"},\n    {\"st\": 10, \"actor\": \"UE\", \"direction\": \"U->S\", \"message\": \"\"}\n  ],\n  \"messages\": [\n    {\n      \"message\": \"E-UTRA SIB1\",\n      \"ies\": [\n        {\"name\": \"cellAccessRelatedInfo.plmn-IdentityList\", \"value\": \"E-UTRA Cell 1 PLMN\"},\n        {\"name\": \"cellSelectionInfo.q-RxLevMin\", \"value\": \"configured for E-UTRA Cell 1\"}\n      ]\n    },\n    {\n      \"message\": \"E-UTRA SIB3\",\n      \"ies\": [\n        {\"name\": \"cellReselectionServingFreqInfo.cellReselectionPriority\", \"value\": \"serving E-UTRA priority\"},\n        {\"name\": \"cellReselectionServingFreqInfo.threshServingLow\", \"value\": \"configured\"}\n      ]\n    },\n    {\n      \"message\": \"E-UTRA SIB24\",\n      \"ies\": [\n        {\"name\": \"carrierFreqListNR.carrierFreq\", \"value\": \"NR Cell 1 ARFCN\"},\n        {\"name\": \"carrierFreqListNR.cellReselectionPriority\", \"value\": \"phase 1: lower than serving E-UTRA priority; phase 2: higher than serving E-UTRA priority\"},\n        {\"name\": \"carrierFreqListNR.threshX-Low\", \"value\": \"configured for lower-priority reselection\"},\n        {\"name\": \"carrierFreqListNR.threshX-High\", \"value\": \"configured for higher-priority reselection\"},\n        {\"name\": \"carrierFreqListNR.q-RxLevMin\", \"value\": \"configured for NR Cell 1\"}\n      ]\n    },\n    {\n      \"message\": \"NR SIB1\",\n      \"ies\": [\n        {\"name\": \"cellAccessRelatedInfo.plmn-IdentityList\", \"value\": \"NR Cell 1 PLMN\"},\n        {\"name\": \"cellSelectionInfo.q-RxLevMin\", \"value\": \"configured for NR Cell 1\"},\n        {\"name\": \"ntn-Config\", \"value\": \"present\"}\n      ]\n    }\n  ]\n}",
+  "stop_reason": "end_turn",
+  "backend_model": "deepseek-v4.1-flash",
+  "steps": [
+    {
+      "st": 1,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "E-UTRA SIB1"
+    },
+    {
+      "st": 2,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "E-UTRA SIB3"
+    },
+    {
+      "st": 3,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "E-UTRA SIB24"
+    },
+    {
+      "st": 4,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "NR SIB1"
+    },
+    {
+      "st": 5,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": ""
+    },
+    {
+      "st": 6,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": ""
+    },
+    {
+      "st": 7,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "E-UTRA SIB24"
+    },
+    {
+      "st": 8,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": ""
+    },
+    {
+      "st": 9,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": ""
+    },
+    {
+      "st": 10,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": ""
+    }
+  ],
+  "messages": [
+    {
+      "message": "E-UTRA SIB1",
+      "ies": [
+        {
+          "name": "cellAccessRelatedInfo.plmn-IdentityList",
+          "value": "E-UTRA Cell 1 PLMN"
+        },
+        {
+          "name": "cellSelectionInfo.q-RxLevMin",
+          "value": "configured for E-UTRA Cell 1"
+        }
+      ]
+    },
+    {
+      "message": "E-UTRA SIB3",
+      "ies": [
+        {
+          "name": "cellReselectionServingFreqInfo.cellReselectionPriority",
+          "value": "serving E-UTRA priority"
+        },
+        {
+          "name": "cellReselectionServingFreqInfo.threshServingLow",
+          "value": "configured"
+        }
+      ]
+    },
+    {
+      "message": "E-UTRA SIB24",
+      "ies": [
+        {
+          "name": "carrierFreqListNR.carrierFreq",
+          "value": "NR Cell 1 ARFCN"
+        },
+        {
+          "name": "carrierFreqListNR.cellReselectionPriority",
+          "value": "phase 1: lower than serving E-UTRA priority; phase 2: higher than serving E-UTRA priority"
+        },
+        {
+          "name": "carrierFreqListNR.threshX-Low",
+          "value": "configured for lower-priority reselection"
+        },
+        {
+          "name": "carrierFreqListNR.threshX-High",
+          "value": "configured for higher-priority reselection"
+        },
+        {
+          "name": "carrierFreqListNR.q-RxLevMin",
+          "value": "configured for NR Cell 1"
+        }
+      ]
+    },
+    {
+      "message": "NR SIB1",
+      "ies": [
+        {
+          "name": "cellAccessRelatedInfo.plmn-IdentityList",
+          "value": "NR Cell 1 PLMN"
+        },
+        {
+          "name": "cellSelectionInfo.q-RxLevMin",
+          "value": "configured for NR Cell 1"
+        },
+        {
+          "name": "ntn-Config",
+          "value": "present"
+        }
+      ]
+    }
+  ],
+  "calls": 1
+}

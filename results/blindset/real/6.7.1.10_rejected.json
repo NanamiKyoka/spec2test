@@ -1,0 +1,218 @@
+{
+  "case_id": "6.7.1.10",
+  "tp": [
+    {
+      "index": 1,
+      "given": "UE supporting skipping TN measurements in NR RRC_IDLE state on a NR NTN Enh Cell and SIB25 contains a list of TN coverage area's information and SIB4 contains list of tn-AreaIdList where TN measurement can be skipped",
+      "when": "a TN NR cell in tn-AreaIdList becomes higher ranked than the serving cell and the UE is in the coverage of that frequency provided via tn-AreaIdlist",
+      "then": "the UE reselects to the TN NR cell",
+      "ok": true
+    }
+  ],
+  "steps": [
+    {
+      "st": 1,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "System Information (SIB25 with coverageAreaInfoList, SIB4 with tn-AreaIdList)",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 2,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 3,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "TN NR Cell 10 configured with NR-4 and tn-AreaId included in tn-AreaIdList",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 4,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "TN NR Cell 10 becomes higher ranked than serving NTN NR Cell 1",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 5,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 6,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "Cell reselection to TN NR Cell 10",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 7,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "RRC_IDLE on TN NR Cell 10",
+      "tp_ref": [
+        1
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "message": "SIB25",
+      "derivation_path": "default_template_fields",
+      "ies": [
+        {
+          "name": "coverageAreaInfoList-r18",
+          "value": "1 entry",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "tn-AreaId-r18",
+          "value": "1",
+          "condition": "within coverageAreaInfoList-r18",
+          "_known": true
+        },
+        {
+          "name": "tn-ReferenceLocation-r18",
+          "value": "latitude 0, longitude 0",
+          "condition": "within coverageAreaInfoList-r18",
+          "_known": true
+        },
+        {
+          "name": "tn-DistanceRadius-r18",
+          "value": "10000",
+          "condition": "within coverageAreaInfoList-r18",
+          "_known": true
+        },
+        {
+          "name": "lateNonCriticalExtension",
+          "value": "Not present",
+          "condition": "",
+          "_known": true
+        }
+      ],
+      "_stop": "end_turn"
+    },
+    {
+      "message": "SIB4",
+      "derivation_path": "default_template_fields",
+      "ies": [
+        {
+          "name": "interFreqCarrierFreqList",
+          "value": "1 entry",
+          "condition": "",
+          "_known": true
+        },
+        {
+          "name": "dl-CarrierFreq",
+          "value": "620000",
+          "condition": "InterFreqCarrierFreqInfo",
+          "_known": true
+        },
+        {
+          "name": "frequencyBandList",
+          "value": "n78",
+          "condition": "InterFreqCarrierFreqInfo",
+          "_known": true
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": "5",
+          "condition": "InterFreqCarrierFreqInfo",
+          "_known": true
+        },
+        {
+          "name": "cellReselectionSubPriority",
+          "value": "0.4",
+          "condition": "InterFreqCarrierFreqInfo",
+          "_known": true
+        },
+        {
+          "name": "q-RxLevMin",
+          "value": "-60",
+          "condition": "InterFreqCarrierFreqInfo",
+          "_known": true
+        },
+        {
+          "name": "q-QualMin",
+          "value": "-18",
+          "condition": "InterFreqCarrierFreqInfo",
+          "_known": true
+        },
+        {
+          "name": "p-Max",
+          "value": "23",
+          "condition": "InterFreqCarrierFreqInfo",
+          "_known": true
+        },
+        {
+          "name": "interFreqNeighCellList",
+          "value": "1 entry",
+          "condition": "InterFreqCarrierFreqInfo",
+          "_known": true
+        },
+        {
+          "name": "physCellId",
+          "value": "10",
+          "condition": "InterFreqNeighCellInfo",
+          "_known": true
+        },
+        {
+          "name": "q-OffsetCell",
+          "value": "0",
+          "condition": "InterFreqNeighCellInfo",
+          "_known": true
+        },
+        {
+          "name": "interFreqCarrierFreqList-v1800",
+          "value": "1 entry",
+          "condition": "contains TN area ID list for TN measurement skipping",
+          "_known": true
+        },
+        {
+          "name": "lateNonCriticalExtension",
+          "value": "Not present",
+          "condition": "",
+          "_known": true
+        }
+      ],
+      "_stop": "end_turn"
+    }
+  ],
+  "status": "generated",
+  "reason": "",
+  "_stage2": {
+    "candidates": [
+      "SIB25",
+      "SIB4"
+    ],
+    "calls": 2
+  },
+  "verdict": "reject",
+  "violations": [
+    {
+      "rule": "R1",
+      "path": "steps[7].message",
+      "detail": "unknown message: RRC_IDLE on TN NR Cell 10"
+    }
+  ]
+}

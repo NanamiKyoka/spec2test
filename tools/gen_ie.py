@@ -116,7 +116,7 @@ def candidate_messages(ctx, symbols_path):
     return out
 
 
-def generate_ie(ctx, steps, message, symbols_path, feedback=None):
+def generate_ie(ctx, steps, message, symbols_path, feedback=None, hint=""):
     msgs, gids, _ = load_symbols(symbols_path)
     skeleton = msgs.get(message, {}).get("fields", [])[:60]
     payload = {
@@ -128,7 +128,7 @@ def generate_ie(ctx, steps, message, symbols_path, feedback=None):
         "validation_errors": feedback or [],
     }
     text, stop = llm.complete([{"role": "user", "content": json.dumps(payload, ensure_ascii=False)}],
-                              system=SYSTEM)
+                              system=SYSTEM + ("\n\n修复时必须参考以下技能说明：\n" + hint if hint else ""))
     ir = llm.extract_json(text)
     if not isinstance(ir, dict):
         return {"message": message, "ies": [], "_error": f"parse_failed(stop={stop})"}
@@ -153,9 +153,14 @@ def _r2_messages(violations):
     return bad
 
 
-def generate_all(ctx, steps, symbols_path, repairs=1):
-    """产品入口：候选为空则弃权；R2 失败时带违规清单重生成一次。"""
+def generate_all(ctx, steps, symbols_path, repairs=1, messages=None):
+    """产品入口：候选为空则弃权；R2 失败时带违规清单重生成。
+
+    messages 为用户勾选的候选子集（None/空 = 全部），用于把生成范围交给人选。
+    """
     cand = candidate_messages(ctx, symbols_path)
+    if messages:
+        cand = [m for m in cand if m in set(messages)]
     if not cand:
         return {"status": "abstained",
                 "reason": "inputs contain no message/SIB names",

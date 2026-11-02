@@ -29,11 +29,11 @@ UI 由 `webapp/`（Next 16 + CopilotKit）在 `:3000` 提供，使用 App Router
 
 | 路由 | 视图 | 内容 |
 |---|---|---|
-| `/` | 对话工作台 | 对话式智能体 + 运行卡 + HITL 审批卡 |
-| `/data` | `DataView` | 指标卡 + 逐例矩阵 + 运行历史 |
-| `/eval` | `EvalView` | 逐例 L3 与基线配对、缺陷检出、官方答案误报 |
+| `/` | 对话工作台 | 左侧仅会话列表；对话式智能体 + 运行卡 + HITL 审批卡 |
+| `/data` | `LabView` | 初始为空；一键跑全部用例后给出判定计数、逐例矩阵与覆盖率 |
+| `/eval` | — | 重定向到 `/data`（评测与数据合并） |
 | `/api` | `ApiView` | 通道、Base URL、模型、温度、Key（可写不可读） |
-| `/about` | `AboutView` | 5 分钟评审路径 + 诚实声明 |
+| `/about` | `AboutView` | 项目说明：问题、智能体结构图、三条可验证点、指标、局限、复现 |
 | `/case/[id]` | `CaseView` | 单例全链条、字段级证据、结果解读 |
 
 旧的 `/#/...` 链接（如 `/#/data`、`/#/case?case=6.7.1.3`）会重定向到新路由。主导航唯一实现在 `webapp/ui/index.tsx` 的 `NAV`；当前项用 `aria-current="page"` 标记。
@@ -48,10 +48,13 @@ UI 由 `webapp/`（Next 16 + CopilotKit）在 `:3000` 提供，使用 App Router
 | GET | `/api/cases` | — | `[{case, title, status, gold_ies}]` |
 | GET | `/api/explain` | — | `{cases:[caseId], source:"live"\|"snapshot"\|"none"}`，已有结果解读的用例索引 |
 | GET | `/api/case/<id>` | — | `{stages:[{stage, status, summary, detail}]}`，stage 顺序固定见上表 |
-| POST | `/api/run` | `{case, instruction?, conversation_id?, hitl?, dry_run?}` | `{job_id}`；`hitl=true` 时候选阶段后暂停等审批。错误码：`400`（缺/未知 case、无凭据）、`404`（会话不存在）、`409`（同会话已有任务）、`429`（全局并发已满） |
-| GET | `/api/job/<id>` | — | `{state:"queued\|running\|awaiting_approval\|done\|failed", stage, log:[{t,msg}], approval?, verdict?:"pass\|reject\|abstained\|canceled", result?}` |
+| POST | `/api/run` | `{case, instruction?, conversation_id?, hitl?, dry_run?, options?}` | `{job_id, options}`；`hitl=true` 时候选阶段后暂停等审批。错误码：`400`（缺/未知 case、无凭据）、`404`（会话不存在）、`409`（同会话已有任务）、`429`（全局并发已满） |
+| GET | `/api/job/<id>` | — | `{state:"queued\|running\|awaiting_approval\|done\|failed", stage, log:[{t,msg}], approval?, options?, verdict?:"pass\|reject\|abstained\|canceled", result?}` |
 | GET | `/api/job/<id>/stream` | — | SSE，`data: <整份 Job JSON>`；任务进入 `done\|failed` 后关闭；断开时前端回退轮询 |
-| POST | `/api/job/<id>/approve` | `{decision:"approve"\|"reject"}` | `{ok}`；仅 `awaiting_approval` 可审批，否则 `409`；`approve` → `running`，`reject`/超时 → `state=done`、`verdict=canceled`，**不调用模型** |
+| POST | `/api/job/<id>/approve` | `{decision:"approve"\|"reject", options?}` | `{ok, options}`；仅 `awaiting_approval` 可审批，否则 `409`；`approve` → `running`，`reject`/超时 → `state=done`、`verdict=canceled`，**不调用模型**。`options` 随审批落盘，覆盖本次运行参数 |
+| GET | `/api/tools` | — | `{tools:[{name, model:bool, eval_only:bool}]}`，阶段工具清单 |
+| POST | `/api/tools/<name>` | `{args:{…}}` | `{ok, data, trace}`；工具名未知 `404`，参数错误 `400`（`error` 带原因），执行异常 `500`。调用模型的工具在无可用凭据时返回 `400 no_credential` |
+| GET | `/api/trace/tools` | `?limit=&job=` | `{rows:[{tool, at, ms, job?, case?, …}]}`；给 `job` 时只返回该任务的调用（决策轨迹） |
 | POST | `/api/chat` | `{message, conversation_id?}` | `{action:"run"\|"reply", case?, say, model?, source:"llm"\|"fallback"\|"timeout"\|"error"}`；意图识别失败不抛 5xx |
 | GET | `/api/metrics` | — | `{runs_total, by_state, by_verdict, seconds_p50, seconds_p95, runs_last_24h, recent_failures}` |
 
@@ -59,7 +62,19 @@ UI 由 `webapp/`（Next 16 + CopilotKit）在 `:3000` 提供，使用 App Router
 
 **轮询语义**：无 SSE 或 SSE 断开时，前端轮询 `GET /api/job/<id>`——首次间隔 1s，按 1.5× 逐步退避，上限 3s；终态 `done\|failed` 停止。
 
-**状态语义**：`stage ∈ ingest|context|candidates|generate|validate|score`；弃权时后三阶段为 `skipped`，`state=done`（**不是 failed**）。
+**状态语义**：`stage ∈ ingest|context|candidates|generate|repair|validate|score`；弃权时后三阶段为 `skipped`，`state=done`（**不是 failed**）。
+`repair` 仅在 `repairs>0` 且发现违规时出现，每轮记录 `{round, before, after, actions}`。
+
+**运行参数（`options`）**：`{messages: string[], mode: "steps"|"full"|"repair_only", repairs: 0–5, strictness: "strict"|"skip_lte_r2"|"r1_only", engine: "pipeline"|"agent", skills: string[], mcpTools: string[]|null}`。
+非法值回落到默认（`full` / `1` / `strict`）而不报错；`messages` 为空表示全部候选；`skills` 中不存在的名字会被丢弃；
+`mcpTools` 为 `null` 表示全部只读工具可用，为数组时只启用列出的工具，前端对未启用的工具直接拒绝调用。
+`engine=agent` 时改由 `scripts/orchestrate.py` 执行（模型自选工具顺序，预算 8 次工具调用），不做 HITL；
+`dry_run` 强制回落到 `pipeline`。参数在输入框「+」菜单与审批卡里设置，前端直传，**不经过模型**；审批文件 `data/jobs/<job>.approval` 记录 `{decision, options}`，
+`run_one` 以审批中的参数覆盖命令行默认值。`mode=steps` 时无字段可召回，L3 记为空而非 0；
+`repair_only` 只重新校验并定向重修已有产物，不重新生成步骤。选中的技能正文会拼进修复提示，未选则不拼。
+
+**阶段工具**：`prepare_case`、`list_candidates`、`validate_intent`、`export_intent` 为确定性工具；
+`generate_steps`、`generate_ies`、`repair_intent` 调用模型；`compare_gold` 标记 `eval_only`，只用于评测，不暴露给编排模型。
 
 ## 设置与密钥规则（硬性）
 1. 配置存 `data/settings.json`（已在 `.gitignore` 内），**不入库**；环境变量优先级低于该文件之外的显式配置时以文件为准。

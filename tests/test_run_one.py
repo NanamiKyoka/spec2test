@@ -60,7 +60,7 @@ def test_generate_parse_failure_is_fatal(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(run_one, "load", fake_load)
     monkeypatch.setattr(gen_ie, "candidate_messages", lambda ctx, p: ["SIB1"])
     monkeypatch.setattr(gen_steps, "generate_steps",
-                        lambda ctx: ([], {"error": "parse_failed(stop=end_turn,len=3)"}))
+                        lambda ctx, repairs=1: ([], {"error": "parse_failed(stop=end_turn,len=3)"}))
     monkeypatch.setattr(sys, "argv", ["run_one.py", "6.7.1.3"])
 
     assert run_one.main() == 1
@@ -70,3 +70,29 @@ def test_generate_parse_failure_is_fatal(tmp_path, monkeypatch, capsys):
     ev = _events(capsys)
     assert any(e["stage"] == "generate" and e["status"] == "failed" for e in ev)
     assert any(e["stage"] == "validate" and e["status"] == "skipped" for e in ev)
+
+
+def test_dry_run_never_repairs(tmp_path, monkeypatch, capsys):
+    """dry-run 不能触发修复（否则桩生成会意外调到模型）。"""
+    monkeypatch.setattr(run_one, "OUT", str(tmp_path / "out"))
+    monkeypatch.setattr(run_one, "OUT_REJECTED", str(tmp_path / "rej"))
+    monkeypatch.setattr(run_one, "GOLD_IE", str(tmp_path / "gold"))
+
+    def fake_load(path):
+        if "benchmark" in path:
+            return {"title": "t", "inputs": {"test_purpose": "p"}, "answers": {}}
+        return {"case_id": "6.7.1.3", "test_purpose": "p",
+                "conformance_requirements": "", "pre_test_conditions": ""}
+
+    def forbidden(*a, **k):
+        raise AssertionError("dry-run 不应调用修复")
+
+    monkeypatch.setattr(run_one, "load", fake_load)
+    monkeypatch.setattr(gen_ie, "candidate_messages", lambda ctx, p: ["SIB1"])
+    monkeypatch.setattr(run_one.stage_tools, "repair_step", forbidden)
+    monkeypatch.setattr(sys, "argv", ["run_one.py", "6.7.1.3", "--dry-run", "--repairs", "3"])
+
+    run_one.main()
+    ev = _events(capsys)
+    assert not any(e["stage"] == "repair" for e in ev)
+    assert any(e["stage"] == "generate" and "dry-run" in e["summary"] for e in ev)

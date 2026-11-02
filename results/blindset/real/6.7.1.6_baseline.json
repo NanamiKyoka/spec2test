@@ -1,0 +1,123 @@
+{
+  "case_id": "6.7.1.6",
+  "text": "{\"steps\":[{\"st\":1,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB1\"},{\"st\":2,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB2\"},{\"st\":3,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB4\"},{\"st\":4,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB19\"},{\"st\":5,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"\"},{\"st\":6,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"\"},{\"st\":7,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"\"},{\"st\":8,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"\"}],\"messages\":[{\"message\":\"SIB1\",\"ies\":[{\"name\":\"cellAccessRelatedInfo\",\"value\":\"present\"}]},{\"message\":\"SIB2\",\"ies\":[{\"name\":\"intraFreqCellReselectionInfo.s-IntraSearchP\",\"value\":\"10\"},{\"name\":\"intraFreqCellReselectionInfo.s-IntraSearchQ\",\"value\":\"0\"},{\"name\":\"intraFreqCellReselectionInfo.s-NonIntraSearchP\",\"value\":\"12\"},{\"name\":\"intraFreqCellReselectionInfo.s-NonIntraSearchQ\",\"value\":\"0\"},{\"name\":\"intraFreqCellReselectionInfo.cellReselectionPriority\",\"value\":\"7\"}]},{\"message\":\"SIB4\",\"ies\":[{\"name\":\"interFreqCarrierFreqList[0].cellReselectionPriority\",\"value\":\"3\"},{\"name\":\"interFreqCarrierFreqList[0].threshX-HighP\",\"value\":\"5\"},{\"name\":\"interFreqCarrierFreqList[0].threshX-LowP\",\"value\":\"5\"}]},{\"message\":\"SIB19\",\"ies\":[{\"name\":\"ntn-Config.t-Service\",\"value\":\"present\"},{\"name\":\"ntn-Config.cellReferenceLocation\",\"value\":\"present\"}]}]}",
+  "stop_reason": "end_turn",
+  "backend_model": "deepseek-v4.1-flash",
+  "steps": [
+    {
+      "st": 1,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1"
+    },
+    {
+      "st": 2,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB2"
+    },
+    {
+      "st": 3,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB4"
+    },
+    {
+      "st": 4,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB19"
+    },
+    {
+      "st": 5,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": ""
+    },
+    {
+      "st": 6,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": ""
+    },
+    {
+      "st": 7,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": ""
+    },
+    {
+      "st": 8,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": ""
+    }
+  ],
+  "messages": [
+    {
+      "message": "SIB1",
+      "ies": [
+        {
+          "name": "cellAccessRelatedInfo",
+          "value": "present"
+        }
+      ]
+    },
+    {
+      "message": "SIB2",
+      "ies": [
+        {
+          "name": "intraFreqCellReselectionInfo.s-IntraSearchP",
+          "value": "10"
+        },
+        {
+          "name": "intraFreqCellReselectionInfo.s-IntraSearchQ",
+          "value": "0"
+        },
+        {
+          "name": "intraFreqCellReselectionInfo.s-NonIntraSearchP",
+          "value": "12"
+        },
+        {
+          "name": "intraFreqCellReselectionInfo.s-NonIntraSearchQ",
+          "value": "0"
+        },
+        {
+          "name": "intraFreqCellReselectionInfo.cellReselectionPriority",
+          "value": "7"
+        }
+      ]
+    },
+    {
+      "message": "SIB4",
+      "ies": [
+        {
+          "name": "interFreqCarrierFreqList[0].cellReselectionPriority",
+          "value": "3"
+        },
+        {
+          "name": "interFreqCarrierFreqList[0].threshX-HighP",
+          "value": "5"
+        },
+        {
+          "name": "interFreqCarrierFreqList[0].threshX-LowP",
+          "value": "5"
+        }
+      ]
+    },
+    {
+      "message": "SIB19",
+      "ies": [
+        {
+          "name": "ntn-Config.t-Service",
+          "value": "present"
+        },
+        {
+          "name": "ntn-Config.cellReferenceLocation",
+          "value": "present"
+        }
+      ]
+    }
+  ],
+  "calls": 1
+}

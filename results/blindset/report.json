@@ -1,0 +1,560 @@
+{
+  "protocol": {
+    "purpose": "用真实模型输出（非注入模板）标注错误，测校验器的真实检出/漏检。",
+    "sources": [
+      "data/out_rejected/6.7.1.10.json（产品链路真实生成，被拒收）",
+      "data/out_baseline_struct/6.7.1.10.json（同模型、无符号表/候选/校验反馈的基线）",
+      "data/out_baseline_struct/6.7.1.12.json",
+      "data/out_baseline_struct/6.7.1.2.json",
+      "data/out_baseline_struct/6.7.1.6.json",
+      "data/out/6.7.1.5.json（产品链路真实生成，旧校验器判为通过）"
+    ],
+    "labeling": "标注者先对照 data/gold_ir 与 TS 38.331 ASN.1 定义逐条判定，再运行校验器；标注文件在运行前固定，不按校验器输出回改。",
+    "in_scope": "错误类型属于校验器声明范围：R1 消息存在性、R2 字段属于该消息、R3 TP 覆盖。",
+    "out_of_scope": "校验器未声明检查：方向取值、步骤顺序、消息完整性。",
+    "exclusions": [
+      "仅点号路径写法差异（如 cellSelectionInfo.q-RxLevMin）不计为错误；合法嵌套路径按叶子名判定。",
+      "仅缺 release 后缀且字段本身语义正确的写法，不作为核心 15 条；单独列在 edge_cases。"
+    ],
+    "gold_basis": "data/gold_ir/ 为官方答案抽取；字段存在性以 data/symbols/rrc_symbols.json（TS 38.331 v19.4.0）与人工复核补充为准。"
+  },
+  "core": [
+    {
+      "id": "B01",
+      "case": "6.7.1.10",
+      "file": "6.7.1.10_rejected.json",
+      "location": "steps[7].message",
+      "error": "把状态描述 RRC_IDLE on TN NR Cell 10 当作 RRC 消息名",
+      "basis": "message 应为 ASN.1 消息名；gold 该步为检查项，无消息",
+      "in_scope": true,
+      "expect_rule": "R1",
+      "detect": {
+        "rule": "R1",
+        "path": "steps[7].message"
+      },
+      "group": "core",
+      "current_detected": true,
+      "legacy_detected": true,
+      "current_violation": {
+        "rule": "R1",
+        "path": "steps[7].message",
+        "detail": "unknown message: RRC_IDLE on TN NR Cell 10"
+      },
+      "legacy_violation": {
+        "rule": "R1",
+        "path": "steps[7].message",
+        "detail": "unknown message: RRC_IDLE on TN NR Cell 10"
+      }
+    },
+    {
+      "id": "B02",
+      "case": "6.7.1.10",
+      "file": "6.7.1.10_rejected.json",
+      "location": "steps[1].message",
+      "error": "把 System Information (SIB25..., SIB4...) 这段说明文字当作消息名",
+      "basis": "消息名应为 SIB25/SIB4 或 Paging；gold 该步为 Paging 前置的系统信息变更",
+      "in_scope": true,
+      "expect_rule": "R1",
+      "detect": {
+        "rule": "R1",
+        "path": "steps[1].message"
+      },
+      "group": "core",
+      "current_detected": true,
+      "legacy_detected": false,
+      "current_violation": {
+        "rule": "R1",
+        "path": "steps[1].message",
+        "detail": "unknown message: System Information"
+      },
+      "legacy_violation": null
+    },
+    {
+      "id": "B03",
+      "case": "6.7.1.10",
+      "file": "6.7.1.10_rejected.json",
+      "location": "steps[3].message",
+      "error": "把配置动作 TN NR Cell 10 configured with... 当作消息名",
+      "basis": "message 应为消息名或空；该步是配置动作，不是信令消息",
+      "in_scope": true,
+      "expect_rule": "R1",
+      "detect": {
+        "rule": "R1",
+        "path": "steps[3].message"
+      },
+      "group": "core",
+      "current_detected": true,
+      "legacy_detected": false,
+      "current_violation": {
+        "rule": "R1",
+        "path": "steps[3].message",
+        "detail": "unknown message: TN NR Cell 10 configured with NR-4/tn-AreaId included in tn-AreaIdList"
+      },
+      "legacy_violation": null
+    },
+    {
+      "id": "B04",
+      "case": "6.7.1.10",
+      "file": "6.7.1.10_rejected.json",
+      "location": "steps[4].message",
+      "error": "把排名变化描述 TN NR Cell 10 becomes higher ranked... 当作消息名",
+      "basis": "message 应为消息名或空；该步是无线条件变化，不是信令消息",
+      "in_scope": true,
+      "expect_rule": "R1",
+      "detect": {
+        "rule": "R1",
+        "path": "steps[4].message"
+      },
+      "group": "core",
+      "current_detected": true,
+      "legacy_detected": false,
+      "current_violation": {
+        "rule": "R1",
+        "path": "steps[4].message",
+        "detail": "unknown message: TN NR Cell 10 becomes higher ranked than serving NTN NR Cell 1"
+      },
+      "legacy_violation": null
+    },
+    {
+      "id": "B05",
+      "case": "6.7.1.10",
+      "file": "6.7.1.10_rejected.json",
+      "location": "steps[6].message",
+      "error": "把重选动作 Cell reselection to TN NR Cell 10 当作消息名",
+      "basis": "message 应为消息名或空；重选不是 RRC 消息",
+      "in_scope": true,
+      "expect_rule": "R1",
+      "detect": {
+        "rule": "R1",
+        "path": "steps[6].message"
+      },
+      "group": "core",
+      "current_detected": true,
+      "legacy_detected": false,
+      "current_violation": {
+        "rule": "R1",
+        "path": "steps[6].message",
+        "detail": "unknown message: Cell reselection to TN NR Cell 10"
+      },
+      "legacy_violation": null
+    },
+    {
+      "id": "B06",
+      "case": "6.7.1.12",
+      "file": "6.7.1.12_baseline.json",
+      "location": "steps[1].message",
+      "error": "E-UTRA SIB1 不是 ASN.1 消息名（应为 SystemInformationBlockType1 或 SI 承载）",
+      "basis": "消息名必须是 TS 36.331/38.331 定义名；E-UTRA SIB1 是口语标签",
+      "in_scope": true,
+      "expect_rule": "R1",
+      "detect": {
+        "rule": "R1",
+        "path": "steps[1].message"
+      },
+      "group": "core",
+      "current_detected": true,
+      "legacy_detected": false,
+      "current_violation": {
+        "rule": "R1",
+        "path": "steps[1].message",
+        "detail": "unknown message: E-UTRA SIB1"
+      },
+      "legacy_violation": null
+    },
+    {
+      "id": "B07",
+      "case": "6.7.1.12",
+      "file": "6.7.1.12_baseline.json",
+      "location": "steps[2].message",
+      "error": "E-UTRA SIB3 不是 ASN.1 消息名",
+      "basis": "消息名必须是 TS 36.331/38.331 定义名；E-UTRA SIB3 是口语标签",
+      "in_scope": true,
+      "expect_rule": "R1",
+      "detect": {
+        "rule": "R1",
+        "path": "steps[2].message"
+      },
+      "group": "core",
+      "current_detected": true,
+      "legacy_detected": false,
+      "current_violation": {
+        "rule": "R1",
+        "path": "steps[2].message",
+        "detail": "unknown message: E-UTRA SIB3"
+      },
+      "legacy_violation": null
+    },
+    {
+      "id": "B08",
+      "case": "6.7.1.12",
+      "file": "6.7.1.12_baseline.json",
+      "location": "steps[3].message",
+      "error": "E-UTRA SIB24 不是 ASN.1 消息名",
+      "basis": "消息名必须是 TS 36.331/38.331 定义名；E-UTRA SIB24 是口语标签",
+      "in_scope": true,
+      "expect_rule": "R1",
+      "detect": {
+        "rule": "R1",
+        "path": "steps[3].message"
+      },
+      "group": "core",
+      "current_detected": true,
+      "legacy_detected": false,
+      "current_violation": {
+        "rule": "R1",
+        "path": "steps[3].message",
+        "detail": "unknown message: E-UTRA SIB24"
+      },
+      "legacy_violation": null
+    },
+    {
+      "id": "B09",
+      "case": "6.7.1.12",
+      "file": "6.7.1.12_baseline.json",
+      "location": "steps[4].message",
+      "error": "NR SIB1 不是 ASN.1 消息名（应为 SIB1 或 SystemInformationBlockType1）",
+      "basis": "消息名必须是 ASN.1 定义名；NR SIB1 是口语标签",
+      "in_scope": true,
+      "expect_rule": "R1",
+      "detect": {
+        "rule": "R1",
+        "path": "steps[4].message"
+      },
+      "group": "core",
+      "current_detected": true,
+      "legacy_detected": false,
+      "current_violation": {
+        "rule": "R1",
+        "path": "steps[4].message",
+        "detail": "unknown message: NR SIB1"
+      },
+      "legacy_violation": null
+    },
+    {
+      "id": "B10",
+      "case": "6.7.1.2",
+      "file": "6.7.1.2_baseline.json",
+      "location": "steps[3].message",
+      "error": "把 IE 字段名 trackingAreaList 当作消息名",
+      "basis": "message 应为消息名；trackingAreaList 是 SIB1 内的字段",
+      "in_scope": true,
+      "expect_rule": "R1",
+      "detect": {
+        "rule": "R1",
+        "path": "steps[3].message"
+      },
+      "group": "core",
+      "current_detected": true,
+      "legacy_detected": false,
+      "current_violation": {
+        "rule": "R1",
+        "path": "steps[3].message",
+        "detail": "unknown message: trackingAreaList"
+      },
+      "legacy_violation": null
+    },
+    {
+      "id": "B11",
+      "case": "6.7.1.10",
+      "file": "6.7.1.10_baseline.json",
+      "location": "messages[SIB4].ies[1].name",
+      "error": "freqBandIndicatorNR 属于 SIB1 的 frequencyBandList，不属于 SIB4",
+      "basis": "TS 38.331：SIB4 用 frequencyBandList；freqBandIndicatorNR 在 SIB1",
+      "in_scope": true,
+      "expect_rule": "R2",
+      "detect": {
+        "rule": "R2",
+        "path": "messages[SIB4].ies[1].name"
+      },
+      "group": "core",
+      "current_detected": true,
+      "legacy_detected": false,
+      "current_violation": {
+        "rule": "R2",
+        "path": "messages[SIB4].ies[1].name",
+        "detail": "field 'freqBandIndicatorNR' is defined in ASN.1 but not in SIB4"
+      },
+      "legacy_violation": null
+    },
+    {
+      "id": "B12",
+      "case": "6.7.1.10",
+      "file": "6.7.1.10_baseline.json",
+      "location": "messages[SIB4].ies[3].name",
+      "error": "tn-AreaIdList 不是 SIB4 的 ASN.1 字段名（应为 tn-AreaIdList-r18）",
+      "basis": "TS 38.331：SIB4 字段为 tn-AreaIdList-r18",
+      "in_scope": true,
+      "expect_rule": "R2",
+      "detect": {
+        "rule": "R2",
+        "path": "messages[SIB4].ies[3].name"
+      },
+      "group": "core",
+      "current_detected": true,
+      "legacy_detected": false,
+      "current_violation": {
+        "rule": "R2",
+        "path": "messages[SIB4].ies[3].name",
+        "detail": "field 'tn-AreaIdList' is defined in ASN.1 but not in SIB4"
+      },
+      "legacy_violation": null
+    },
+    {
+      "id": "B13",
+      "case": "6.7.1.10",
+      "file": "6.7.1.10_baseline.json",
+      "location": "messages[SIB25].ies[0].name",
+      "error": "coverageAreaInfoList 不是 SIB25 的 ASN.1 字段名（应为 coverageAreaInfoList-r18）",
+      "basis": "TS 38.331：SIB25 字段为 coverageAreaInfoList-r18",
+      "in_scope": true,
+      "expect_rule": "R2",
+      "detect": {
+        "rule": "R2",
+        "path": "messages[SIB25].ies[0].name"
+      },
+      "group": "core",
+      "current_detected": true,
+      "legacy_detected": false,
+      "current_violation": {
+        "rule": "R2",
+        "path": "messages[SIB25].ies[0].name",
+        "detail": "field 'coverageAreaInfoList' is defined in ASN.1 but not in SIB25"
+      },
+      "legacy_violation": null
+    },
+    {
+      "id": "B14",
+      "case": "6.7.1.10",
+      "file": "6.7.1.10_baseline.json",
+      "location": "messages[SIB25].ies[1].name",
+      "error": "tn-DistanceRadius 不是 SIB25 的 ASN.1 字段名（应为 tn-DistanceRadius-r18）",
+      "basis": "TS 38.331：SIB25 字段为 tn-DistanceRadius-r18",
+      "in_scope": true,
+      "expect_rule": "R2",
+      "detect": {
+        "rule": "R2",
+        "path": "messages[SIB25].ies[1].name"
+      },
+      "group": "core",
+      "current_detected": true,
+      "legacy_detected": false,
+      "current_violation": {
+        "rule": "R2",
+        "path": "messages[SIB25].ies[1].name",
+        "detail": "field 'tn-DistanceRadius' is defined in ASN.1 but not in SIB25"
+      },
+      "legacy_violation": null
+    },
+    {
+      "id": "B15",
+      "case": "6.7.1.6",
+      "file": "6.7.1.6_baseline.json",
+      "location": "messages[SIB19].ies[1].name",
+      "error": "cellReferenceLocation 不是 SIB19 的字段（应为 referenceLocation-r17）",
+      "basis": "TS 38.331：SIB19/NTN-Config 使用 referenceLocation-r17",
+      "in_scope": true,
+      "expect_rule": "R2",
+      "detect": {
+        "rule": "R2",
+        "path": "messages[SIB19].ies[1].name"
+      },
+      "group": "core",
+      "current_detected": true,
+      "legacy_detected": true,
+      "current_violation": {
+        "rule": "R2",
+        "path": "messages[SIB19].ies[1].name",
+        "detail": "unknown field 'ntn-Config.cellReferenceLocation' for SIB19"
+      },
+      "legacy_violation": {
+        "rule": "R2",
+        "path": "messages[SIB19].ies[1].name",
+        "detail": "unknown field 'ntn-Config.cellReferenceLocation' for SIB19"
+      }
+    },
+    {
+      "id": "B16",
+      "case": "6.7.1.5",
+      "file": "6.7.1.5_product.json",
+      "location": "messages[SIB2].ies[4].name",
+      "error": "distanceThresh-r17 属于 SIB19，不属于 SIB2",
+      "basis": "TS 38.331：distanceThresh-r17 在 SIB19 的 NTN-Config 中；SIB2 无此字段",
+      "in_scope": true,
+      "expect_rule": "R2",
+      "detect": {
+        "rule": "R2",
+        "path": "messages[SIB2].ies[4].name"
+      },
+      "group": "core",
+      "current_detected": true,
+      "legacy_detected": false,
+      "current_violation": {
+        "rule": "R2",
+        "path": "messages[SIB2].ies[4].name",
+        "detail": "field 'distanceThresh-r17' is defined in ASN.1 but not in SIB2"
+      },
+      "legacy_violation": null
+    },
+    {
+      "id": "B17",
+      "case": "6.7.1.10",
+      "file": "6.7.1.10_baseline.json",
+      "location": "steps[3..6].direction",
+      "error": "direction 取值 N/A，IR 只允许 S->U / U->S / none",
+      "basis": "data/IR.md 与 gold：非信令步骤用 none；N/A 不在枚举内",
+      "in_scope": false,
+      "expect_rule": null,
+      "detect": null,
+      "group": "core",
+      "current_detected": false,
+      "legacy_detected": false,
+      "current_violation": null,
+      "legacy_violation": null
+    },
+    {
+      "id": "B18",
+      "case": "6.7.1.10",
+      "file": "6.7.1.10_baseline.json",
+      "location": "steps[7].message",
+      "error": "Paging 出现在 SIB25/SIB4 配置之后；gold 在 step 2 先发 Paging 通知系统信息变更",
+      "basis": "gold_ir/6.7.1.10.json：step 2 为 Paging，SIB25 随之更新",
+      "in_scope": false,
+      "expect_rule": null,
+      "detect": null,
+      "group": "core",
+      "current_detected": false,
+      "legacy_detected": false,
+      "current_violation": null,
+      "legacy_violation": null
+    },
+    {
+      "id": "B19",
+      "case": "6.7.1.5",
+      "file": "6.7.1.5_product.json",
+      "location": "messages（缺失）",
+      "error": "缺少 SIB4（gold 含 dl-CarrierFreq 与 cellReselectionPriority）",
+      "basis": "gold_ir/6.7.1.5.json 的 messages 含 SIB4",
+      "in_scope": false,
+      "expect_rule": null,
+      "detect": null,
+      "group": "core",
+      "current_detected": false,
+      "legacy_detected": false,
+      "current_violation": null,
+      "legacy_violation": null
+    }
+  ],
+  "edge_cases": [
+    {
+      "id": "E01",
+      "case": "6.7.1.10",
+      "file": "6.7.1.10_baseline.json",
+      "location": "messages[Paging].ies[0].name",
+      "error": "ue-Identity 只能出现在 PagingRecord 内，不能作为 Paging 顶层 IE",
+      "basis": "TS 38.331：Paging -> pagingRecordList -> PagingRecord -> ue-Identity",
+      "in_scope": true,
+      "expect_rule": "R2",
+      "detect": {
+        "rule": "R2",
+        "path": "messages[Paging].ies[0].name"
+      },
+      "note": "符号表把嵌套字段拍平，当前 R2 无法区分顶层/嵌套；记为已知漏检。",
+      "group": "edge_cases",
+      "current_detected": false,
+      "legacy_detected": false,
+      "current_violation": null,
+      "legacy_violation": null
+    },
+    {
+      "id": "E02",
+      "case": "6.7.1.12",
+      "file": "6.7.1.12_baseline.json",
+      "location": "messages[NR SIB1].ies[2].name",
+      "error": "ntn-Config 属于 SIB19，不属于 SIB1",
+      "basis": "TS 38.331：SIB1 无 ntn-Config；NTN-Config 在 SIB19",
+      "in_scope": true,
+      "expect_rule": "R2",
+      "detect": {
+        "rule": "R1",
+        "path": "steps[4].message"
+      },
+      "note": "消息名 NR SIB1 本身被 R1 拒收；字段级 R2 未运行。整条输出被拒，但字段错位未被单独指出。",
+      "group": "edge_cases",
+      "current_detected": true,
+      "legacy_detected": false,
+      "current_violation": {
+        "rule": "R1",
+        "path": "steps[4].message",
+        "detail": "unknown message: NR SIB1"
+      },
+      "legacy_violation": null
+    }
+  ],
+  "summary": {
+    "current": {
+      "total": 19,
+      "detected": 16,
+      "missed": 3,
+      "rate": 0.842,
+      "in_scope": {
+        "total": 16,
+        "detected": 16,
+        "missed": 0
+      },
+      "out_of_scope": {
+        "total": 3,
+        "detected": 0,
+        "missed": 3
+      }
+    },
+    "legacy": {
+      "total": 19,
+      "detected": 2,
+      "missed": 17,
+      "rate": 0.105,
+      "in_scope": {
+        "total": 16,
+        "detected": 2,
+        "missed": 14
+      },
+      "out_of_scope": {
+        "total": 3,
+        "detected": 0,
+        "missed": 3
+      }
+    },
+    "edge_current": {
+      "total": 2,
+      "detected": 1,
+      "missed": 1,
+      "rate": 0.5,
+      "in_scope": {
+        "total": 2,
+        "detected": 1,
+        "missed": 1
+      },
+      "out_of_scope": {
+        "total": 0,
+        "detected": 0,
+        "missed": 0
+      }
+    },
+    "edge_legacy": {
+      "total": 2,
+      "detected": 0,
+      "missed": 2,
+      "rate": 0.0,
+      "in_scope": {
+        "total": 2,
+        "detected": 0,
+        "missed": 2
+      },
+      "out_of_scope": {
+        "total": 0,
+        "detected": 0,
+        "missed": 0
+      }
+    }
+  },
+  "source": "真实模型输出；标注见 results/blindset/annotations.json"
+}

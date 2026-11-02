@@ -1,0 +1,130 @@
+{
+  "case_id": "6.7.1.10",
+  "text": "{\"steps\":[{\"st\":1,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB1\"},{\"st\":2,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB4\"},{\"st\":3,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"SIB25\"},{\"st\":4,\"actor\":\"SS\",\"direction\":\"N/A\",\"message\":\"\"},{\"st\":5,\"actor\":\"UE\",\"direction\":\"N/A\",\"message\":\"\"},{\"st\":6,\"actor\":\"SS\",\"direction\":\"N/A\",\"message\":\"\"},{\"st\":7,\"actor\":\"UE\",\"direction\":\"N/A\",\"message\":\"\"},{\"st\":8,\"actor\":\"SS\",\"direction\":\"S->U\",\"message\":\"Paging\"},{\"st\":9,\"actor\":\"UE\",\"direction\":\"U->S\",\"message\":\"RRCSetupRequest\"}],\"messages\":[{\"message\":\"SIB1\",\"ies\":[{\"name\":\"cellAccessRelatedInfo\",\"value\":\"NTN NR Cell 1\"},{\"name\":\"cellSelectionInfo\",\"value\":\"configured for NTN NR Cell 1\"}]},{\"message\":\"SIB4\",\"ies\":[{\"name\":\"interFreqCarrierFreqList\",\"value\":\"includes TN NR Cell 10 frequency\"},{\"name\":\"freqBandIndicatorNR\",\"value\":\"TN NR Cell 10 band\"},{\"name\":\"dl-CarrierFreq\",\"value\":\"TN NR Cell 10 ARFCN\"},{\"name\":\"tn-AreaIdList\",\"value\":\"includes TN area identity of TN NR Cell 10\"}]},{\"message\":\"SIB25\",\"ies\":[{\"name\":\"coverageAreaInfoList\",\"value\":\"includes TN coverage area for TN NR Cell 10 frequency\"},{\"name\":\"tn-DistanceRadius\",\"value\":\"configured so UE location is within TN coverage\"}]},{\"message\":\"Paging\",\"ies\":[{\"name\":\"ue-Identity\",\"value\":\"UE identity for verification on TN NR Cell 10\"}]},{\"message\":\"RRCSetupRequest\",\"ies\":[{\"name\":\"establishmentCause\",\"value\":\"mo-Signalling\"}]}]}",
+  "stop_reason": "end_turn",
+  "backend_model": "deepseek-v4.1-flash",
+  "steps": [
+    {
+      "st": 1,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB1"
+    },
+    {
+      "st": 2,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB4"
+    },
+    {
+      "st": 3,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SIB25"
+    },
+    {
+      "st": 4,
+      "actor": "SS",
+      "direction": "N/A",
+      "message": ""
+    },
+    {
+      "st": 5,
+      "actor": "UE",
+      "direction": "N/A",
+      "message": ""
+    },
+    {
+      "st": 6,
+      "actor": "SS",
+      "direction": "N/A",
+      "message": ""
+    },
+    {
+      "st": 7,
+      "actor": "UE",
+      "direction": "N/A",
+      "message": ""
+    },
+    {
+      "st": 8,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "Paging"
+    },
+    {
+      "st": 9,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "RRCSetupRequest"
+    }
+  ],
+  "messages": [
+    {
+      "message": "SIB1",
+      "ies": [
+        {
+          "name": "cellAccessRelatedInfo",
+          "value": "NTN NR Cell 1"
+        },
+        {
+          "name": "cellSelectionInfo",
+          "value": "configured for NTN NR Cell 1"
+        }
+      ]
+    },
+    {
+      "message": "SIB4",
+      "ies": [
+        {
+          "name": "interFreqCarrierFreqList",
+          "value": "includes TN NR Cell 10 frequency"
+        },
+        {
+          "name": "freqBandIndicatorNR",
+          "value": "TN NR Cell 10 band"
+        },
+        {
+          "name": "dl-CarrierFreq",
+          "value": "TN NR Cell 10 ARFCN"
+        },
+        {
+          "name": "tn-AreaIdList",
+          "value": "includes TN area identity of TN NR Cell 10"
+        }
+      ]
+    },
+    {
+      "message": "SIB25",
+      "ies": [
+        {
+          "name": "coverageAreaInfoList",
+          "value": "includes TN coverage area for TN NR Cell 10 frequency"
+        },
+        {
+          "name": "tn-DistanceRadius",
+          "value": "configured so UE location is within TN coverage"
+        }
+      ]
+    },
+    {
+      "message": "Paging",
+      "ies": [
+        {
+          "name": "ue-Identity",
+          "value": "UE identity for verification on TN NR Cell 10"
+        }
+      ]
+    },
+    {
+      "message": "RRCSetupRequest",
+      "ies": [
+        {
+          "name": "establishmentCause",
+          "value": "mo-Signalling"
+        }
+      ]
+    }
+  ],
+  "calls": 1
+}

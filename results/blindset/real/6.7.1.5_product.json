@@ -1,0 +1,208 @@
+{
+  "case_id": "6.7.1.5",
+  "steps": [
+    {
+      "st": 1,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SystemInformation",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 2,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "RRCRelease",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 3,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 4,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 5,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 6,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "",
+      "tp_ref": [
+        1
+      ]
+    },
+    {
+      "st": 7,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "SystemInformation",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 8,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 9,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 10,
+      "actor": "UE",
+      "direction": "U->S",
+      "message": "",
+      "tp_ref": [
+        2
+      ]
+    },
+    {
+      "st": 11,
+      "actor": "SS",
+      "direction": "S->U",
+      "message": "",
+      "tp_ref": [
+        2
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "message": "SIB19",
+      "derivation_path": "SIB19 ASN.1 default template fields -> ntn-Config-r17 (referenceLocation-r17, distanceThresh-r17)",
+      "ies": [
+        {
+          "name": "ntn-Config-r17",
+          "value": "Present",
+          "condition": "Serving cell provides NR NTN access and location-based measurements are configured",
+          "_known": true
+        },
+        {
+          "name": "referenceLocation-r17",
+          "value": "latitude: 0, longitude: 0, altitude: 0",
+          "condition": "Included in ntn-Config-r17; UE distance to serving cell referenceLocation is evaluated against distanceThresh-r17",
+          "_known": true
+        },
+        {
+          "name": "distanceThresh-r17",
+          "value": "1000",
+          "condition": "Included in ntn-Config-r17; distance between UE and referenceLocation-r17 is larger than distanceThresh-r17",
+          "_known": true
+        },
+        {
+          "name": "t-Service-r17",
+          "value": "3600",
+          "condition": "Included in ntn-Config-r17 if service time validity is provided",
+          "_known": true
+        },
+        {
+          "name": "lateNonCriticalExtension",
+          "value": "Not present",
+          "condition": "",
+          "_known": true
+        }
+      ],
+      "_stop": "end_turn"
+    },
+    {
+      "message": "SIB2",
+      "derivation_path": "38.331 SIB2 / SIB2-v1700-IEs default template",
+      "ies": [
+        {
+          "name": "q-RxLevMin",
+          "value": -60,
+          "condition": "intraFreqCellReselectionInfo",
+          "_known": true
+        },
+        {
+          "name": "s-IntraSearchP",
+          "value": 10,
+          "condition": "intraFreqCellReselectionInfo",
+          "_known": true
+        },
+        {
+          "name": "s-NonIntraSearchP",
+          "value": 10,
+          "condition": "cellReselectionServingFreqInfo",
+          "_known": true
+        },
+        {
+          "name": "cellReselectionPriority",
+          "value": 3,
+          "condition": "cellReselectionServingFreqInfo",
+          "_known": true
+        },
+        {
+          "name": "distanceThresh-r17",
+          "value": 10000,
+          "condition": "SIB2-v1700-IEs",
+          "_known": true
+        }
+      ],
+      "_stop": "end_turn"
+    }
+  ],
+  "status": "generated",
+  "reason": "",
+  "_stage2": {
+    "candidates": [
+      "SIB19",
+      "SIB2"
+    ],
+    "calls": 2
+  },
+  "verdict": "pass",
+  "violations": [],
+  "calls": 2,
+  "tp": [
+    {
+      "index": 1,
+      "given": "UE supporting location-based measurements in NR RRC_IDLE state on a cell which provides access by NR NTN",
+      "when": "Sintrasearch is non-zero in system information and distance between UE and the serving cell referenceLocation is larger than distanceThresh",
+      "then": "UE performs intra-frequency measurements and reselects the highest ranked cell up on Srxlev > SIntraSearchP",
+      "ok": true
+    },
+    {
+      "index": 2,
+      "given": "UE supporting location-based measurements in NR RRC_IDLE state on a cell which provides access by NR NTN",
+      "when": "Snonintrasearch is non-zero in system information and distance between UE and the serving cell reference location referenceLocation is larger than distanceThresh",
+      "then": "UE performs inter-frequency measurements and reselects the cell which belong to the lower priority frequency upon Srxlev > Snonintrasearch",
+      "ok": true
+    }
+  ]
+}

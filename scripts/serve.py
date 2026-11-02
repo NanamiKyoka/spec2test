@@ -28,13 +28,17 @@ import secret_store
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+sys.path.insert(0, os.path.join(ROOT, "tools"))     # 阶段工具与 MCP 共用实现
 SETTINGS = os.path.join(ROOT, "data", "settings.json")
 CONV_DIR = os.path.join(ROOT, "data", "conversations")
 RUNS_FILE = os.path.join(ROOT, "data", "runs.jsonl")
 JOBS_DIR = os.path.join(ROOT, "data", "jobs")
 JOBS_KEEP = 300
 MAX_CONCURRENT_RUNS = 4
+STALE_APPROVAL_SECONDS = 700
 RUN_ONE = os.path.join(HERE, "run_one.py")
+ORCHESTRATE = os.path.join(HERE, "orchestrate.py")
+AGENT_BUDGET = 8
 
 CATALOG_PROXY = ["claude-sonnet-4-6[1M]", "claude-opus-4-8[1M]", "claude-haiku-4-5"]
 NULLABLE_FIELDS = {"L1", "L3", "status", "verdict"}
@@ -600,12 +604,57 @@ def _apply_job_event(job, ev, last_t=None):
     return now
 
 
-def start_job(cid, dry_run=False, conversation_id=None, hitl=False):
+RUN_MODES = ("steps", "full", "repair_only")
+RUN_ENGINES = ("pipeline", "agent")
+RUN_STRICTNESS = ("strict", "skip_lte_r2", "r1_only")
+
+
+def norm_run_options(raw):
+    """把前端传的运行参数收敛成固定结构；非法值回落到默认，不报错。"""
+    raw = raw if isinstance(raw, dict) else {}
+    msgs = raw.get("messages")
+    if isinstance(msgs, list):
+        msgs = [str(m).strip() for m in msgs if str(m).strip()][:40]
+    else:
+        msgs = []
+    try:
+        repairs = max(0, min(5, int(raw.get("repairs", 1))))
+    except (TypeError, ValueError):
+        repairs = 1
+
+    import skills as skills_lib
+    known_skills = {s["name"] for s in skills_lib.list_skills()}
+    picked = raw.get("skills")
+    skills = ([str(s).strip() for s in picked if str(s).strip() in known_skills][:12]
+              if isinstance(picked, list) else [])
+
+    import stage_tools
+    readonly = {n for n, t in stage_tools.TOOLS.items()
+                if not t["model"] and not t["eval_only"]}
+    picked_tools = raw.get("mcpTools", raw.get("mcp_tools"))
+    mcp_tools = (sorted({str(t).strip() for t in picked_tools if str(t).strip() in readonly})
+                 if isinstance(picked_tools, list) else None)
+
+    return {
+        "messages": msgs,
+        "mode": raw.get("mode") if raw.get("mode") in RUN_MODES else "full",
+        "repairs": repairs,
+        "strictness": (raw.get("strictness")
+                       if raw.get("strictness") in RUN_STRICTNESS else "strict"),
+        "engine": raw.get("engine") if raw.get("engine") in RUN_ENGINES else "pipeline",
+        "skills": skills,
+        "mcpTools": mcp_tools,
+    }
+
+
+def start_job(cid, dry_run=False, conversation_id=None, hitl=False, options=None):
+    options = norm_run_options(options)
     jid = uuid.uuid4().hex[:12]
     with _jobs_lock:
         _jobs[jid] = {"id": jid, "state": "queued", "stage": "", "log": [], "result": None,
                       "created": time.time(), "updated": time.time(), "case": cid,
                       "conversation_id": conversation_id, "hitl": bool(hitl),
+                      "options": options,
                       "approval": None,
                       "verdict": None, "stages": [], "started": None, "finished": None}
     with _jobs_lock:
@@ -613,7 +662,8 @@ def start_job(cid, dry_run=False, conversation_id=None, hitl=False):
     s = load_settings()
     with _jobs_lock:
         _jobs[jid].update({"provider": s["provider"], "model": s["model"],
-                           "mode": "dry" if dry_run else "live"})
+                           "mode": "dry" if dry_run else "live",
+                           "engine": options["engine"]})
         save_job(_jobs[jid])
 
     def worker():
@@ -623,13 +673,24 @@ def start_job(cid, dry_run=False, conversation_id=None, hitl=False):
             job["started"] = time.time()
             save_job(job)
         last_t = time.time()
-        cmd = [sys.executable, RUN_ONE, cid]
-        if dry_run:
-            cmd.append("--dry-run")
-        if hitl:
-            cmd.extend(["--hitl", "--job-id", jid])
+        if options["engine"] == "agent":
+            cmd = [sys.executable, ORCHESTRATE, cid, "--max-steps", str(AGENT_BUDGET)]
+        else:
+            cmd = [sys.executable, RUN_ONE, cid]
+            if dry_run:
+                cmd.append("--dry-run")
+            if hitl:
+                cmd.extend(["--hitl", "--job-id", jid])
+            cmd.extend(["--mode", options["mode"], "--repairs", str(options["repairs"]),
+                        "--strictness", options["strictness"]])
+            if options["messages"]:
+                cmd.extend(["--messages", ",".join(options["messages"])])
+            if options["skills"]:
+                cmd.extend(["--skills", ",".join(options["skills"])])
         try:
-            proc = subprocess.Popen(cmd, cwd=ROOT, env=child_env(s), text=True,
+            env = child_env(s)
+            env["SPEC2TEST_JOB"] = jid        # 工具调用按任务归档，供 trace 面板取决策轨迹
+            proc = subprocess.Popen(cmd, cwd=ROOT, env=env, text=True,
                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                     encoding="utf-8", errors="replace", bufsize=1)
             for line in proc.stdout:
@@ -698,6 +759,35 @@ def start_job(cid, dry_run=False, conversation_id=None, hitl=False):
 
     threading.Thread(target=worker, daemon=True).start()
     return jid
+
+
+
+def _expire_stale_jobs():
+    """审批等待超时的任务视为结束：否则旧任务会一直占着会话运行锁。"""
+    now = time.time()
+    stale = []
+    with _jobs_lock:
+        for jid, job in _jobs.items():
+            if job.get("state") != "awaiting_approval":
+                continue
+            started = job.get("started") or job.get("created") or 0
+            if now - started <= STALE_APPROVAL_SECONDS:
+                continue
+            job["state"] = "failed"
+            job["error"] = "approval_timeout"
+            job["finished"] = now
+            job.setdefault("log", []).append(
+                {"t": round(now, 3), "msg": "审批等待超时，任务已自动结束"}
+            )
+            stale.append((jid, job))
+    for jid, job in stale:
+        try:
+            os.makedirs(JOBS_DIR, exist_ok=True)
+            with open(os.path.join(JOBS_DIR, jid + ".approval"), "w", encoding="utf-8") as f:
+                json.dump({"decision": "reject", "at": now}, f)
+        except Exception:
+            pass
+        save_job(job)
 
 
 def _job_verdict(job):
@@ -930,6 +1020,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 return self._json({"error": "conversation_not_found"}, 404)
             return self._json(c)
         if path == "/api/runs":
+            _expire_stale_jobs()
             q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             try:
                 limit = max(1, min(200, int(q.get("limit", ["20"])[0])))
@@ -941,6 +1032,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             for r in load_runs():
                 merged[r["job_id"]] = r
             for jid, j in live.items():          # 内存里更新（运行中/刚完成）
+                detail = (j.get("result") or {}).get("detail") or {}
                 merged[jid] = {"job_id": jid, "case": j.get("case"),
                                "state": j.get("state"), "verdict": _job_verdict(j),
                                "started": j.get("started"), "finished": j.get("finished"),
@@ -950,6 +1042,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                                "model": j.get("model"),
                                "conversation_id": j.get("conversation_id"),
                                "summary": j.get("summary"),
+                               "L1": detail.get("L1"), "L3": detail.get("L3"),
+                               "violations": len(detail.get("violations") or [])
+                               if detail else None,
                                "stages": j.get("stage_seconds") or {}}
                 if j.get("error"):
                     merged[jid]["error"] = j["error"]
@@ -957,6 +1052,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             runs.sort(key=lambda x: -(x.get("started") or x.get("finished") or 0))
             return self._json(runs[:limit])
         if path == "/api/metrics":
+            _expire_stale_jobs()
             with _jobs_lock:
                 live = {jid: j for jid, j in _jobs.items()}
             merged = {r["job_id"]: r for r in load_runs() if r.get("job_id")}
@@ -994,6 +1090,23 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                                "recent_failures": failures})
         if path == "/api/cases":
             return self._json(list_cases())
+        if path == "/api/trace/tools":
+            q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            try:
+                limit = max(1, min(200, int(q.get("limit", ["20"])[0])))
+            except ValueError:
+                limit = 20
+            import stage_tools
+            return self._json({"rows": stage_tools.recent_trace(
+                limit, job=(q.get("job", [""])[0] or None))})
+        if path == "/api/skills":
+            import skills as skills_lib
+            return self._json({"skills": skills_lib.list_skills()})
+        if path == "/api/tools":
+            import stage_tools
+            return self._json({"tools": [{"name": k, "model": v["model"],
+                                          "eval_only": v["eval_only"]}
+                                         for k, v in stage_tools.TOOLS.items()]})
         if path == "/api/explain":
             cases, source = set(), "none"
             for sub, tag in (("data", "live"), ("results", "snapshot")):
@@ -1038,6 +1151,24 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not self._origin_ok():
             return self._json({"error": "bad_origin"}, 403)
         path = urllib.parse.urlparse(self.path).path
+        m = re.match(r"^/api/tools/([a-z0-9_]+)$", path)
+        if m:
+            name = m.group(1)
+            import stage_tools
+            spec = stage_tools.TOOLS.get(name)
+            if not spec:
+                return self._json({"ok": False, "error": "unknown_tool"}, 404)
+            if spec["model"] and not credential_ok(load_settings()):
+                return self._json({"ok": False, "error": "no_credential"}, 400)
+            args = self._body().get("args")
+            try:
+                res = stage_tools.call(name, args if isinstance(args, dict) else {})
+            except stage_tools.ToolError as e:
+                return self._json({"ok": False, "error": str(e)}, 400)
+            except Exception as e:
+                return self._json({"ok": False, "error": "tool_failed",
+                                   "message": str(e)[:160]}, 500)
+            return self._json({"ok": True, **res})
         if path == "/api/settings":
             body = self._body()
             s = save_settings(body)
@@ -1178,15 +1309,18 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 approval = job.get("approval") or {}
                 if job.get("state") != "awaiting_approval" or approval.get("status") != "pending":
                     return self._json({"error": "not_awaiting_approval"}, 409)
-                decision = (self._body().get("decision") or "").strip()
+                body = self._body()
+                decision = (body.get("decision") or "").strip()
                 if decision not in ("approve", "reject"):
                     return self._json({"error": "bad_decision"}, 400)
+                options = norm_run_options(body.get("options") or job.get("options"))
                 try:
                     os.makedirs(JOBS_DIR, exist_ok=True)
                     dest = os.path.join(JOBS_DIR, jid + ".approval")
                     tmp = dest + "." + uuid.uuid4().hex + ".tmp"
                     with open(tmp, "w", encoding="utf-8") as f:
-                        json.dump({"decision": decision, "at": time.time()}, f)
+                        json.dump({"decision": decision, "options": options,
+                                   "at": time.time()}, f)
                     os.replace(tmp, dest)
                 except Exception as e:
                     return self._json({"error": "write_failed", "message": str(e)[:120]}, 500)
@@ -1195,8 +1329,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     if live is not None:
                         live.setdefault("approval", {})["status"] = (
                             "approved" if decision == "approve" else "rejected")
+                        live["options"] = options
                         save_job(live)
-            return self._json({"ok": True})
+            return self._json({"ok": True, "options": options})
         if path == "/api/run":
             body = self._body()
             cid = (body.get("case") or "").strip()
@@ -1210,7 +1345,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             conv_id = (body.get("conversation_id") or "").strip() or None
             if conv_id and _load_conv(conv_id) is None:
                 return self._json({"error": "conversation_not_found"}, 404)
+            opts = norm_run_options(body.get("options"))
+            if body.get("dry_run"):
+                opts["engine"] = "pipeline"      # 快速模式不调用模型
+            if body.get("hitl") and opts["engine"] == "agent":
+                return self._json({"error": "hitl_not_supported_with_agent"}, 400)
             # 槽位检查与任务入表必须在同一把锁内，否则并发请求会突破并发上限
+            _expire_stale_jobs()
             with _slot_lock:
                 with _jobs_lock:
                     active = [j for j in _jobs.values()
@@ -1223,8 +1364,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 if conv_id and instruction:
                     append_message(conv_id, "user", instruction)
                 jid = start_job(cid, bool(body.get("dry_run")), conv_id,
-                                hitl=bool(body.get("hitl")))
-            return self._json({"job_id": jid})
+                                hitl=bool(body.get("hitl")), options=opts)
+            return self._json({"job_id": jid, "options": opts})
         return self._json({"error": "not_found"}, 404)
 
     def do_PATCH(self):
