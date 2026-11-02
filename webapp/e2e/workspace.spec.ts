@@ -28,3 +28,16 @@ test("旧 hash 链接重定向到新路由", async ({ page }) => {
   await page.goto("/#/case?case=6.7.1.3");
   await expect(page).toHaveURL(/\/case\/6\.7\.1\.3/);
 });
+
+test("跨进程 POST 不被 Origin 拦截", async ({ page }) => {
+  await page.goto("/");
+  const status = await page.evaluate(async () => {
+    const r = await fetch("/api/run", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ case: "evil", dry_run: true }),
+    });
+    return r.status;
+  });
+  expect(status).toBe(400);
+});
