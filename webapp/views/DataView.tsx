@@ -118,8 +118,7 @@ function MetricCard({
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Card className="relative">
-        <CardBody>
+      <div className="relative px-4 py-3">
           <div className="flex items-start justify-between gap-2">
             <div className="text-xs text-muted">{label}</div>
             <button
@@ -134,8 +133,7 @@ function MetricCard({
           </div>
           <div className="num mt-1 text-2xl font-semibold leading-none">{value}</div>
           {sub && <div className="mt-1.5 text-xs leading-relaxed text-muted">{sub}</div>}
-        </CardBody>
-      </Card>
+        </div>
 
       <Modal open={open} onClose={() => setOpen(false)} title={explain.title}>
         <dl className="space-y-3 text-sm leading-relaxed">
