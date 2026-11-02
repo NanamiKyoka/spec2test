@@ -31,7 +31,8 @@ bash scripts/repro.sh --live   # 真实调用模型，写 data/，产出可用�
 ### 用法 B：看单个用例的全链条（理解系统怎么工作的）
 
 ```bash
-python scripts/serve.py          # 或直接双击 start.bat
+start.bat                        # 同时起 Python :8000 与 Next :3000
+# 或分两步：py -3.12 scripts/serve.py  +  cd webapp && npm run dev
 # 浏览器打开 http://127.0.0.1:3000/
 ```
 
