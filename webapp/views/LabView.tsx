@@ -127,7 +127,7 @@ export function LabView() {
             正在运行：{running.current ?? "…"}（{running.done}/{running.total}）
             <div className="mt-2 h-1.5 overflow-hidden rounded bg-line">
               <div
-                className="h-full bg-accent-solid transition-all"
+                className="h-full bg-accent-solid transition-[width]"
                 style={{ width: `${Math.round((running.done / Math.max(1, running.total)) * 100)}%` }}
               />
             </div>

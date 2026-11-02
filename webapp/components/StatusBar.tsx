@@ -56,9 +56,9 @@ export function StatusBar() {
   const active = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
 
   return (
-    <header className="sticky top-0 z-20 flex h-12 shrink-0 items-center gap-4 border-b border-line/80 bg-canvas/85 px-4 backdrop-blur">
+    <header className="sticky top-0 z-20 flex h-12 shrink-0 items-center gap-4 border-b border-line bg-canvas px-4">
       <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-        <span className="h-2 w-2 rounded-full bg-accent-solid" aria-hidden />
+        <span className="h-2 w-2 rounded-full bg-ink" aria-hidden />
         Spec2Test
       </Link>
       <nav className="flex items-center gap-1 text-sm">

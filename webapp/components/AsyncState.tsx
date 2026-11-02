@@ -32,9 +32,9 @@ export function AsyncState({
       <div role="status" aria-live="polite" className={`rounded-md border border-line bg-surface ${pad}`}>
         <div className="text-sm text-muted">{title || "正在读取…"}</div>
         <div className="mt-3 space-y-2" aria-hidden>
-          <div className="h-3 w-1/3 animate-pulse rounded bg-line/60" />
-          <div className="h-3 w-2/3 animate-pulse rounded bg-line/40" />
-          <div className="h-3 w-1/2 animate-pulse rounded bg-line/30" />
+          <div className="h-3 w-1/3 rounded bg-line/60" />
+          <div className="h-3 w-2/3 rounded bg-line/40" />
+          <div className="h-3 w-1/2 rounded bg-line/30" />
         </div>
       </div>
     );

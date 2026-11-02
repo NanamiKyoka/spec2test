@@ -7,17 +7,16 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { X, HelpCircle, Inbox, ChevronDown } from "lucide-react";
 import { cn } from "../lib/cn";
 
-/* ---------------- Button ---------------- */
 const buttonVariants = cva(
   "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
   {
     variants: {
       variant: {
         primary: "bg-accent-solid text-white hover:brightness-110 active:brightness-95",
-        ghost: "border border-line bg-canvas hover:bg-surface active:bg-surface text-ink",
-        subtle: "text-muted hover:bg-surface active:bg-surface hover:text-ink",
-        danger: "border border-bad/40 text-bad-ink hover:bg-bad/10 active:bg-bad/10",
-        icon: "text-muted hover:bg-surface hover:text-ink",
+        ghost: "border border-line bg-surface hover:bg-raised active:bg-raised text-ink",
+        subtle: "text-muted hover:bg-raised active:bg-raised hover:text-ink",
+        danger: "border border-negative/40 text-negative hover:bg-negative/10 active:bg-negative/10",
+        icon: "text-muted hover:bg-raised hover:text-ink",
       },
       size: {
         sm: "h-7 px-2.5",
@@ -41,25 +40,23 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = "Button";
 
-/* ---------------- Card ---------------- */
 export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("rounded-lg border border-line bg-canvas", className)} {...props} />;
+  return <div className={cn("rounded-lg border border-line bg-surface", className)} {...props} />;
 }
 export function CardHead({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("flex items-center gap-2 border-b border-line px-4 py-2.5", className)} {...props} />;
+  return <div className={cn("flex items-center gap-2 border-b border-rule px-4 py-2.5", className)} {...props} />;
 }
 export function CardBody({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return <div className={cn("px-4 py-3", className)} {...props} />;
 }
 
-/* ---------------- Chip ---------------- */
 type ChipTone = "ok" | "warn" | "bad" | "muted" | "accent";
 const chipTone: Record<ChipTone, string> = {
-  ok: "border-ok/40 text-ok-ink bg-ok/10",
-  warn: "border-warn/40 text-warn-ink bg-warn/10",
-  bad: "border-bad/40 text-bad-ink bg-bad/10",
-  muted: "border-line text-muted bg-surface",
-  accent: "border-accent/40 text-accent-ink bg-accent/10",
+  ok: "border-ok/30 text-ok bg-ok/10",
+  warn: "border-warn/30 text-warn bg-warn/10",
+  bad: "border-bad/30 text-bad bg-bad/10",
+  muted: "border-line text-muted bg-raised",
+  accent: "border-accent/30 text-accent bg-accent/10",
 };
 export function Chip({
   tone = "muted",
@@ -76,7 +73,7 @@ export function Chip({
     <span
       title={title}
       className={cn(
-        "inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-xs leading-5",
+        "inline-flex items-center gap-1 whitespace-nowrap rounded-md border px-2 py-0.5 text-xs leading-5",
         chipTone[tone],
         className
       )}
@@ -86,7 +83,6 @@ export function Chip({
   );
 }
 
-/* ---------------- Table ---------------- */
 export function Table({ className, ...props }: React.TableHTMLAttributes<HTMLTableElement>) {
   return (
     <div className="w-full overflow-x-auto">
@@ -98,7 +94,7 @@ export function Th({ className, ...props }: React.ThHTMLAttributes<HTMLTableCell
   return (
     <th
       className={cn(
-        "sticky top-0 z-10 border-b border-line bg-surface px-3 py-2 text-left text-xs font-semibold text-muted",
+        "sticky top-0 z-10 bg-canvas px-3 py-2 text-left text-xs font-normal text-muted",
         className
       )}
       {...props}
@@ -106,10 +102,9 @@ export function Th({ className, ...props }: React.ThHTMLAttributes<HTMLTableCell
   );
 }
 export function Td({ className, ...props }: React.TdHTMLAttributes<HTMLTableCellElement>) {
-  return <td className={cn("border-b border-line px-3 py-2 align-top", className)} {...props} />;
+  return <td className={cn("border-b border-rule px-3 py-2 align-top", className)} {...props} />;
 }
 
-/* ---------------- Field ---------------- */
 export function Field({
   label,
   hint,
@@ -125,7 +120,7 @@ export function Field({
 }) {
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
-      <label htmlFor={htmlFor} className="text-xs font-medium text-ink">
+      <label htmlFor={htmlFor} className="text-sm font-medium text-ink">
         {label}
       </label>
       {children}
@@ -135,9 +130,8 @@ export function Field({
 }
 
 export const inputCls =
-  "h-9 w-full rounded-md border border-line bg-canvas px-3 text-sm text-ink outline-none transition-colors placeholder:text-muted focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:cursor-not-allowed disabled:bg-surface disabled:opacity-60";
+  "h-9 w-full rounded-md border border-control bg-surface px-3 text-sm text-ink outline-none transition-colors placeholder:text-muted focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:cursor-not-allowed disabled:bg-raised disabled:opacity-60";
 
-/* ---------------- Term（术语就地解释） ---------------- */
 export function Term({ term, desc }: { term: string; desc: string }) {
   return (
     <Tooltip.Root delayDuration={150}>
@@ -156,7 +150,7 @@ export function Term({ term, desc }: { term: string; desc: string }) {
       <Tooltip.Portal>
         <Tooltip.Content
           sideOffset={4}
-          className="z-50 max-w-[260px] rounded-md border border-line bg-canvas px-2.5 py-1.5 text-xs leading-relaxed text-ink shadow-card"
+          className="z-50 max-w-[260px] rounded-md border border-line bg-surface px-2.5 py-1.5 text-xs leading-relaxed text-ink shadow-overlay"
         >
           {desc}
           <Tooltip.Arrow className="fill-[rgb(var(--line))]" />
@@ -166,7 +160,6 @@ export function Term({ term, desc }: { term: string; desc: string }) {
   );
 }
 
-/* ---------------- Modal ---------------- */
 export function Modal({
   open,
   onClose,
@@ -184,8 +177,8 @@ export function Modal({
     <Dialog.Root open={open} onOpenChange={(v) => !v && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-black/40" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-line bg-canvas shadow-card focus:outline-none">
-          <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-line bg-surface shadow-overlay focus:outline-none">
+          <div className="flex items-center justify-between gap-3 border-b border-rule px-4 py-3">
             <Dialog.Title className="min-w-0 truncate text-sm font-semibold">{title}</Dialog.Title>
             <Dialog.Description className="sr-only">{title}</Dialog.Description>
             <Dialog.Close asChild>
@@ -196,7 +189,7 @@ export function Modal({
           </div>
           <div className="max-h-[70vh] overflow-y-auto scroll-thin px-4 py-4">{children}</div>
           {footer && (
-            <div className="flex justify-end gap-2 border-t border-line px-4 py-3">{footer}</div>
+            <div className="flex justify-end gap-2 border-t border-rule px-4 py-3">{footer}</div>
           )}
         </Dialog.Content>
       </Dialog.Portal>
@@ -204,7 +197,6 @@ export function Modal({
   );
 }
 
-/* ---------------- Section（可折叠分组，用于页面分层） ---------------- */
 export function Section({
   title,
   meta,
@@ -225,13 +217,13 @@ export function Section({
   const [open, setOpen] = React.useState(defaultOpen);
   const id = React.useId();
   return (
-    <section className={cn("rounded-lg border border-line bg-canvas", className)}>
+    <section className={cn("rounded-lg border border-line bg-surface", className)}>
       <button
         type="button"
         aria-expanded={open}
         aria-controls={id}
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-medium hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/40"
+        className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-medium hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/40"
       >
         {icon}
         <span className="min-w-0 truncate">{title}</span>
@@ -243,14 +235,13 @@ export function Section({
           />
         </span>
       </button>
-      <div id={id} hidden={!open} className={cn("border-t border-line", bodyClassName)}>
+      <div id={id} hidden={!open} className={cn("border-t border-rule", bodyClassName)}>
         {children}
       </div>
     </section>
   );
 }
 
-/* ---------------- Empty（空态必须给下一步） ---------------- */
 export function Empty({
   title,
   action,
@@ -262,14 +253,13 @@ export function Empty({
 }) {
   return (
     <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
-      <div className="rounded-full bg-surface p-3 text-muted">{icon ?? <Inbox className="h-5 w-5" />}</div>
+      <div className="rounded-full bg-raised p-3 text-muted">{icon ?? <Inbox className="h-5 w-5" />}</div>
       <p className="max-w-[420px] text-sm leading-relaxed text-muted">{title}</p>
       {action}
     </div>
   );
 }
 
-/* ---------------- Toast（极简） ---------------- */
 const ToastCtx = React.createContext<(msg: string) => void>(() => {});
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [msg, setMsg] = React.useState<string | null>(null);
@@ -283,7 +273,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastCtx.Provider value={push}>
       {children}
       {msg && (
-        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-md bg-ink px-3 py-2 text-xs text-canvas shadow-card">
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-md bg-ink px-3 py-2 text-xs text-canvas shadow-overlay">
           {msg}
         </div>
       )}
@@ -292,7 +282,6 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 }
 export const useToast = () => React.useContext(ToastCtx);
 
-/* ---------------- TopBar ---------------- */
 export type ViewKey = "data" | "eval" | "chat" | "api" | "about";
 const NAV: { key: ViewKey; label: string }[] = [
   { key: "data", label: "数据" },
@@ -314,10 +303,10 @@ export function TopBar({
   right?: React.ReactNode;
 }) {
   return (
-    <header className="flex h-14 shrink-0 items-center gap-2 border-b border-line bg-canvas px-3 sm:gap-3 sm:px-4">
+    <header className="flex h-12 shrink-0 items-center gap-2 border-b border-line bg-canvas px-3 sm:gap-3 sm:px-4">
       <div className="flex shrink-0 items-baseline gap-2">
         <span className="text-base font-semibold tracking-tight">Spec2Test</span>
-        <span className="hidden text-xs text-muted md:inline">NR NTN 测试意图编译器</span>
+        <span className="hidden text-xs text-muted md:inline">NR NTN 一致性用例生成</span>
       </div>
       <nav className="ml-2 flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto" aria-label="主导航">
         {NAV.map((n) => (
@@ -328,8 +317,8 @@ export function TopBar({
             className={cn(
               "shrink-0 rounded-md px-2 py-1.5 text-sm transition-colors sm:px-2.5",
               view === n.key
-                ? "bg-accent/10 font-medium text-accent-ink"
-                : "text-muted hover:bg-surface hover:text-ink"
+                ? "bg-active font-medium text-ink"
+                : "text-muted hover:bg-raised hover:text-ink"
             )}
           >
             {n.label}

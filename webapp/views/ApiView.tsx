@@ -45,7 +45,7 @@ const NO_KEY_PROVIDERS: Provider[] = ["openai", "anthropic"];
 
 /* 表单分组标题：比字段标签弱一档，比正文强一档 */
 function GroupHead({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{children}</h2>;
+  return <h2 className="text-xs font-medium text-muted">{children}</h2>;
 }
 
 export function ApiView() {
@@ -333,13 +333,13 @@ export function ApiView() {
                     value={temperature}
                     aria-valuetext={temperature.toFixed(1)}
                     onChange={(e) => setTemperature(Number(e.target.value))}
-                    style={{ "--pct": `${Math.round(temperature * 100)}%` } as React.CSSProperties}
+                    style={{ accentColor: "rgb(var(--accent))" } as React.CSSProperties}
                     className={cn(
                       "h-4 min-w-0 flex-1 cursor-pointer appearance-none rounded-full bg-transparent",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
                       // 轨道：已选段用强调色，未选段用分隔线色
                       "[&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-full",
-                      "[&::-webkit-slider-runnable-track]:bg-[linear-gradient(to_right,rgb(var(--accent))_var(--pct),rgb(var(--line))_var(--pct))]",
+                      "[&::-webkit-slider-runnable-track]:bg-line",
                       "[&::-moz-range-track]:h-1 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-line",
                       "[&::-moz-range-progress]:h-1 [&::-moz-range-progress]:rounded-full [&::-moz-range-progress]:bg-accent-solid",
                       // 滑块：与按钮同色的实心圆点

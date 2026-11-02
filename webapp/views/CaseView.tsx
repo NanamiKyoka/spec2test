@@ -180,7 +180,7 @@ function StageList({ stages }: { stages: Stage[] }) {
 function SectionLabel({ children, meta }: { children: ReactNode; meta?: ReactNode }) {
   return (
     <div className="mb-3 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 border-b border-line pb-2">
-      <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{children}</h2>
+      <h2 className="text-xs font-medium text-muted">{children}</h2>
       {meta && <span className="text-xs text-muted">{meta}</span>}
     </div>
   );

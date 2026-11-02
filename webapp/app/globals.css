@@ -3,34 +3,49 @@
 @tailwind utilities;
 
 :root {
-  --canvas: 255 255 255;
-  --surface: 247 248 250;
-  --line: 232 232 236;
-  --ink: 26 26 26;
-  --muted: 107 114 128;
-  --accent: 77 107 254;
-  --accent-ink: 59 85 230;
-  --accent-solid: 59 85 230;
-  --ok: 15 157 88;
-  --ok-ink: 11 122 68;
-  --warn: 180 83 9;
-  --warn-ink: 180 83 9;
-  --bad: 217 48 37;
-  --bad-ink: 197 34 31;
+  --canvas: 249 251 252;
+  --surface: 255 255 255;
+  --raised: 244 246 248;
+  --active: 235 237 238;
+  --line: 232 234 236;
+  --rule: 240 241 242;
+  --control: 205 206 209;
+  --ink: 19 20 22;
+  --muted: 93 95 96;
+  --accent: 27 108 128;
+  --accent-ink: 27 108 128;
+  --accent-solid: 19 20 22;
+  --ok: 30 123 79;
+  --ok-ink: 30 123 79;
+  --warn: 146 64 14;
+  --warn-ink: 146 64 14;
+  --bad: 196 36 42;
+  --bad-ink: 196 36 42;
+  --positive: 30 123 79;
+  --negative: 196 36 42;
+  --warning: 146 64 14;
+  --chart-1: 27 108 128;
+  --chart-2: 47 112 187;
+  --chart-3: 168 111 12;
   --r-sm: 6px;
-  --r-md: 10px;
-  --r-lg: 14px;
+  --r-md: 6px;
+  --r-lg: 8px;
+  --r-sheet: 16px;
 }
 
 .dark {
   --canvas: 15 17 21;
   --surface: 21 24 30;
+  --raised: 30 34 40;
+  --active: 40 44 52;
   --line: 37 42 51;
+  --rule: 30 34 40;
+  --control: 74 80 92;
   --ink: 230 232 235;
   --muted: 154 163 173;
-  --accent: 122 145 255;
-  --accent-ink: 143 164 255;
-  --accent-solid: 74 103 240;
+  --accent: 27 108 128;
+  --accent-ink: 27 108 128;
+  --accent-solid: 230 232 235;
   --ok: 52 211 153;
   --ok-ink: 52 211 153;
   --warn: 251 191 36;
@@ -47,14 +62,13 @@ body {
 body {
   background: rgb(var(--canvas));
   color: rgb(var(--ink));
-  font-family: "Inter Variable", system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  font-family: var(--font-plex-sans), system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
   -webkit-font-smoothing: antialiased;
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
 .num {
   font-variant-numeric: tabular-nums;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 .scroll-thin::-webkit-scrollbar {
@@ -69,68 +83,13 @@ body {
   background: transparent;
 }
 
-/* 结论色点：绿=通过 红=拒收 灰=弃权（弃权不得用红色） */
 .dot-ok { background: rgb(var(--ok)); }
 .dot-bad { background: rgb(var(--bad)); }
 .dot-muted { background: rgb(var(--muted)); }
 
-/* 路由切换：轻微上浮淡入，尊重减少动效偏好 */
-@keyframes page-enter {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.page-enter {
-  animation: page-enter 220ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
-}
-@media (prefers-reduced-motion: reduce) {
-  .page-enter {
-    animation: none;
-  }
-}
-
-/* 顶栏导航与卡片交互的细微过渡 */
-a,
-button {
-  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, opacity 150ms ease;
-}
-
-/* 对话区：单栏居中、留白优先（chatbot.app 风格） */
-.chat-sparse .copilotKitChat {
-  background: transparent;
-}
-.chat-sparse .copilotKitHeader {
-  display: none;
-}
-.chat-sparse .copilotKitMessagesContainer {
-  max-width: 46rem;
-  width: 100%;
-  margin: 0 auto;
-  padding: 2rem 1rem 1rem;
-}
-.chat-sparse .copilotKitInputContainer {
-  max-width: 46rem;
-  width: 100%;
-  margin: 0 auto;
-  padding: 0 1rem 1.25rem;
-}
-.chat-sparse .copilotKitInput {
-  border-radius: 0.9rem;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 10px 30px rgb(0 0 0 / 0.07);
-}
-
 @keyframes s2t-progress {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(400%);
-  }
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
 }
 
 .progress-indeterminate {
@@ -144,5 +103,9 @@ button {
 }
 
 html {
-  caret-color: rgb(var(--accent-solid));
+  caret-color: rgb(var(--accent));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-indeterminate { animation: none; }
 }

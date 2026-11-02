@@ -33,7 +33,7 @@ const ROUTE: [string, string, string][] = [
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
     <section className="mt-8" aria-labelledby={id}>
-      <h2 id={id} className="text-xs font-semibold uppercase tracking-wide text-muted">
+      <h2 id={id} className="text-xs font-medium text-muted">
         {title}
       </h2>
       <div className="mt-3 space-y-3 text-sm leading-relaxed">{children}</div>

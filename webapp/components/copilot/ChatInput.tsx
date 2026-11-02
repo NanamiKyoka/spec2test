@@ -180,7 +180,7 @@ export function ChatInput({ inProgress, onSend, onStop, chatReady }: Props) {
   return (
     <div ref={boxRef} className="relative w-full">
       {open && (
-        <div className="absolute bottom-full left-0 z-30 mb-2 w-[19rem] overflow-hidden rounded-lg border border-line bg-surface shadow-lg">
+        <div className="absolute bottom-full left-0 z-30 mb-2 w-[19rem] overflow-hidden rounded-lg border border-line bg-surface shadow-overlay">
           <div className="flex items-center justify-between border-b border-line px-3 py-2">
             {view === "main" ? (
               <span className="text-xs font-medium">运行参数</span>
@@ -315,7 +315,7 @@ export function ChatInput({ inProgress, onSend, onStop, chatReady }: Props) {
         </div>
       )}
 
-      <div className="rounded-[0.9rem] border border-line bg-surface px-3 pb-2 pt-2 shadow-[0_1px_2px_rgb(0_0_0/0.04),0_10px_30px_rgb(0_0_0/0.07)] focus-within:border-accent/40">
+      <div className="rounded-md border border-line bg-surface px-3 pb-2 pt-2 shadow-overlay focus-within:border-accent/40">
         {chips.length > 0 && (
           <div className="mb-1.5 flex flex-wrap gap-1">
             {chips.map((c) => (

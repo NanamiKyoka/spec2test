@@ -84,7 +84,7 @@ export function RunCard({ caseId }: { caseId: string }) {
         </div>
       </div>
       <div className="mt-2 h-1.5 overflow-hidden rounded bg-line">
-        <div className="h-full bg-accent-solid transition-all" style={{ width: `${pct}%` }} />
+        <div className="h-full bg-accent-solid transition-[width]" style={{ width: `${pct}%` }} />
       </div>
       {paramChips.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
