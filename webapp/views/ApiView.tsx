@@ -228,7 +228,12 @@ export function ApiView() {
       {header}
 
       {/* 主区：表单。可操作的内容在前，说明性内容折叠到后面 */}
-      <Card className="mt-5">
+      <div className="mt-5 grid grid-cols-[320px_1fr] gap-6">
+        <div>
+          <h2 className="text-base font-medium text-ink">设置</h2>
+          <p className="mt-1 text-sm text-muted">配置模型 provider、凭据与参数。</p>
+        </div>
+        <Card>
         <CardHead>
           <span className="flex items-center gap-2 text-sm font-medium">
             <KeyRound className="h-4 w-4 text-accent" aria-hidden />
@@ -462,6 +467,7 @@ export function ApiView() {
           )}
         </CardBody>
       </Card>
+      </div>
 
       {/* 说明性内容：不占首屏，需要时展开 */}
       <Section
