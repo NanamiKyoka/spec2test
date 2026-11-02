@@ -87,6 +87,8 @@ def finish(case, ir, a, sym_path):
              "无违规" if not viol else "发现 %d 条违规（将拒收）" % len(viol),
              {"violations": viol})
     except Exception as e:
+        # 校验器自身出错不能当成“无违规”：按拒收处理，并留下可审计记录
+        viol = [{"rule": "R0", "path": "validate", "detail": "校验异常：%s" % e}]
         emit("validate", "failed", "校验异常：%s" % e)
 
     verdict = "reject" if viol else "pass"
@@ -232,6 +234,12 @@ def main():
         else:
             import gen_steps
             steps, meta = gen_steps.generate_steps(ctx)
+            if meta.get("error"):
+                # 解析失败不能当成“生成完成 0 步”继续往下走
+                emit("generate", "failed", "生成失败：%s" % meta["error"])
+                emit("validate", "skipped", "上游失败")
+                emit("score", "skipped", "上游失败")
+                return 1
             ie = gen_ie.generate_all(ctx, steps, sym_path)
             ir = {"case_id": case, "tp": parse_tp(ctx.get("test_purpose", "")),
                   "steps": steps, "messages": ie["messages"],
