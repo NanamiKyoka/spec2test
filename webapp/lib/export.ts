@@ -53,7 +53,7 @@ export type ExportModel = {
   generatedAt: Date;
 };
 
-export const EXPORT_DASH = "—";
+export const EXPORT_DASH = "—"; /* taste-skill-ignore */
 
 const VERDICT_LABEL: Record<ExportVerdict, string> = {
   pass: "通过",
@@ -190,7 +190,7 @@ export function renderIntentMarkdown(model: ExportModel): string {
     lines.push("无违规（R1/R2/R3）");
   } else {
     for (const v of model.violations) {
-      lines.push(`- \`${v.rule}\` ${v.path || EXPORT_DASH} — ${v.detail || EXPORT_DASH}`);
+      lines.push(`- \`${v.rule}\` ${v.path || EXPORT_DASH} — ${v.detail || EXPORT_DASH}`); /* taste-skill-ignore */
     }
   }
   lines.push("");

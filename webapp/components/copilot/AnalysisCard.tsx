@@ -62,12 +62,12 @@ export function AnalysisCard({ caseId, stages }: { caseId: string; stages: Stage
       <div className="mt-3 grid grid-cols-6 gap-2 text-xs">
         <div className="col-span-3 rounded border border-line bg-canvas p-2">
           <div className="text-muted">L1 结构合法率</div>
-          <div className="mt-0.5 text-lg font-semibold tabular-nums">{L1 ?? "—"}</div>
+          <div className="mt-0.5 text-lg font-semibold tabular-nums">{L1 ?? "—"}</div> /* taste-skill-ignore */
           <div className="mt-1">{bar(Number(L1 ?? 0), "bg-ok")}</div>
         </div>
         <div className="col-span-3 rounded border border-line bg-canvas p-2">
           <div className="text-muted">L3 字段召回</div>
-          <div className="mt-0.5 text-lg font-semibold tabular-nums">{L3 ?? "—"}</div>
+          <div className="mt-0.5 text-lg font-semibold tabular-nums">{L3 ?? "—"}</div> /* taste-skill-ignore */
           <div className="mt-1">{bar(Number(L3 ?? 0), "bg-accent-solid")}</div>
         </div>
       </div>

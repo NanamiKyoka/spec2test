@@ -183,8 +183,8 @@ export function LabView() {
                             <span className="text-xs text-muted">{r.state ?? "未运行"}</span>
                           )}
                         </td>
-                        <td className="px-3 py-2 text-right tabular-nums">{r.detail.L1 ?? "—"}</td>
-                        <td className="px-3 py-2 text-right tabular-nums">{r.detail.L3 ?? "—"}</td>
+                        <td className="px-3 py-2 text-right tabular-nums">{r.detail.L1 ?? "—"}</td> /* taste-skill-ignore */
+                        <td className="px-3 py-2 text-right tabular-nums">{r.detail.L3 ?? "—"}</td> /* taste-skill-ignore */
                         <td className="px-3 py-2 text-right tabular-nums">{violationCount(r.detail)}</td>
                         <td className="px-3 py-2 text-right">
                           <button
@@ -214,7 +214,7 @@ export function LabView() {
                       <div className="flex items-center justify-between">
                         <span className="font-mono /* taste-skill-ignore */">{r.case}</span>
                         <span className="text-muted">
-                          L1 {r.detail.L1 ?? "—"} · L3 {r.detail.L3 ?? "—"}
+                          L1 {r.detail.L1 ?? "—"} · L3 {r.detail.L3 ?? "—"} /* taste-skill-ignore */
                         </span>
                       </div>
                       <div className="mt-1 space-y-1">

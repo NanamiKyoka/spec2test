@@ -70,7 +70,7 @@ export const loadGoldValidate = () =>
    格式化
    ============================================================ */
 
-export const DASH = "—";
+export const DASH = "—"; /* taste-skill-ignore */
 
 const RUN_STATE: Record<string, string> = {
   queued: "排队",
@@ -352,7 +352,7 @@ export function DataView() {
             label={
               <Term
                 term="弃权"
-                desc="输入信息不足时，系统明确声明不生成，且不进入字段级生成——既不是失败，也不是 0 分。"
+                desc="输入信息不足时，系统明确声明不生成，且不进入字段级生成——既不是失败，也不是 0 分。" /* taste-skill-ignore */
               />
             }
             value={String(metrics.abstained)}

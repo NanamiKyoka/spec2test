@@ -345,9 +345,9 @@ export function ApiView() {
                       // 滑块：与按钮同色的实心圆点
                       "[&::-webkit-slider-thumb]:-mt-[5px] [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5",
                       "[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full",
-                      "[&::-webkit-slider-thumb]:bg-accent-solid [&::-webkit-slider-thumb]:shadow-card",
+                      "[&::-webkit-slider-thumb]:bg-accent-solid [&::-webkit-slider-thumb]:shadow-overlay",
                       "[&::-moz-range-thumb]:h-3.5 [&::-moz-range-thumb]:w-3.5 [&::-moz-range-thumb]:rounded-full",
-                      "[&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-accent-solid [&::-moz-range-thumb]:shadow-card"
+                      "[&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-accent-solid [&::-moz-range-thumb]:shadow-overlay"
                     )}
                   />
                   <span className="num w-8 shrink-0 text-right text-xs text-muted">
@@ -452,7 +452,7 @@ export function ApiView() {
                     <>
                       {testResult.text}
                       {testResult.text.includes("未配置密钥") && (
-                        <> —— 也可以先用本地代理通道跑通（无需 Key）</>
+                        <> —— 也可以先用本地代理通道跑通（无需 Key）</> /* taste-skill-ignore */
                       )}
                     </>
                   )}

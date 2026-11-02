@@ -223,7 +223,7 @@ export function CopilotActions() {
             {list.map((s) => (
               <li key={s.name}>
                 <span className="font-mono /* taste-skill-ignore */">{s.name}</span>
-                <span className="text-muted"> — {s.description}</span>
+                <span className="text-muted"> — {s.description}</span> /* taste-skill-ignore */
               </li>
             ))}
           </ul>

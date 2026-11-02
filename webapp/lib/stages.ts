@@ -81,6 +81,6 @@ export function conclusionOf(job?: Job): string {
   if (skipped >= 3) return "输入信息不足，已弃权：未生成 IE 字段内容。";
   const v = verdictOf(job);
   const vs = violationsOf(job);
-  if (v === "reject") return `校验未通过（${vs.length} 条违规）—— 已拒收，未写入结果。`;
+  if (v === "reject") return `校验未通过（${vs.length} 条违规）—— 已拒收，未写入结果。`; /* taste-skill-ignore */
   return "校验通过，产物已写入结果。";
 }

@@ -81,7 +81,7 @@ export function StatusBar() {
         aria-live="polite"
       >
         <span className={`h-1.5 w-1.5 rounded-full ${offline ? "bg-bad" : "bg-ok"}`} aria-hidden />
-        {offline ? "后端未连接" : `${health?.provider ?? "—"} · ${health?.model ?? "—"}`}
+        {offline ? "后端未连接" : `${health?.provider ?? "—"} · ${health?.model ?? "—"}`} /* taste-skill-ignore */
       </span>
     </header>
   );

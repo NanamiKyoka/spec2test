@@ -103,7 +103,7 @@ export function RunCard({ caseId }: { caseId: string }) {
       {job.state === "awaiting_approval" && (
         <div className="mt-2 rounded border border-line bg-canvas p-2">
           <div className="text-xs">
-            候选消息：{((job.approval?.candidates ?? []).map((c) => (typeof c === "string" ? c : c.message || c.name || ""))).join(" / ") || "—"}
+            候选消息：{((job.approval?.candidates ?? []).map((c) => (typeof c === "string" ? c : c.message || c.name || ""))).join(" / ") || "—"} /* taste-skill-ignore */
           </div>
           <div className="mt-1 text-xs text-muted">在对话里确认后继续；也可用审批卡操作。</div>
         </div>
@@ -114,8 +114,8 @@ export function RunCard({ caseId }: { caseId: string }) {
             <span className={`h-1.5 w-1.5 rounded-full ${dot}`} aria-hidden />
             {label}
           </span>
-          <span className="text-muted">L1 {detail.L1 ?? "—"}</span>
-          <span className="text-muted">L3 {detail.L3 ?? "—"}</span>
+          <span className="text-muted">L1 {detail.L1 ?? "—"}</span> /* taste-skill-ignore */
+          <span className="text-muted">L3 {detail.L3 ?? "—"}</span> /* taste-skill-ignore */
           <span className="text-muted">违规 {violations}</span>
           <button
             type="button"

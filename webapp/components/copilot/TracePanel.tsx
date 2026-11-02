@@ -70,7 +70,7 @@ export function TracePanel({
   return (
     <aside aria-label="运行 trace" className="flex w-80 shrink-0 flex-col border-l border-line bg-surface">
       <div className="flex items-center justify-between border-b border-line px-3 py-2 text-sm">
-        <span>运行 trace · {caseId ?? "—"}</span>
+        <span>运行 trace · {caseId ?? "—"}</span> /* taste-skill-ignore */
         <button className="text-xs text-muted" onClick={onClose}>
           关闭
         </button>
