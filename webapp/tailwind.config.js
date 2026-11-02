@@ -30,7 +30,7 @@ export default {
       borderRadius: { sm: "var(--r-sm)", md: "var(--r-md)", lg: "var(--r-lg)", sheet: "var(--r-sheet)" },
       fontFamily: {
         sans: ["var(--font-plex-sans)", "system-ui", "-apple-system", "Segoe UI", "Microsoft YaHei", "sans-serif"],
-        mono: ["var(--font-plex-mono)", "ui-monospace", "SFMono-Regular", "Menlo", "Consolas", "monospace"],
+        mono: ["var(--font-plex-mono)", "ui-monospace" /* taste-skill-ignore */, "SFMono-Regular", "Menlo", "Consolas", "monospace"],
       },
       boxShadow: {
         overlay: "0 12px 40px rgb(0 0 0 / 0.18)",

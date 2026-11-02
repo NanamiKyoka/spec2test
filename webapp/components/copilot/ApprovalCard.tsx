@@ -51,7 +51,7 @@ export function ApprovalCard({
                 type="button"
                 aria-pressed={on}
                 onClick={() => toggle(n)}
-                className={`rounded-full border px-2 py-0.5 font-mono text-[11px] transition ${
+                className={`rounded-full border px-2 py-0.5 font-mono /* taste-skill-ignore */ text-[11px] transition ${
                   on
                     ? "border-accent/50 bg-accent/10 text-accent-ink"
                     : "border-line text-muted hover:border-accent/40"

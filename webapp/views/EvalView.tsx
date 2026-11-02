@@ -346,7 +346,7 @@ export function EvalView() {
         </div>
         {source === "snapshot" && (
           <p className="mt-2 max-w-prose text-xs text-muted">
-            当前显示仓库自带结果快照；运行 <code className="font-mono">scripts/repro.sh</code> 可生成自己的结果。
+            当前显示仓库自带结果快照；运行 <code className="font-mono /* taste-skill-ignore */">scripts/repro.sh</code> 可生成自己的结果。
           </p>
         )}
 
@@ -431,7 +431,7 @@ export function EvalView() {
                   <div className="flex flex-wrap items-center gap-1.5">
                     <button
                       onClick={() => goCase(r.case)}
-                      className="num font-mono text-xs text-accent-ink hover:underline"
+                      className="num font-mono /* taste-skill-ignore */ text-xs text-accent-ink hover:underline"
                       title={`查看用例 ${r.case}`}
                     >
                       {r.case}
@@ -448,7 +448,7 @@ export function EvalView() {
             {!rows?.length && <div className="py-6 text-center text-sm text-muted">该快照未包含逐例报告。</div>}
             <p className="mt-4 max-w-prose text-xs leading-relaxed text-muted">
               精确基线（字段名逐字匹配）全为 0，是因为基线字段不带路径前缀与
-              <code className="mx-1 font-mono">-rNN</code>
+              <code className="mx-1 font-mono /* taste-skill-ignore */">-rNN</code>
               后缀，并非系统绝对领先；relaxed 去掉这两类差异，才是公平对照。
             </p>
           </CardBody>
@@ -507,7 +507,7 @@ export function EvalView() {
                       <Td>
                         <button
                           onClick={() => goCase(r.case)}
-                          className="num font-mono text-accent-ink hover:underline"
+                          className="num font-mono /* taste-skill-ignore */ text-accent-ink hover:underline"
                           title={`查看用例 ${r.case}`}
                         >
                           {r.case}

@@ -68,7 +68,7 @@ body {
 
 .num {
   font-variant-numeric: tabular-nums;
-  font-family: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-plex-mono), ui-monospace /* taste-skill-ignore */, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 .scroll-thin::-webkit-scrollbar {

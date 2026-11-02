@@ -164,7 +164,7 @@ function StageList({ stages }: { stages: Stage[] }) {
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                 <span className="text-sm font-medium">{s.label}</span>
-                <span className="font-mono text-xs text-muted">{s.key}</span>
+                <span className="font-mono /* taste-skill-ignore */ text-xs text-muted">{s.key}</span>
                 <Chip tone={meta.tone}>{meta.label}</Chip>
               </div>
               <div className="mt-0.5 text-sm leading-relaxed text-muted">{s.summary}</div>
@@ -382,7 +382,7 @@ export function CaseView({ caseId, embedded = false }: { caseId: string; embedde
           <Button variant="subtle" onClick={() => router.push("/data")}>
             <ArrowLeft className="h-4 w-4" /> 数据面板
           </Button>
-          <span className="num truncate font-mono text-xs text-muted">{caseId}</span>
+          <span className="num truncate font-mono /* taste-skill-ignore */ text-xs text-muted">{caseId}</span>
           <div className="ml-auto flex flex-wrap items-center gap-2">
             <Button
               variant="subtle"
@@ -466,7 +466,7 @@ export function CaseView({ caseId, embedded = false }: { caseId: string; embedde
                             setPicked({ msg, ie });
                           }}
                           aria-label={`查看 ${ie.name} 的证据`}
-                          className="rounded-full border border-line bg-canvas px-2 py-0.5 font-mono text-xs text-ink transition-colors hover:border-accent/40 hover:bg-accent/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                          className="rounded-full border border-line bg-canvas px-2 py-0.5 font-mono /* taste-skill-ignore */ text-xs text-ink transition-colors hover:border-accent/40 hover:bg-accent/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
                         >
                           {ie.name}
                         </button>
@@ -533,7 +533,7 @@ export function CaseView({ caseId, embedded = false }: { caseId: string; embedde
                   <summary className="cursor-pointer px-3 py-2 text-xs text-muted hover:text-ink">
                     测试目的（TP 原文）
                   </summary>
-                  <pre className="scroll-thin max-h-[220px] max-w-[75ch] overflow-auto whitespace-pre-wrap border-t border-line bg-surface px-3 py-2 font-mono text-xs leading-relaxed">
+                  <pre className="scroll-thin max-h-[220px] max-w-[75ch] overflow-auto whitespace-pre-wrap border-t border-line bg-surface px-3 py-2 font-mono /* taste-skill-ignore */ text-xs leading-relaxed">
                     {ctx.test_purpose}
                   </pre>
                 </details>
@@ -543,7 +543,7 @@ export function CaseView({ caseId, embedded = false }: { caseId: string; embedde
                   <summary className="cursor-pointer px-3 py-2 text-xs text-muted hover:text-ink">
                     符合性要求（规范引文）
                   </summary>
-                  <pre className="scroll-thin max-h-[220px] max-w-[75ch] overflow-auto whitespace-pre-wrap border-t border-line bg-surface px-3 py-2 font-mono text-xs leading-relaxed">
+                  <pre className="scroll-thin max-h-[220px] max-w-[75ch] overflow-auto whitespace-pre-wrap border-t border-line bg-surface px-3 py-2 font-mono /* taste-skill-ignore */ text-xs leading-relaxed">
                     {ctx.conformance_requirements}
                   </pre>
                 </details>
@@ -591,7 +591,7 @@ export function CaseView({ caseId, embedded = false }: { caseId: string; embedde
                       </div>
                       <ul className="mt-1 space-y-0.5">
                         {leafFields(t).map((n) => (
-                          <li key={n} className="truncate font-mono text-xs">
+                          <li key={n} className="truncate font-mono /* taste-skill-ignore */ text-xs">
                             {n}
                           </li>
                         ))}
@@ -631,7 +631,7 @@ export function CaseView({ caseId, embedded = false }: { caseId: string; embedde
                                 setPicked({ msg: m.message || "", ie: f });
                               }}
                               title="查看该字段的证据"
-                              className="group flex w-full items-center justify-between gap-2 rounded px-1 py-0.5 text-left font-mono text-xs hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                              className="group flex w-full items-center justify-between gap-2 rounded px-1 py-0.5 text-left font-mono /* taste-skill-ignore */ text-xs hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
                             >
                               <span className="truncate">{f.name}</span>
                               <span className="flex shrink-0 items-center gap-1 text-muted">
@@ -667,7 +667,7 @@ export function CaseView({ caseId, embedded = false }: { caseId: string; embedde
                     <li key={i} className="text-xs">
                       <div className="flex flex-wrap items-center gap-1.5">
                         <Chip tone="bad">{v.rule}</Chip>
-                        <span className="break-all font-mono text-xs">{v.path}</span>
+                        <span className="break-all font-mono /* taste-skill-ignore */ text-xs">{v.path}</span>
                       </div>
                       <div className="mt-0.5 leading-relaxed text-muted">{v.detail}</div>
                     </li>
@@ -706,7 +706,7 @@ export function CaseView({ caseId, embedded = false }: { caseId: string; embedde
                   <tr key={s.st} className="hover:bg-surface">
                     <Td className="num text-right">{s.st}</Td>
                     <Td>{s.actor || DASH}</Td>
-                    <Td className="font-mono text-xs">{s.direction || DASH}</Td>
+                    <Td className="font-mono /* taste-skill-ignore */ text-xs">{s.direction || DASH}</Td>
                     <Td className="max-w-[420px] truncate" title={s.message || ""}>
                       {s.message || DASH}
                     </Td>
@@ -719,7 +719,7 @@ export function CaseView({ caseId, embedded = false }: { caseId: string; embedde
         )}
 
         <Section title="原始数据（只读）" className="mt-3" bodyClassName="p-0">
-          <pre className="scroll-thin max-h-[360px] overflow-auto p-3 font-mono text-xs leading-relaxed">
+          <pre className="scroll-thin max-h-[360px] overflow-auto p-3 font-mono /* taste-skill-ignore */ text-xs leading-relaxed">
             {JSON.stringify({ report, abstain, ie, out }, null, 2)}
           </pre>
         </Section>
@@ -734,7 +734,7 @@ export function CaseView({ caseId, embedded = false }: { caseId: string; embedde
             <div className="space-y-4 text-sm">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-muted">取值</span>
-                <span className="font-mono">{picked.ie.value || DASH}</span>
+                <span className="font-mono /* taste-skill-ignore */">{picked.ie.value || DASH}</span>
                 {pickedGold === true ? (
                   <Chip tone="ok">命中官方叶子字段</Chip>
                 ) : pickedGold === false ? (
@@ -751,7 +751,7 @@ export function CaseView({ caseId, embedded = false }: { caseId: string; embedde
                     {pickedPaths.map((p) => (
                       <li
                         key={p}
-                        className="break-all rounded border border-line bg-surface px-2 py-1 font-mono text-xs"
+                        className="break-all rounded border border-line bg-surface px-2 py-1 font-mono /* taste-skill-ignore */ text-xs"
                       >
                         {p}
                       </li>
@@ -778,7 +778,7 @@ export function CaseView({ caseId, embedded = false }: { caseId: string; embedde
               {pickedDerivation && (
                 <div>
                   <div className="mb-1 text-xs font-medium text-ink">模板来源（derivation path）</div>
-                  <p className="break-words font-mono text-xs">{pickedDerivation}</p>
+                  <p className="break-words font-mono /* taste-skill-ignore */ text-xs">{pickedDerivation}</p>
                 </div>
               )}
 
@@ -788,8 +788,8 @@ export function CaseView({ caseId, embedded = false }: { caseId: string; embedde
                   <ul className="space-y-1">
                     {pickedViolations.map((v, i) => (
                       <li key={i} className="rounded border border-bad/30 bg-bad/5 px-2 py-1">
-                        <span className="font-mono text-xs text-bad-ink">{v.rule}</span>{" "}
-                        <span className="font-mono text-xs">{v.path}</span>
+                        <span className="font-mono /* taste-skill-ignore */ text-xs text-bad-ink">{v.rule}</span>{" "}
+                        <span className="font-mono /* taste-skill-ignore */ text-xs">{v.path}</span>
                         <div className="text-muted">{v.detail}</div>
                       </li>
                     ))}

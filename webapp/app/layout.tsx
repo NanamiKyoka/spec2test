@@ -3,10 +3,9 @@ import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import "@copilotkit/react-ui/styles.css";
 import { AppProviders } from "@/components/AppProviders";
+import { AppShell } from "@/components/AppShell";
 import { CaseDrawer } from "@/components/CaseDrawer";
 import { CopilotProvider } from "@/components/CopilotProvider";
-import { PageTransition } from "@/components/PageTransition";
-import { StatusBar } from "@/components/StatusBar";
 
 export const metadata: Metadata = {
   title: "Spec2Test",
@@ -32,12 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="h-full font-sans">
         <AppProviders>
           <CopilotProvider>
-            <div className="flex h-full flex-col">
-              <StatusBar />
-              <main className="min-h-0 flex-1 overflow-hidden">
-                <PageTransition>{children}</PageTransition>
-              </main>
-            </div>
+            <AppShell>{children}</AppShell>
             <CaseDrawer />
           </CopilotProvider>
         </AppProviders>

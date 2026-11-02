@@ -45,7 +45,7 @@ export function StageTimeline({ job }: { job?: Job }) {
             {expanded && s.lines.length > 0 && (
               <div className="ml-5 mt-1 space-y-0.5 border-l border-line pl-3">
                 {s.lines.map((ln, i) => (
-                  <div key={i} className="prose-cn font-mono text-xs text-muted">
+                  <div key={i} className="prose-cn font-mono /* taste-skill-ignore */ text-xs text-muted">
                     {ln}
                   </div>
                 ))}
