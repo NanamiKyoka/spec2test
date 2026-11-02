@@ -1,5 +1,6 @@
-export type CaseItem = {
-  case: string;
+import type { RunOptions } from "./runParams";
+
+export type CaseItem = {  case: string;
   title: string;
   status: string;
   gold_ies: number;
@@ -67,9 +68,32 @@ export type RunRec = {
   started?: number;
   finished?: number;
   seconds?: number;
+  L1?: number | null;
+  L3?: number | null;
+  violations?: number | null;
 };
 
 export type JobLog = { t: number; msg: string };
+
+export type ToolTraceRow = {
+  tool: string;
+  at: number;
+  ms: number;
+  case?: string;
+  strictness?: string;
+  calls?: number;
+  repairs?: number;
+  ok?: boolean;
+};
+
+export type SkillItem = {
+  name: string;
+  description: string;
+  when: string;
+  chars: number;
+};
+
+export type ToolItem = { name: string; model: boolean; eval_only: boolean };
 
 export type Violation = { rule: string; path: string; detail: string };
 
@@ -84,6 +108,15 @@ export type Job = {
   approval?: {
     status: "pending" | "approved" | "rejected" | "timeout" | string;
     candidates?: JobCandidate[];
+  };
+  options?: {
+    messages?: string[];
+    mode?: string;
+    repairs?: number;
+    strictness?: string;
+    engine?: string;
+    skills?: string[];
+    mcpTools?: string[] | null;
   };
   result?: {
     stage?: string;
@@ -167,26 +200,46 @@ export const api = {
 
   runs: (limit = 20) => call<RunRec[]>("/api/runs" + qs({ limit })),
 
+  toolTrace: (limit = 20, job?: string) =>
+    call<{ rows: ToolTraceRow[] }>("/api/trace/tools" + qs({ limit, job })),
+
+  skills: () => call<{ skills: SkillItem[] }>("/api/skills"),
+  tools: () => call<{ tools: ToolItem[] }>("/api/tools"),
+  callTool: (name: string, args: Record<string, unknown>) =>
+    call<{ ok: boolean; data?: any; error?: string }>(`/api/tools/${name}`, {
+      method: "POST",
+      body: JSON.stringify({ args }),
+    }),
+
   chatGuide: (message: string, conversationId?: string) =>
     call<{ action: "run" | "reply"; case?: string; say: string; source?: string; model?: string }>(
       "/api/chat",
       { method: "POST", body: JSON.stringify({ message, conversation_id: conversationId }) }
     ),
 
-  run: (caseId: string, instruction: string, conversationId?: string, hitl?: boolean) =>
-    call<{ job_id: string }>("/api/run", {
+  run: (
+    caseId: string,
+    instruction: string,
+    conversationId?: string,
+    hitl?: boolean,
+    dryRun?: boolean,
+    options?: RunOptions
+  ) =>
+    call<{ job_id: string; options?: RunOptions }>("/api/run", {
       method: "POST",
       body: JSON.stringify({
         case: caseId,
         instruction,
         conversation_id: conversationId,
         hitl: Boolean(hitl),
+        dry_run: Boolean(dryRun),
+        options,
       }),
     }),
-  approveJob: (jobId: string, decision: "approve" | "reject") =>
+  approveJob: (jobId: string, decision: "approve" | "reject", options?: RunOptions) =>
     call<{ ok: true }>(`/api/job/${jobId}/approve`, {
       method: "POST",
-      body: JSON.stringify({ decision }),
+      body: JSON.stringify({ decision, options }),
     }),
   job: (id: string) => call<Job>(`/api/job/${id}`),
 };

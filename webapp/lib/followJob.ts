@@ -1,5 +1,6 @@
 import { api, pollJob, type Job } from "./api";
 import { setJob } from "./jobStore";
+import type { RunOptions } from "./runParams";
 
 export type FollowResult = { job: Job; sseOk: boolean; stoppedAtApproval: boolean };
 
@@ -57,8 +58,14 @@ export function followJob(
   });
 }
 
-export async function startRun(caseId: string, hitl: boolean, conversationId?: string) {
-  const { job_id } = await api.run(caseId, "", conversationId, hitl);
+export async function startRun(
+  caseId: string,
+  hitl: boolean,
+  conversationId?: string,
+  dryRun = false,
+  options?: RunOptions
+) {
+  const { job_id } = await api.run(caseId, `运行用例 ${caseId}`, conversationId, hitl, dryRun, options);
   setJob(job_id, { id: job_id, state: "queued", log: [], case: caseId });
   return job_id;
 }

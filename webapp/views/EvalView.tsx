@@ -332,7 +332,7 @@ export function EvalView() {
           <div>
             <h1 className="text-xl font-semibold tracking-tight">评测总览</h1>
             <p className="mt-1 max-w-prose text-sm text-muted">
-              8 个 NTN 用例逐例报数：与结构化解码基线配对对照，判对错由规则校验器给出，不报平均数。
+              每个用例的生成结果、基线对照与缺陷检出。
             </p>
           </div>
           <div className="ml-auto flex items-center gap-2">

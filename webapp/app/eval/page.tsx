@@ -1,3 +1,11 @@
 "use client";
-import { EvalView } from "@/views/EvalView";
-export default function Page() { return <EvalView />; }
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+export default function Page() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace("/data");
+  }, [router]);
+  return null;
+}

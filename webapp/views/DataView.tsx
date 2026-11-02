@@ -101,7 +101,7 @@ export function statusChip(status: string | undefined, verdict?: string | null) 
 }
 
 /* ============================================================
-   指标卡（每个都可点开看口径）
+   指标卡（可点开查看说明）
    ============================================================ */
 
 function MetricCard({
@@ -125,8 +125,8 @@ function MetricCard({
             <button
               type="button"
               onClick={() => setOpen(true)}
-              aria-label={`${explain.title} 的口径说明`}
-              title="口径说明"
+              aria-label={`${explain.title} 的说明`}
+              title="说明"
               className="rounded p-0.5 text-muted hover:bg-surface hover:text-ink"
             >
               <HelpCircle className="h-3.5 w-3.5" />
@@ -300,7 +300,7 @@ export function DataView() {
           <div>
             <h1 className="text-xl font-semibold tracking-tight">数据面板</h1>
             <p className="mt-1 max-w-prose text-sm text-muted">
-              TS 38.523-1 §6.7 NTN 切片的逐例结果、运行历史与校验口径。
+              8 个用例的逐例结果与运行历史。
             </p>
           </div>
           <div className="ml-auto flex items-center gap-2">
@@ -395,7 +395,7 @@ export function DataView() {
           </CardHead>
           <CardBody className="p-0">
             <p className="border-b border-line px-3 py-2 text-xs leading-relaxed text-muted">
-              绿=通过；灰=弃权；红=拒收。点用例号看字段证据，L1/L3 见指标卡口径。
+              绿=通过；灰=弃权；红=拒收。点用例号查看字段级证据。
             </p>
             <div className="flex flex-wrap items-center gap-1.5 border-b border-line px-3 py-2">
               {(
@@ -545,7 +545,7 @@ export function DataView() {
           <CardHead>
             <ShieldCheck className="h-4 w-4 text-muted" />
             <span className="text-sm font-medium">弃权与基线对照</span>
-            <span className="ml-auto text-xs text-muted">同一输入下，系统与裸 prompt 基线的对照</span>
+            <span className="ml-auto text-xs text-muted">系统输出与基线输出的对照</span>
           </CardHead>
           <CardBody className="p-0">
             {!abstain?.length ? (

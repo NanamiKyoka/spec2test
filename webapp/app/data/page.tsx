@@ -1,3 +1,3 @@
 "use client";
-import { DataView } from "@/views/DataView";
-export default function Page() { return <DataView />; }
+import { LabView } from "@/views/LabView";
+export default function Page() { return <LabView />; }

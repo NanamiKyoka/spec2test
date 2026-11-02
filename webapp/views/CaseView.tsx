@@ -186,7 +186,7 @@ function SectionLabel({ children, meta }: { children: ReactNode; meta?: ReactNod
   );
 }
 
-export function CaseView({ caseId }: { caseId: string }) {
+export function CaseView({ caseId, embedded = false }: { caseId: string; embedded?: boolean }) {
   const router = useRouter();
   const [report, setReport] = useState<ReportRow | undefined>();
   const [abstain, setAbstain] = useState<AbstainRow | undefined>();
@@ -334,8 +334,6 @@ export function CaseView({ caseId }: { caseId: string }) {
     : "";
 
   const doneStages = stages.filter((s) => s.status === "ok").length;
-  const verdictBorder =
-    verdict === "pass" ? "border-l-ok" : verdict === "reject" ? "border-l-bad" : "border-l-muted/50";
 
   if (loading) {
     return (
@@ -357,8 +355,8 @@ export function CaseView({ caseId }: { caseId: string }) {
           <div className="mt-4">
             <AsyncState
               state="empty"
-              title={`快照中没有 ${caseId} 的产物数据`}
-              message="运行 scripts/repro.sh 生成后刷新，或去对话页重新跑一次。"
+              title={`暂无 ${caseId} 的结果`}
+              message="去对话页运行一次，或返回数据面板查看其他用例。"
               action={
                 <>
                   <Button variant="primary" onClick={() => router.push("/data")}>
@@ -378,9 +376,9 @@ export function CaseView({ caseId }: { caseId: string }) {
 
   return (
     <div className="h-full overflow-y-auto scroll-thin">
-      <div className="mx-auto max-w-[1100px] px-6 py-6">
+      <div className={embedded ? "px-5 py-5" : "mx-auto max-w-[1100px] px-6 py-6"}>
         {/* 导航条：返回与用例号是次要信息，唯一主操作是「在对话中继续」 */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className={embedded ? "hidden" : "flex flex-wrap items-center gap-2"}>
           <Button variant="subtle" onClick={() => router.push("/data")}>
             <ArrowLeft className="h-4 w-4" /> 数据面板
           </Button>
@@ -411,7 +409,7 @@ export function CaseView({ caseId }: { caseId: string }) {
         </div>
 
         {/* 一、结论：判定 + 关键指标 + 关键字段，页面唯一的重心 */}
-        <Card className={cn("mt-4 border-l-4", verdictBorder)}>
+        <Card className="mt-4">
           <CardBody className="py-5">
             <div className="flex items-start gap-3">
               {verdict === "pass" ? (
@@ -525,7 +523,7 @@ export function CaseView({ caseId }: { caseId: string }) {
 
         <Section
           title="条款依据"
-          meta={ctx ? ctx.title || "（无标题）" : "无上下文快照"}
+          meta={ctx ? ctx.title || "（无标题）" : "无上下文"}
           className="mt-0"
         >
           {ctx ? (
@@ -551,12 +549,12 @@ export function CaseView({ caseId }: { caseId: string }) {
                 </details>
               )}
               {!ctx.test_purpose && !ctx.conformance_requirements && (
-                <p className="text-sm text-muted">该用例的条款快照中没有 TP 原文或符合性要求。</p>
+                <p className="text-sm text-muted">该用例的条款上下文未包含 TP 原文或符合性要求。</p>
               )}
             </div>
           ) : (
             <p className="max-w-[68ch] px-4 py-3 text-sm leading-relaxed text-muted">
-              该用例没有条款上下文快照（data/ctx/{caseId}.json），只能看到生成与校验结果。
+              该用例缺少条款上下文，只能看到生成与校验结果。
             </p>
           )}
         </Section>
@@ -612,7 +610,7 @@ export function CaseView({ caseId }: { caseId: string }) {
             </CardHead>
             <CardBody className="scroll-thin max-h-[320px] overflow-auto">
               {!out ? (
-                <p className="text-sm leading-relaxed text-muted">快照中不含该用例的系统产出。</p>
+                <p className="text-sm leading-relaxed text-muted">暂无该用例的系统产出。</p>
               ) : out.status === "abstained" ? (
                 <p className="text-sm leading-relaxed text-muted">
                   已弃权：{out.reason || "输入中没有消息/SIB 名"}。未生成 IE 字段内容；步骤仅含消息名。

@@ -3,6 +3,10 @@ import "@fontsource-variable/inter";
 import "./globals.css";
 import "@copilotkit/react-ui/styles.css";
 import { AppProviders } from "@/components/AppProviders";
+import { CaseDrawer } from "@/components/CaseDrawer";
+import { CopilotProvider } from "@/components/CopilotProvider";
+import { PageTransition } from "@/components/PageTransition";
+import { StatusBar } from "@/components/StatusBar";
 
 export const metadata: Metadata = {
   title: "Spec2Test",
@@ -13,7 +17,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="zh-CN">
       <body className="h-full">
-        <AppProviders>{children}</AppProviders>
+        <AppProviders>
+          <CopilotProvider>
+            <div className="flex h-full flex-col">
+              <StatusBar />
+              <main className="min-h-0 flex-1 overflow-hidden">
+                <PageTransition>{children}</PageTransition>
+              </main>
+            </div>
+            <CaseDrawer />
+          </CopilotProvider>
+        </AppProviders>
       </body>
     </html>
   );

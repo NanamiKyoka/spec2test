@@ -73,3 +73,76 @@ body {
 .dot-ok { background: rgb(var(--ok)); }
 .dot-bad { background: rgb(var(--bad)); }
 .dot-muted { background: rgb(var(--muted)); }
+
+/* 路由切换：轻微上浮淡入，尊重减少动效偏好 */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.page-enter {
+  animation: page-enter 220ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-enter {
+    animation: none;
+  }
+}
+
+/* 顶栏导航与卡片交互的细微过渡 */
+a,
+button {
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, opacity 150ms ease;
+}
+
+/* 对话区：单栏居中、留白优先（chatbot.app 风格） */
+.chat-sparse .copilotKitChat {
+  background: transparent;
+}
+.chat-sparse .copilotKitHeader {
+  display: none;
+}
+.chat-sparse .copilotKitMessagesContainer {
+  max-width: 46rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem 1rem 1rem;
+}
+.chat-sparse .copilotKitInputContainer {
+  max-width: 46rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1rem 1.25rem;
+}
+.chat-sparse .copilotKitInput {
+  border-radius: 0.9rem;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 10px 30px rgb(0 0 0 / 0.07);
+}
+
+@keyframes s2t-progress {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+.progress-indeterminate {
+  width: 25%;
+  animation: s2t-progress 1.3s ease-in-out infinite;
+}
+
+::selection {
+  background: rgb(var(--accent) / 0.22);
+  color: rgb(var(--ink));
+}
+
+html {
+  caret-color: rgb(var(--accent-solid));
+}

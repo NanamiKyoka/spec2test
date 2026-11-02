@@ -1,14 +1,23 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 type Health = { provider?: string; model?: string; data_source?: string };
+
+const NAV = [
+  { href: "/", label: "对话" },
+  { href: "/data", label: "数据与评测" },
+  { href: "/api", label: "API" },
+  { href: "/about", label: "关于" },
+];
 
 export function StatusBar() {
   const [health, setHealth] = useState<Health | null>(null);
   const [offline, setOffline] = useState(false);
   const seq = useRef(0);
+  const pathname = usePathname();
 
   useEffect(() => {
     let alive = true;
@@ -44,17 +53,34 @@ export function StatusBar() {
     };
   }, []);
 
+  const active = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
+
   return (
-    <header className="flex h-12 shrink-0 items-center gap-3 border-b border-line px-4">
-      <span className="font-semibold">Spec2Test</span>
-      <nav className="flex gap-3 text-sm text-muted">
-        <Link href="/">对话</Link>
-        <Link href="/data">数据</Link>
-        <Link href="/eval">评测</Link>
-        <Link href="/api">API</Link>
-        <Link href="/about">关于</Link>
+    <header className="sticky top-0 z-20 flex h-12 shrink-0 items-center gap-4 border-b border-line/80 bg-canvas/85 px-4 backdrop-blur">
+      <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+        <span className="h-2 w-2 rounded-full bg-accent-solid" aria-hidden />
+        Spec2Test
+      </Link>
+      <nav className="flex items-center gap-1 text-sm">
+        {NAV.map((n) => (
+          <Link
+            key={n.href}
+            href={n.href}
+            aria-current={active(n.href) ? "page" : undefined}
+            className={`rounded-md px-2.5 py-1 transition-colors ${
+              active(n.href) ? "bg-surface text-ink" : "text-muted hover:bg-surface/70 hover:text-ink"
+            }`}
+          >
+            {n.label}
+          </Link>
+        ))}
       </nav>
-      <span className="ml-auto text-xs text-muted" role="status" aria-live="polite">
+      <span
+        className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-line/80 bg-surface px-2.5 py-1 text-xs text-muted"
+        role="status"
+        aria-live="polite"
+      >
+        <span className={`h-1.5 w-1.5 rounded-full ${offline ? "bg-bad" : "bg-ok"}`} aria-hidden />
         {offline ? "后端未连接" : `${health?.provider ?? "—"} · ${health?.model ?? "—"}`}
       </span>
     </header>

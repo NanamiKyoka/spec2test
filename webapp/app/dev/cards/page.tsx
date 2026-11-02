@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { ApprovalCard } from "@/components/copilot/ApprovalCard";
+import { LoadingCard } from "@/components/copilot/LoadingCard";
 import { ResultCard } from "@/components/copilot/ResultCard";
 import { RunCard } from "@/components/copilot/RunCard";
 import { setJob } from "@/lib/jobStore";
@@ -29,6 +30,9 @@ export default function Page() {
     <main className="space-y-4 p-6" data-testid="cards">
       <div data-testid="run">
         <RunCard caseId="6.7.1.99" />
+      </div>
+      <div data-testid="loading">
+        <LoadingCard title="读取六阶段证据" />
       </div>
       <div data-testid="approval">
         <ApprovalCard jobId="fixture" candidates={["SIB1"]} onDecide={() => {}} />

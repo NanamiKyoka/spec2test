@@ -36,7 +36,7 @@ const DEFAULTS: Record<Provider, { base_url: string; model: string }> = {
 };
 
 const PROVIDER_LABEL: Record<Provider, string> = {
-  proxy: "本地代理（OpenCode）",
+  proxy: "本机模型通道",
   openai: "OpenAI 兼容",
   anthropic: "Anthropic 官方",
 };
@@ -196,9 +196,7 @@ export function ApiView() {
     <>
       <h1 className="text-xl font-semibold tracking-tight">API 管理</h1>
       <p className="mt-1 max-w-[68ch] text-sm leading-relaxed text-muted">
-        凭据只保存在本机{" "}
-        <code className="rounded bg-surface px-1 py-0.5 font-mono text-xs">data/settings.json</code>
-        （已 gitignore），页面只显示掩码。
+        选择模型通道并填写凭据。密钥只保存在本机，保存后仅显示掩码，页面不会回显明文。
       </p>
     </>
   );
@@ -389,7 +387,7 @@ export function ApiView() {
               {needsKey && !keySet && (
                 <p className="max-w-[68ch] text-xs leading-relaxed text-muted">
                   提示：未配置 Key 时，对话页会收到{" "}
-                  <Term term="no_credential" desc="后端返回的错误码，表示当前通道缺少可用凭据" />
+                  <Term term="no_credential" desc="当前通道缺少可用凭据" />
                   ，这是预期行为，不是故障。
                 </p>
               )}
@@ -474,8 +472,7 @@ export function ApiView() {
       >
         <div className="max-w-[68ch] space-y-2 text-sm leading-relaxed text-muted">
           <p>
-            <b className="text-ink">本地代理</b>：适合"手上没有厂商 Key"的情况——只要本机 OpenCode
-            代理在跑，<b className="text-ink">不需要填 Key</b>。它的模型列表无法枚举，页面会显示内置目录。
+            <b className="text-ink">本地代理</b>：使用本机已配置的模型通道，<b className="text-ink">不需要填 Key</b>。模型列表无法自动获取时会显示内置目录。
           </p>
           <p>
             <b className="text-ink">OpenAI 兼容</b>：适用于 DeepSeek、通义、vLLM 等任意兼容端点，填

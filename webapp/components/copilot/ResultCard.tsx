@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { openCasePanel } from "@/lib/panel";
 
 export type Stage = { stage: string; status?: string; summary?: string; detail?: Record<string, unknown> };
 type Violation = { rule: string; path: string; detail: string };
@@ -63,9 +63,14 @@ export function ResultCard({
           ))}
         </ul>
       )}
-      <Link className="mt-2 inline-block text-xs text-accent-ink" href={`/case/${caseId}`}>
-        查看完整证据 →
-      </Link>
+      <button
+        type="button"
+        onClick={() => openCasePanel(caseId)}
+        className="mt-3 flex w-full items-center justify-between rounded-md border border-line bg-canvas px-3 py-2 text-left text-xs transition-colors hover:border-accent/40 hover:bg-surface"
+      >
+        <span>打开用例面板 · 字段级证据</span>
+        <span className="text-accent-ink">→</span>
+      </button>
     </div>
   );
 }
