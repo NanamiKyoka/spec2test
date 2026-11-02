@@ -72,3 +72,9 @@ def test_bad_origin_rejected(base):
     body = json.dumps({"case": "6.7.1.12"}).encode()
     headers = {"Content-Type": "application/json", "Origin": "https://evil.example"}
     assert _code(base + "/api/run", body, headers) == 403
+
+
+def test_cross_port_loopback_origin_allowed(base):
+    body = json.dumps({"case": "evil"}).encode()
+    headers = {"Content-Type": "application/json", "Origin": "http://localhost:3000"}
+    assert _code(base + "/api/run", body, headers) == 400

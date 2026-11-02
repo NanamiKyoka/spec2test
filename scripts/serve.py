@@ -1028,8 +1028,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         orig = self.headers.get("Origin")
         if not orig:
             return True
-        port = self.server.server_address[1]
-        return orig in ("http://127.0.0.1:%d" % port, "http://localhost:%d" % port)
+        try:
+            host = urllib.parse.urlparse(orig).hostname
+        except ValueError:
+            return False
+        return host in ("127.0.0.1", "localhost")
 
     def do_POST(self):
         if not self._origin_ok():

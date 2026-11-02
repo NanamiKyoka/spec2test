@@ -46,15 +46,22 @@ export function CopilotActions() {
 
       if (!sseOk) {
         if (hitl) {
-          const first = await api.job(jobId);
-          if (first.state === "awaiting_approval") {
-            setJob(jobId, { ...first, id: jobId, case: caseId });
-            return JSON.stringify({
-              job_id: jobId,
-              state: "awaiting_approval",
-              candidates: first.approval?.candidates ?? [],
-              next: "请让用户确认候选消息，然后调用 approve_candidates",
-            });
+          const deadline = Date.now() + 60000;
+          while (Date.now() < deadline) {
+            const snap = await api.job(jobId);
+            setJob(jobId, { ...snap, id: jobId, case: caseId });
+            if (snap.state === "awaiting_approval") {
+              return JSON.stringify({
+                job_id: jobId,
+                state: "awaiting_approval",
+                candidates: snap.approval?.candidates ?? [],
+                next: "请让用户确认候选消息，然后调用 approve_candidates",
+              });
+            }
+            if (snap.state === "done" || snap.state === "failed") {
+              return JSON.stringify(summarize(jobId, snap));
+            }
+            await new Promise((r) => setTimeout(r, 1000));
           }
         }
         const j = await waitTerminal(jobId, caseId, ac.signal);
